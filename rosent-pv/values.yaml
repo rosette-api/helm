@@ -1,0 +1,56 @@
+# Default values for rosent-pv.
+# This deploys Rosette Enterprise and uses a persistent volume that
+# was pre-populated with roots.
+rosentimage:
+  # Full name is concatenation of imageName:imageVersion
+  imageName: rosette/server-enterprise
+  imageVersion: 1.16.1
+  pullPolicy: IfNotPresent
+  port: 8181
+  # max Java heap size in GB, default is 4, must be >=4; to run all endpoints the recommended minimum is 16
+  jvmMaxHeap: 4
+  # the number of seconds the readiness and liveness probes will wait before becoming active.
+  probeDelay: 120
+
+nfsServer:
+  address: 10.2.22.1
+  rootsMountPoint: /var/nfsshare/roots
+
+loadbalancer:
+  port: 8181
+  sessionAffinity: None
+
+horizontalLoadBalancer:
+  targetCPUUtilizationPercent: 50
+  targetMinReplicas: 1
+  targetMaxReplicas: 3
+
+environment: "test"
+
+imagePullSecrets: []
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: false
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: default
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
