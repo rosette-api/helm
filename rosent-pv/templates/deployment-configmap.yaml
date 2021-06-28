@@ -28,7 +28,7 @@ spec:
         - name: rosent-pv-container
           image: {{ .Values.rosentimage.imageName }}:{{ .Values.rosentimage.imageVersion }}
           command: ["/bin/bash","-c"]
-          args: ["/rosette/server/bin/update_k8s_config.sh && /rosette/server/bin/launch.sh console"]
+          args: ["chmod ug+x /rosette/server/bin/update_k8s_config.sh && /rosette/server/bin/update_k8s_config.sh && /rosette/server/bin/launch.sh console"]
           imagePullPolicy: {{ .Values.rosentimage.pullPolicy }}
           env:
           - name: ROSETTE_JVM_MAX_HEAP
