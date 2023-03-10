@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "rosette-server.fullname" . }}-deployment
+  labels:
+    {{- include "rosette-server.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.horizontalLoadBalancer.targetMinReplicas }}
+  selector:
+    matchLabels:
+      {{- include "rosette-server.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "rosette-server.selectorLabels" . | nindent 8 }}
+    spec:
+      volumes:
+      - name: pv-roots-storage
+        persistentVolumeClaim:
+          claimName: {{ include "rosette-server.fullname" . }}-roots-claim
+      - name: pv-config
+        configMap:
+          name: {{ include "rosette-server.fullname" . }}-config-configmap
+      - name: pv-config-rosapi
+        configMap:
+          name: {{ include "rosette-server.fullname" . }}-config-rosapi-configmap
+      - name: pv-conf
+        configMap:
+          name: {{ include "rosette-server.fullname" . }}-conf-configmap
+      containers:
+        - name: rosette-server-container
+# Resource allocation is highly dependent on endpoint called, message size and language used.
+# this must be tweaked for your specific load
+          resources:
+            limits:
+              cpu: {{ .Values.rsimage.cpuLimit }}
+              memory: {{ .Values.rsimage.memoryLimit }}
+            requests:
+              cpu: {{ .Values.rsimage.cpuRequest }}
+              memory: {{ .Values.rsimage.memoryRequest }}
+          image: {{ .Values.rsimage.imageName }}:{{ .Values.rsimage.imageVersion }}
+          command: ["/bin/bash","-c"]
+          args: ["/rosette/server/bin/launch.sh console"]
+          imagePullPolicy: {{ .Values.rsimage.pullPolicy }}
+          ports:
+            - name: "rosette-server"
+              containerPort: {{ .Values.rsimage.port }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /rest/metrics/health/worker
+              port: {{ .Values.rsimage.port }}
+            initialDelaySeconds: {{ .Values.rsimage.probeDelay }}
+            periodSeconds: 20
+            failureThreshold: 1
+          readinessProbe:
+            httpGet:
+              path: /rest/metrics/health/worker
+              port: {{ .Values.rsimage.port }}
+            initialDelaySeconds: {{ .Values.rsimage.probeDelay }}
+            periodSeconds: 20
+            failureThreshold: 1 
+          volumeMounts:
+          - mountPath: "/rosette/server/roots"
+            name: pv-roots-storage
+          - mountPath: "/rosette/server/launcher/config"
+            name: pv-config
+          - mountPath: "/rosette/server/launcher/config/rosapi"
+            name: pv-config-rosapi
+          - mountPath: "/rosette/server/conf"
+            name: pv-conf
+# Used with non-root user containers
+#          securityContext:
+#            allowPrivilegeEscalation: false

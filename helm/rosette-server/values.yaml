@@ -1,0 +1,66 @@
+# Default values for rosette-server.
+# This deploys Rosette Server (RS) and uses a persistent volume that
+# was pre-populated with roots.
+# Configuration information is stored as ConfigMaps
+
+rsimage:
+  # Full name is concatenation of imageName:imageVersion
+  imageName: rosette/server-enterprise
+  imageVersion: 1.24.1
+  pullPolicy: IfNotPresent
+  port: 8181
+  cpuLimit: 8
+  cpuRequest: 4
+  memoryRequest: 8G
+  memoryLimit: 16G
+  # These directories must be located inside the chart i.e. under ./rosette-server  
+  confDirectory: conf
+  configDirectory: config
+  configRosapiDirectory: config/rosapi
+
+  # the number of seconds the readiness and liveness probes will wait before becoming active.
+  probeDelay: 120
+
+# This will need to be updated for your environment and Persistent Volume type
+nfsServer:
+  address: 10.150.0.39
+  rootsMountPoint: /var/nfsshare/roots
+
+loadbalancer:
+  port: 8181
+  sessionAffinity: None
+
+horizontalLoadBalancer:
+  targetCPUUtilizationPercent: 50
+  targetMinReplicas: 1
+  targetMaxReplicas: 3
+
+environment: "test"
+
+imagePullSecrets: []
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: false
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: default
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

@@ -1,0 +1,1430 @@
+apiVersion: v1
+data:
+  allowed-endpoints.yaml: |
+    endpoints:
+    - /language
+    - /morphology
+    - /sentences
+    - /entities
+    - /tokens
+  analyze-factory-config.yaml: |
+    # Required parameters for token analysis (for topics)
+    rootDirectory: ${rbl-root}
+    universalPosTags: false
+    analyze: true
+    disambiguate: false
+    fragmentBoundaryDetection: true
+    # Optional parameters
+    emailAddresses: true
+    emoticons: true
+    urls: true
+  cat-factory-config.yaml: |+
+    #Sets the root directory. The file structure under this directory should look like:
+    #models/
+    #  eng/
+    #    combined-iab-qag/...
+    #
+    #This option is required if the component configuration does not supply a 'modelDirectory'.
+    rootDirectory: ${tcat-root}
+
+    #Maximum number of results to return
+    #maxResults: Integer.MAX_VALUE
+
+    #Uses 'elbow thresholding' to determine the number of results to return
+    #
+    #elbowThresholding: false
+
+    #Enable elbow thresholding
+    #elbowThresholding: false
+
+  constraints.yaml: |2
+
+    # The following properties were determined as optimal during early rounds of performance tests targeting < 2 second response time.
+    # Larger values may cause sustained degradation of system performance.  These values may change as components are improved.
+
+    # maxInputRawByteSize is the maximum number of bytes per raw doc
+    # recommend not to exceed 10,000,000
+    maxInputRawByteSize   : 614400
+    # maxInputRawTextSize is the maximum number of characters per submission
+    # recommend not to exceed 1,000,000
+    maxInputRawTextSize   : 50000
+    # maxNameDedupeListSize is the maximum number of names to be deduplicated
+    # recommend not to exceed  100,000.
+    maxNameDedupeListSize : 1000
+  downloaderExtractor.yaml: |+
+    # urlContentDownloader is the configuration for downloading URL content.
+    urlContentDownloader:
+      # processTimeoutMs is the timeout in milliseconds for processing URL downloader component.
+      # values: dependent on network
+      processTimeoutMs      : 10000
+
+      # connectTimeout is the timeout in milliseconds for connecting to the URL.
+      # values: dependent on network
+      connectTimeout        : 5000
+
+      # readTimeout is the timeout in milliseconds for reading content from URL.
+      # values: dependent on network
+      readTimeout           : 3000
+
+      # maxRedirects is the maximum number of HTTP redirects allowed.
+      # values: typically, lower is faster
+      maxRedirects          : 10
+
+      # maxRetries is the maximum number of retries to attempt.
+      # values: dependent on network
+      maxRetries            : 1
+
+      # retryInterval is the retry interval in milliseconds.
+      # values: arbitrary
+      retryInterval         : 1000
+
+    # proxy is the configuration for an OPTIONAL proxy.
+    #proxy:
+      # proxyType is the type of proxy (required).
+      # values: HTTP or SOCKS
+      #proxyType             : HTTP
+      # inetSocketAddress is the IP of the proxy (required).
+      #inetSocketAddress     : 10.2.3.4
+      # inetSocketPort is the port of the proxy (required).
+      #inetSocketPort        : 3128
+      # username is the username for the proxy (optional).
+      #username              : username
+      # password is the password for the proxy (optional).
+      #password              : password
+
+    # textExtractor is the configuration for text extractor.
+    textExtractor:
+      # processTimeoutMs is the timeout in milliseconds for processing TextExtractionProcessor component.
+      # values: arbitrary
+      processTimeoutMs      : 10000
+
+      # maxHeapSize is the maximum heap size of forked process in MB.
+      # values: dependent on server
+      maxHeapSize           : 64
+
+      # htmlExtractor is the HTML extractor class.
+      htmlExtractor         : de.l3s.boilerpipe.extractors.ArticleExtractor
+
+      # supportedParsers is the list of parsers to run (required).
+      supportedParsers:
+        - org.apache.tika.parser.html.HtmlParser
+        - org.apache.tika.parser.txt.TXTParser
+
+
+
+  dp-factory-config.yaml: |+
+    rootDirectory: ${dp-root}
+
+    rootDirectory: ${dp-root}
+
+    #language: { }
+
+    #language: { }
+
+  event-extractor-factory-config.yaml: |-
+    # Base URL of ETS. Set to empty to disable.
+    eventTrainingServerUrl:
+  framework-override.properties: |
+    # disable stacktrace in Felix SCR
+    ds.showerrors=false
+  rbl-factory-config.yaml: |+
+    #Whether to tokenize and analyze URLs.
+    urls: true
+
+    #Whether to tokenize and analyze hashtags.
+    hashtags: true
+
+    #Indicates whether the single language annotators should convert part of speech
+    #tags to their corresponding universal versions. If true, the universal tags are
+    #returned. If false, the traditional tags are returned.
+    universalPosTags: true
+
+    #The root directory of the RBL-JE installation. Setting it sets default values
+    #for otherwise required options.
+    rootDirectory: ${rbl-root}
+
+    #Whether to tokenize and analyze emoticons.
+    emoticons: true
+
+    #Whether to tokenize and analyze @mentions.
+    atMentions: true
+
+    #Whether to tokenize and analyze email addresses.
+    emailAddresses: true
+
+    #Whether to add ADM extended properties to tokens. No extended properties
+    #are currently enabled by this option. Deprecated.
+    #deliverExtendedAttributes: false
+
+    #Whether to segment each run of numbers or Latin letters into its own token,
+    #without splitting on medial number/word joiners.
+    #
+    #For example, "12.34AB-CD)E-" is split into "12.34", "AB-CD", ")", "E", and "-".
+    #
+    #Has no effect when 'consistentLatinSegmentation' is set or when
+    #'tokenizerType' is not 'spaceless_lexical' or the language is not
+    #Chinese or Japanese.
+    #segmentNonJapanese: true
+
+    #The language for RBL
+    #language: null
+
+    #The minimum length of non-native text to be considered for a script change. A
+    #script change indicates a boundary between tokens, so the length may influence
+    #how a mixed-script string is tokenized.
+    #
+    #Has no effect when 'consistentLatinSegmentation' or when 'tokenizerType'
+    #is not 'spaceless_lexical' or the language is not Chinese or Japanese.
+    #minLengthForScriptChange: 10
+
+    #Turns on FST tokenization for supported languages. Deprecated,
+    #replaced by 'tokenizerType'.
+    #fstTokenize: false
+
+    #Specifies the POS tag set to use.
+    #posTagSet: "basis"
+
+    #Configures the maximum number of tokens that can be in a line that is
+    #considered short for the purposes of fragment boundary detection
+    #maxTokensForShortLine: 6
+
+    #Whether to split prefixes off of unknown Hebrew words.
+    #guessHebrewPrefixes: false
+
+    #If a non primary script region is less than this length, and adjacent to a
+    #primary script region, it is appended to the primary script region. Applies
+    #only to statistical segmentation languages.
+    #minNonPrimaryScriptRegionLength: 10
+
+    #Indicates whether Hebrew root forms will be generated.
+    #includeHebrewRoots: false
+
+    #'universalPosTags' uses a set of per-language files to convert from Basis POS
+    #tags to Universal POS Tags. This option allows the conversion to a different
+    #set of POS tags.
+    #customPosTags: null
+
+    #The XML license content. This overrides 'licensePath'.
+    #licenseString: null
+
+    #Whether to ignore whitespace separators when segmenting input text. When not
+    #set, JLA will treat whitespace separators as morpheme delimiters. Note that
+    #Japanese orthography allows a newline to occur in the middle of a word.
+    #
+    #Has no effect when 'whitespaceTokenization' is set or when
+    #'tokenizerType' is not 'spaceless_lexical' or the language is not
+    #Chinese or Japanese.
+    #ignoreSeparators: true
+
+    #Indicates whether the analyzers should return extended tags, such as
+    #morphological tags, with the analysis. Currently, they can only be returned
+    #with the raw analysis. If true, the extended tags are returned if possible. If
+    #false, extended tags are not returned.
+    #deliverExtendedTags: false
+
+    #The maximum number of entries in the analysis cache. Larger values (up to some
+    #empirical limit) increase throughput at the expense of extra memory. A value of
+    #zero turns off caching completely.
+    #analysisCacheSize: 100000
+
+    #Additional user defined analysis dictionary configurations.
+    #
+    #You are required to set the 'language', 'dict', and 'options' for every
+    #configuration. Configurations missing one of those will be ignored.
+    #analysisUserDefinedDictionaries: [ ]
+
+    #Enables faster (but less accurate) part of speech disambiguation for English.
+    #alternativeEnglishDisambiguation: false
+
+    #Additional user defined tokenization rules configurations.
+    #
+    #You are required to set the 'language' and the 'rules' for every configuration.
+    #Configurations missing one of those will be ignored.
+    #tokenizationUserRules: [ ]
+
+    #A directory where perceptron or other statistical model files may be found.
+    #modelDirectory: "${rootDirectory}/models"
+
+    #The highest conversion level that will be used by the Chinese Script Converter.
+    #conversionLevel: "lexemic"
+
+    #Whether the produced analyzers should disambiguate their results.
+    #Disambiguation is not supported for all languages.
+    #disambiguate: true
+
+    #Whether to use "v" instead of "ü" in pinyin readings, a common substitution in
+    #environments that lack diacritics. The value is ignored when 'readingType' is
+    #"cjktex" or "tone_marks", which always use "v" and "ü" respectively. It is
+    #probably most useful when 'readingType' is "tone_numbers".
+    #
+    #Has no effect when 'readings' is not set or when 'tokenizerType' is not
+    #'spaceless_lexical' or the language is not Chinese or Japanese.
+    #useVForUDiaeresis: false
+
+    #Request query processing. RBL may change its behavior to reflect the fact that
+    #query input is often not in full sentences; typically, this disables
+    #disambiguation.
+    #query: false
+
+    #If true, analysis and tokenization are case-sensitive; otherwise
+    #case-insensitive.
+    #caseSensitive: true
+
+    #A list of paths to many-to-one normalization dictionaries. Paths are separated
+    #by the OS-specific path separator. If 'rootDirectory' is specified, the
+    #substring "${rootDirectory}" is replaced with the root directory. If the
+    #value is null, many-to-one normalization is not done.
+    #normalizationDictionaryPaths: null
+
+    #Whether to decompose compounds.
+    #decomposeCompounds: true
+
+    #Whether to consider punctuation between alphanumeric characters as a break. For
+    #example, the text "www.basistech.com" is segmented as a single token when the
+    #option is not set, but as five tokens when it is set: "www", ".", "basistech",
+    #".", "com".
+    #
+    #Has no effect when 'consistentLatinSegmentation' is set or when
+    #'tokenizerType' is not 'spaceless_lexical' or the language is not
+    #Chinese or Japanese.
+    #breakAtAlphaNumIntraWordPunct: false
+
+    #Enables faster (but less accurate) part of speech disambiguation for Greek.
+    #alternativeGreekDisambiguation: false
+
+    #Whether to add readings to morphological analyses. The annotator will try to
+    #add readings by whole words. If it cannot, it will fall back to concatenating
+    #the readings of individual characters.
+    #
+    #Has no effect when 'alternativeTokenization' is not set.
+    #readings: false
+
+    #Whether or not to do analysis. If this is false, the annotator will only do
+    #tokenization.
+    #analyze: true
+
+    #Whether to return all the readings for a token. For characters with multiple
+    #readings, all the readings are returned in brackets and separated by
+    #semicolons.
+    #
+    #Has no effect when 'readings' is not set or when 'tokenizerType' is not
+    #'spaceless_lexical' or the language is not Chinese or Japanese.
+    #generateAll: false
+
+    #Whether to segment place names from their suffixes. For example, "東京都" (Tokyo Metropolis) is segmented as two tokens ("東京" and
+    #"都").
+    #
+    #Has no effect when 'alternativeTokenization' is not set.
+    #separatePlaceNameFromSuffix: true
+
+    #Deprecated, replaced by 'breakAtAlphaNumIntraWordPunct',
+    #'consistentLatinSegmentation', 'decomposeCompounds',
+    #'deepCompoundDecomposition', 'favorUserDictionary', 'generateAll',
+    #'ignoreSeparators', 'ignoreStopwords', 'minLengthForScriptChange', 'pos',
+    #'readingByCharacter', 'readings', 'readingsSeparateSyllables', 'readingType',
+    #'segmentNonJapanese', 'separateNumbersFromCounters',
+    #'separatePlaceNameFromSuffix', 'useVForUDiaeresis', 'whiteSpaceIsNumberSep', and
+    #'whitespaceTokenization'
+    #alternativeJapaneseTokenizationOptions: null
+
+    #Configures the fragment boundary delimiters.
+    #fragmentBoundaryDelimiters: "\u0009\u000B\u000C"
+
+    #Selects which tokenizer to use. "fst" selects a tokenizer that uses an
+    #FST to determine word breaks, which is supported for Czech, Dutch, English,
+    #French, German, Greek, Hungarian, Italian, Polish, Portuguese, Romanian, Russian,
+    #and Spanish. "icu" selects a tokenizer that that uses ICU break rules to
+    #determine word breaks. This is supported for all languages other than Chinese and
+    #Japanese. "spaceless_lexical" selects a tokenizer that uses a lexical and rule-based
+    #approach to determine word breaks in input without spaces between words. This is
+    #supported for Chinese and Japanese. "spaceless_statistical" selects a tokenizer
+    #that uses a statistical model to determine word breaks in input without spaces.
+    #This is supported for Chinese, Japanese, Korean, and Thai. "default" selects the default
+    #type for each language. The default type is "spaceless_statistical" for Chinese,
+    #Japanese, and Thai, and "icu" for all other languages.
+    #tokenizerType: "default"
+
+    #The path of the RBL-JE license file.
+    #licensePath: "${rootDirectory}/licenses/rlp-license.xml"
+
+    #The representation of readings. Possible values (case-insensitive) are:
+    #"tone_marks" (pinyin with diacritics over the appropriate vowels),
+    #"tone_numbers" (pinyin with a number from 1 to 4 suffixed to each syllable, or
+    #no number for neutral tone), "no_tones" (pinyin without tones), "cjktex"
+    #(macros for the CJKTeX pinyin.sty style).
+    #
+    #Has no effect when 'readings' is not set or when 'tokenizerType' is not
+    #'spaceless_lexical' or the language is not Chinese or Japanese.
+    #readingType: "tone_marks"
+
+    #Turns on Unicode NFKC normalization before tokenization.
+    #nfkcNormalize: false
+
+    #Whether to treat whitespace as a number separator. If set, the text "1995 1996"
+    #is segmented as two tokens; otherwise, the same text is segmented as a single
+    #token.
+    #
+    #Has no effect when 'consistentLatinSegmentation' is set or when
+    #'tokenizerType' is not 'spaceless_lexical' or the language is not
+    #Chinese or Japanese.
+    #whiteSpaceIsNumberSep: false
+
+    #Whether to provide consistent segmentation of embedded text not in Japanese
+    #script, where "consistency" is measured against the behavior of the Chinese,
+    #Japanese, and Korean segmenters previously available in Basis Technology's
+    #native API, RLP. If this is true, then the setting of 'segmentNonJapanese' is
+    #ignored.
+    #
+    #Has no effect when 'tokenizerType' is not 'spaceless_lexical' or the language
+    #is not Chinese or Japanese.
+    #consistentLatinSegmentation: true
+
+    #Whether to use different tokenizers for different scripts (other than the
+    #overall script). If false, uses the tokenizer for the
+    #'defaultTokenizationLanguage'. Applies only to statistical segmentation
+    #languages.
+    #tokenizeForScript: false
+
+    #Directs the use of an alternative tokenization algorithm. The specifics depend
+    #on the language. Deprecated, replaced by 'tokenizerType'.
+    #alternativeTokenization: false
+
+    #Controls the tokenization of contractions. If this is true, then contractions
+    #such as "can't" are delivered as *multiple* tokens. By default, they are
+    #delivered as one.
+    #tokenizeContractions: false
+
+    #Deprecated, replaced by 'tokenizerType'
+    #alternativeJapaneseTokenization: false
+
+    #Whether to return numbers and counters as separate tokens. For example, "二匹"
+    #(2 small animals) is split into "二" and "匹".
+    #
+    #Has no effect when 'tokenizerType' is not 'spaceless_lexical' or the
+    #language is not Chinese or Japanese.
+    #separateNumbersFromCounters: true
+
+    #Turns on fragment boundary detection.
+    #fragmentBoundaryDetection: true
+
+    #Whether to recursively decompose each token into smaller tokens, if the token
+    #is marked in the dictionary as being decomposable.
+    #
+    #For example, if only 'decomposeCompounds' is set, the token
+    #"徳島大学分子酵素学研究センター" will only be decomposed into six smaller tokens:
+    #"徳島大学", "分子", "酵素", "学", "研究", "センター".
+    #However, because "徳島大学" is marked decomposable in the dictionary, if deep
+    #decompounding is enabled, the first token will be further decomposed into two
+    #more tokens for a total of seven tokens from the original string:
+    #"徳島", "大学", "分子", "酵素", "学", "研究", and "センター".
+    #None of these seven tokens is further decomposable.
+    #
+    #Has no effect when 'decomposeCompounds' is not set or when
+    #'tokenizerType' is not 'spaceless_lexical' or the language is not
+    #Chinese or Japanese.
+    #deepCompoundDecomposition: false
+
+    #Whether to favor words in the user dictionary during segmentation.
+    #
+    #Has no effect when 'tokenizerType' is not 'spaceless_lexical' or the
+    #language is not Chinese or Japanese.
+    #favorUserDictionary: false
+
+    #Whether to add a separator character between readings when concatenating
+    #readings by character.
+    #
+    #Has no effect when 'readings' is not set or when 'tokenizerType' is not
+    #'spaceless_lexical' or the language is not Chinese or Japanese.
+    #readingsSeparateSyllables: false
+
+    #Whether to add parts of speech to morphological analyses.
+    #
+    #Has no effect when 'tokenizerType' is not 'spaceless_lexical' or the
+    #language is not Chinese or Japanese.
+    #pos: true
+
+    #Indicates whether to treat whitespace as a morpheme delimiter.
+    #
+    #Has no effect if the language is not Chinese or Japanese or
+    #'tokenizerType' is not 'spaceless_lexical'.
+    #whitespaceTokenization: false
+
+    #Enables faster (but less accurate) part of speech disambiguation for Spanish.
+    #alternativeSpanishDisambiguation: false
+
+    #Whether to skip directly to the fallback behavior of 'readings' without
+    #considering readings for whole words.
+    #
+    #Has no effect when 'readings' is not set or when 'tokenizerType' is not
+    #'spaceless_lexical' or the language is not Chinese or Japanese.
+    #readingByCharacter: false
+
+    #Selects which disambiguator to use for Hebrew. dnn is deep neural network,
+    #dictionary is a dictionary-based reranker, and perceptron is a perceptron.
+    #
+    #disambiguatorType: "perceptron"
+
+    #Whether to return the surface forms of compound components.
+    #compoundComponentSurfaceForms: false
+
+    #The path to the lemma/compound dictionary directory.
+    #dictionaryDirectory: "${rootDirectory}/dicts"
+
+    #The language to which the Chinese Script Converter is converting.
+    #targetLanguage: null
+
+    #'tokenizeContractions' uses a default set of per-language rules. This option
+    #allows the application to replace those rules.
+    #customTokenizeContractionRules: null
+
+    #Whether to join sequences of Katakana tokens adjacent to a middle dot token.
+    #
+    #Has no effect when 'tokenizerType' is not 'spaceless_lexical' or the language
+    #is not Japanese.
+    #joinKatakanaNextToMiddleDot: true
+
+    #Whether to filter stopwords out of the output.
+    #ignoreStopwords: false
+
+    #The language to use for script regions other than the script of the overall
+    #language. Applies only to statistical segmentation languages.
+    #defaultTokenizationLanguage: "xxx"
+
+    #Additional user defined segmentation dictionary configurations.
+    #
+    #You are required to set the 'language' and the 'dict' for every configuration.
+    #Configurations missing one of those will be ignored.
+    #segmentationUserDefinedDictionaries: [ ]
+
+  rct-factory-config.yaml: |+
+    #The root directory of the RCT installation.
+    #Providing this removes the need to provide a 'licenseString'
+    rootDirectory: ${rct-root}
+
+    #The XML string containing the RCT license.
+    #
+    #licenseString: ${rootDirectory}/licenses/rct-license.xml
+
+    #When true, enables "reverse transliteration" (Arabic to Arabizi).
+    # Otherwise, the transliterator will do normal transliteration (Arabizi to Arabic)
+    #reversed: false
+
+  relax-factory-config.yaml: |+
+    processors:
+    - targeted
+    - triggered
+    - treePathPattern
+
+    threadPoolSize: 1
+
+    nlp4jRoot: ${dp-root}
+
+    relaxRoot: ${relax-root}
+
+    #confidenceModelPath: ""
+
+    #entityFabricatorClassName: ""
+
+    #adjunctsToArgs: false
+
+    #generatePatternId: false
+
+    #generateReport: false
+
+    #splitConj: false
+
+    #useRblTokensInternally: false
+
+    #normalizePredicates: false
+
+    #resolvePronouns: false
+
+    #bundleLicenseString: ""
+
+    #licenseString: ""
+
+    #licenseFile: ""
+
+    #allowedRelationships: [ ]
+
+    #language: { }
+
+    #processorTypes: [ ]
+
+    #calculateConfidence: false
+
+    #confidenceThreshold: 0.0
+
+    #calculateSalience: false
+
+    #removeNonSalient: false
+
+  rex-factory-config.yaml: "# The REX root directory. A REX root directory contains
+    language models and necessary configuration\n# files.\n# This value is stored
+    as a java.nio.file.Path.  Strings or URIs are valid values.  E.g.\n# \"/path/to/rex-root\"
+    or \"file:///path/to/rex-root\"\nrootDirectory: ${rex-root}\n\n# The RBL root
+    directory for REX to use.\n# This value is stored as a java.nio.file.Path.  Strings
+    or URIs are valid values.  E.g.\n# \"/path/to/rex-root/rbl-je\" or \"file:///path/to/rex-root/rbl-je\"\nrblRootDirectory:
+    ${rex-root}/rbl-je\n\n# Additional gazetteer files used to reject entities for
+    the given language.\n# This property accepts a list of values and the values are
+    stored as a java.nio.file.Path.\n# Strings or URIs are valid values.  Entries
+    are added below in the form:\n# - \"/path/<language_code>/reject/example.txt\"\n#rejectGazetteers:
+    null\n\n# Regular expressions and gazetteers may be configured to match tokens
+    partially independent\n# from token boundaries. If true, reported offsets correspond
+    to token boundaries.\n# Valid values: true, false\n#snapToTokenBoundaries: true\n\n#
+    Apply joiner rules after redactor (old behavior).\n# Valid values: true, false\n#runJoinerPostRedactor:
+    false\n\n# Additional regex files used to reject entities.\n# This property accepts
+    a list of values and the values are stored as a java.nio.file.Path.\n# Strings
+    or URIs are valid values.  Entries are added below in the form:\n# - \"/path/<language_code>/reject/regexes.xml\"\n#rejectRegularExpressionSets:
+    null\n\n# The option to allow partial gazetteer matches. For the purposes of this
+    setting, a partial\n# match is one that does not line up with token boundaries
+    as determined by the internal\n# tokenizer. This only applies to accept gazetteers.\n#
+    Valid values:  true, false\n#allowPartialGazetteerMatches: false\n\n# Custom list
+    of Knowledge Bases for the linker, in order of priority.\n# This property accepts
+    a list of values and the values are stored as a java.nio.file.Path.\n# Strings
+    or URIs are valid values.  Entries are added below in the form:\n# - \"${rex-root}/data/flinx/data/kb/<custom_kb_name>/\"\n#kbs:
+    null\n\n# Set extraction method to use on structured regions.\n# These values
+    are enums and should not be quoted.\n# Valid values:  nerModel, nameClassifier,
+    none\n#structuredRegionProcessingType: NULL\n\n# The maximum number of tokens
+    allowed in an entity returned by Statistical Entity Extractor.\n# Entity Redactor
+    discards entities from Statistical Entity Extractor with more than this number\n#
+    of tokens.\n# Valid values:  Integers greater than 0.\n#maxEntityTokens: 8\n\n#
+    Custom processors to add to annotators. See AppDev guide for more details on custom
+    processors.\n# This property accepts a list of values and the values are stored
+    as Strings.\n# - \"/path/to/MyCustomProcessor.java\"\n#customProcessors: null\n\n#
+    Additional files used to produce regex entities.\n# This property accepts a list
+    of values and the values are stored as a java.nio.file.Path.\n# Strings or URIs
+    are valid values.  Entries are added below in the form:\n# - \"/path/<language_code>/accept/regexes.xml\"\n#acceptRegularExpressionSets:
+    null\n\n# An option to calculate entity confidence values.\n# Valid values:  true,
+    false\n#calculateConfidence: false\n\n# Additional joiner rules files.\n# This
+    property accepts a list of values and the values are stored as a java.nio.file.Path.\n#
+    Strings or URIs are valid values.  Entries are added below in the form:\n# - \"/path/to/custom-joiners/my-joiner-rules.xml\"\n#joinerRuleFiles:
+    null\n\n#The entity types to be excluded from extraction.\n# This property accepts
+    a list of values and the values are stored as Strings.\n# Valid values:  Person,
+    Location, Organization, Product, Title\n# Other valid values are possible if you
+    are using DB Pedia Types or have defined custom\n# entity types.\n#excludedEntityTypes:
+    null\n\n# The overlay directory. An overlay directory is a directory shaped like
+    the 'data' directory.\n# REX will look for files in both the overlay directory
+    and the root directory, using files from\n# both locations. However, if a file
+    exists in both places (as identified by its path relative\n# to the overlay or
+    root data directory), REX prefers the version in the overlay directory.\n# If
+    REX finds a zero-length file in the overlay directory, it ignores both that file
+    and any\n# corresponding file in the root data directory.\n# This value is stored
+    as a java.nio.file.Path.  Strings or URIs are valid values.  E.g.\n# \"/path/to/overlay-data\"
+    or \"file:///path/to/overlay-data\"\n#dataOverlayDirectory: null\n\n# The confidence
+    value threshold below which entities extracted by the statistical processor\n#
+    are ignored.\n# This property is stored as a Float.\n# Valid values:  -1.0 to
+    1.0\n#confidenceThreshold: -1.0\n\n# The option to resolve pronouns to person
+    entities.\n# Valid values: true, false\n#resolvePronouns: false\n\n# Additional
+    files used to produce statistical entities for the given language.\n# This property
+    accepts a list of values and the values are comma separated trios.\n# The trios
+    of values specify the language, case-sensitivity and the model file,\n# separated
+    by commas. See caseSensitivity for valid values.\n# For example:\n# - eng,caseSensitive,english-model.bin\n#
+    - jpn,automatic,japanese-model.bin\n#statisticalModels: null\n\n# Additional gazetteer
+    files used to produce entities for the given language.\n# This property accepts
+    a list of values and the values are stored as a java.nio.file.Path.\n# Strings
+    or URIs are valid values.  Entries are added below in the form:\n# - \"/path/<language_code>/accept/example.txt\"\n#acceptGazetteers:
+    null\n\n# The option to search for and link mentions to knowledge base entities
+    with disambiguation model.\n# Enabling this option also enables calculateConfidence.\n#
+    Valid values:  true, false\n#linkEntities: false\n\n# The capitalization (aka
+    'case') used in the input texts. Processing standard documents\n# requires caseSensitive,
+    which is the default. Documents with all-caps, no-caps or headline\n# capitalization
+    may yield higher accuracy if processed with the caseInsensitive value.\n# These
+    values are enums and should not be quoted.\n# Valid values: automatic, caseSensitive,
+    caseInsensitive\n#caseSensitivity: caseSensitive\n\n# The maximum number of entities
+    for in-document coreference resolution (a.k.a. chaining).\n# Valid values:  Integers
+    greater than 0.\n#maxResolvedEntities: 2000\n\n# An option to calculate entity-chain
+    salience values.\n# Valid values: true, false\n#calculateSalience: false\n\n#
+    Enable the REX Training Server (RTS) decoder and specify the workspace to be used.\n#
+    Valid values:  \"aQuotedWorkspaceIdString\" (Pre 2.0)\n#                \"workspace/model\"
+    (2.0 and later)\n#rtsDecoder: null\n\n# The option to retain social media symbols
+    ('@' and '#') in normalized output.\n# Valid values: true, false\n#retainSocialMediaSymbols:
+    false\n\n# An option to calculate entity-chain salience with statistical-based
+    calculation\n# (returns 0 or 1) or simple calculation (returns score between 0
+    and 1).\n# Valid values: true, false\n#statSalienceMode: true\n\n# Register a
+    custom processor class. See AppDev guide for more details on custom processors.\n#
+    This property accepts a list of values and the values are stored as Strings.\n#
+    - \"/path/to/MyCustomProcessor.class\"\n#customProcessorClasses: null\n\n# The
+    option to keep existing annotated text entities.\n# Valid values: true, false\n#keepEntitiesInInput:
+    false\n\n# An option to adjust offsets according to normalization.\n# Valid values:
+    true, false\n#adjustNormalizedOffsets: false\n\n# The option to prefer length
+    over weights during redaction. If true, the redactor will always\n# choose a longer
+    entity over a shorter one if the two overlap, regardless of their user-defined\n#
+    weights. In this case, if the lengths are the same, then weight is used to disambiguate
+    the\n# entities. If false, the redactor will choose the higher weighted entity
+    when two overlap,\n# regardless of the length of the entity string. In this case,
+    if the weights are the\n# same, then the redactor will choose the longer of the
+    two entities.\n# Valid values: true, false\n#redactorPreferLength: true\n\n# The
+    option to choose whether to look for candidate entities in text or link pre-existing
+    mentions (extracted by other processors) to knowledge base entities with disambiguation
+    model.\n# Valid values:  text, entities\n#linkMentionMode: text\n\n# The option
+    to assign default confidence value 1.0 to non-statistical entities instead of\n#
+    null.\n# Valid values: true, false\n#useDefaultConfidence: false\n\n# Extract
+    entities in structured regions with NER (perceptron, dnn) models if there are
+    enough\n# tokens.\n# Valid values:  Integers greater than or equal to 0.\n#structuredRegionProcessingSentenceTokensMin:
+    0\n\n# Enables the splitting of IDENTIFIER:MONEY regex matches into IDENTIFIER:CURRENCY_AMT
+    and IDENTIFIER:CURRENCY_TYPE\n# where the amount of the currency will be represented
+    in one entity and the type will be \n# represented in another.\n#regexCurrencySplit:
+    false\n\n# Enable only the REX Training Server (RTS) decoder (rtsDecoder must
+    be used with this\n# parameter)\n# Valid values:  true, false\n#onlyRtsDecoder:
+    false\n\n# The confidence value threshold below which linking results by the kbLinker
+    processor are\n# ignored.\n# This property is stored as a Float.\n# Valid values:
+    \ -1.0 to 1.0\n#linkingConfidenceThreshold: -1.0\n\n# An option for document entity
+    resolution (also known as entity chaining).\n# These values are enums and should
+    not be quoted.\n# Valid values:  HIGH, STANDARD, STANDARD_MINUS or NULL\n#indocType:
+    STANDARD\n\n# List the set of active processors for an entity extraction run.
+    All processors are active by\n# default. This method provides a way to turn off
+    selected processors. The order of the\n# processors cannot be changed. Note that
+    turning off redactor can cause overlapping and unsorted\n# entities to be returned.\n#\n#
+    Default processors: acceptGazetteer, acceptRegex, rejectGazetteer, rejectRegex,
+    statistical,\n#                     indocCoref, redactor, joiner\n#\n# Valid values:
+    deepNeuralNetwork, indocCoref, acceptGazetteer, joiner, rejectRegex,\n#               statistical,
+    nameClassifier, rejectGazetteer, acceptRegex, redactor, kbLinker,\n#               pronominalResolver\n#\n#
+    These values are enums and should not be quoted.  Entries are added below in the
+    form:\n# - acceptGazetteer\n# - acceptRegex\n#\n#processors: null\n\n# The option
+    to add supplemental regex files, usually for entity types that are excluded by\n#
+    default. The supplemental regex files are located at data/regex/<lang>/accept/supplemental
+    and\n# are not used unless specified.\n# Strings or URIs are valid values.  Entries
+    are added below in the form:\n# - \"${rex-root}/data/regex/<lang>/accept/supplemental/date-regexes.xml\"\n#
+    - \"data/regex/<lang>/accept/supplemental/time-regexes.xml\"\n#supplementalRegularExpressionPaths:
+    null\n\n# The option to disable usage of the disambiguation model when linking.\n#
+    Valid values: true, false\",\n#disableLinkerDisambiguation: false\n\n"
+  rex-no-resolution-factory-config.yaml: |
+    rootDirectory: ${rex-root}
+    startingWithDefaultConfiguration: true
+    calculateConfidence: false
+    resolvePronouns: false
+    rblRootDirectory: ${rex-root}/rbl-je
+    caseSensitivity: automatic
+    linkEntities: true
+  rli-factory-config.yaml: |+
+    #Root directory of your RLI-JE installation.
+    rootDirectory: ${rli-root}
+
+    #The maximum number of results to return.
+    #maxResults: 5
+
+    #The invalidity threshold.
+    #
+    #If the input profile distance measure is smaller than invalidityThreshold/100 ×
+    #maximumProfileDistance, the result is flagged as valid. maximumProfileDistance
+    #is the maximum distance any input text can have. If the threshold is 0, all
+    #results are flagged as invalid. If the value is 100, all results are flagged
+    #valid. The accepted value range is [0, 100].
+    #invalidityThreshold: 99.0
+
+    #This option is deprecated. Use 'languageWeightAdjustments'.
+    #
+    #A language hint.
+    #
+    #The weight is a float from 1 to 99 (the default is 1.0). Standard analysis and
+    #short-string analysis use this hint differently.
+    #
+    #In standard analysis the hint reduces the distance of the input profile from the
+    #specified language's profile by the specified weight (treated as a percentage).
+    #For example "nld" with the default weight reduces the distance from the Dutch
+    #language profile by 1.0%. Another example: "deu" with a weight of 50.005
+    #reduces the distance of the input profile from the German language profile by
+    #50.005%. If the language is already known, then use a large hint weight to
+    #suppress language detection, leaving only encoding and script detection to be
+    #performed.
+    #
+    #For short-string analysis, the hint weight provides a greater boost to
+    #confidence than for standard analysis. Confidence is boosted by 100/(100 - weight).
+    #For example, a 50% French weight boosts French confidence by a factor of 2, and
+    #75% French weight boosts confidence by a factor of 4.
+    #languageHint: null
+
+    #The profile depth.
+    #
+    #Profile depth is the maximum number of n-grams to be used in the input profile.
+    #If the depth is 100, the 100 most frequent n-grams are included in the input
+    #profile. A small depth improves detection speed but reduces detection accuracy.
+    #profileDepth: 1200
+
+    #Path to a file containing your RLI-JE XML license. If you don't provide this
+    #option, or 'licenseString', RLI-JE assumes your license is
+    #"${rootDirectory}/licenses/rlp-license.xml".
+    #licenseFile: ${rootDirectory}/licenses/rlp-license.xml
+
+    #The short-string threshold.
+    #
+    #By default, the short-string threshold is 0 and short-string language detection
+    #is inactive. To turn it on, set the threshold to a non-negative integer, such as
+    #6. If the string contains fewer characters than this threshold, RLI-JE performs
+    #short-string language detection. When RLI-JE is performing short-string language
+    #detection, only 'languageHint' and language weight adjustments are used. The
+    #other options are ignored.
+    #shortStringThreshold: 0
+
+    #Enables language region detection.
+    #multilingual: false
+
+    #The XML license content. This overrides 'licensePath'.
+    #licenseString: ${rootDirectory}/licenses/rlp-license.xml
+
+    #The minimum length for a language region (the amount of text examined in a
+    #script region). This is only used for language region detection.
+    #minRegionLength: 20
+
+    #The maximum region length. This is only used for language region detection.
+    #maxRegionLength: 65536
+
+    #The maximum number of results to return.
+    #minNonScriptioContinuaRegionLength: 5
+
+    #A set of language weight adjustments.
+    #
+    #Use this setting to change the language weight for a language, for the purpose
+    #of detecting another language that is present in the document. The weight
+    #parameter is a non-negative percentage that is applied to the language weight;
+    #70 reduces the weight to 70% of its default value. For example, you may be
+    #interested in detecting German in a document that is mostly English but also
+    #contains some German. Reduce the language weight for English or increase the
+    #language weight for German.
+    #languageWeightAdjustments: [ ]
+
+    #Whether to ignore script and encoding differences in language detection results.
+    #By default, results that share a language but have different scripts or
+    #encodings, such as Simplified Chinese and Traditional Chinese, are returned as
+    #separate results. If script and encoding differences are ignored, only one
+    #result is returned per language.
+    #uniqueLanguages: false
+
+    #Whether to force a language boundary when the script changes
+    #breakRegionOnScriptBoundary: true
+
+    #The minimum number of valid non-whitespace characters required for
+    #identification. If the input data has less than the minimum number of valid
+    #characters, no detection is performed.
+    #minValidChars: 4
+
+    #Enables language region detection.
+    #koreanDialects: false
+
+    #The ambiguity threshold.
+    #
+    #If the distance difference between the input profile and a candidate built-in
+    #profile is smaller than ambiguityThreshold/100 × bestProfileDistance, the result
+    #is flagged as ambiguous. bestProfileDistance is the distance measure of the best
+    #matching profile. If the threshold is 0 then all results will be flagged as
+    #unambiguous. If the value is 100 then all results will be flagged as ambiguous.
+    #The accepted value range is [0, 100].
+    #ambiguityThreshold: 2.0
+
+    #This option is deprecated. Use 'languageWeightAdjustments'.
+    #
+    #An encoding hint.
+    #
+    #The weight is a float from 1 to 100 (the default is 3.0). The hint reduces the
+    #distance from the input profile from the specified encoding's profile by the
+    #specified weight (treated as a percentage). For example, "Ascii" with the
+    #default weight reduces the distance from the input profile by 1.0%. The value of
+    #100 forces only those results which match the encoding hint to be considered
+    #during detection.
+    #encodingHint: null
+
+  rni-dedupe-factory-config.yaml: |
+    # rootDirectory is the location of the RNI root
+    rootDirectory: ${rni-rnt-root}
+  rni-factory-config.yaml: |+
+    #The XML license content.
+    #licenseString: null
+
+    #The path to the root directory.
+    #rootDirectory: null
+
+  rnt-factory-config.yaml: |+
+    #The path to the root directory
+    rootDirectory: ${rni-rnt-root}
+
+    #The XML license content.
+    #licenseString: null
+
+    #A mapping of languages to transliteration schemes.
+    #schemeMap: null
+
+  rosette-license.xml: |
+    <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+    <!-- Basis Technology License -->
+    <BTLicense>
+        <generator>Seth Gransky</generator>
+        <customer>Seth Testing</customer>
+        <orderid>SHIP-0000121</orderid>
+        <expiration>Perpetual</expiration>
+        <license xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="functionLicense">
+            <module>Rosette</module>
+            <language>Arabic</language>
+            <function>entities,entities-linked,events,morphology,semantics/similar,semantics/vector,sentences,sentiment,tokens,transliteration</function>
+            <license_key>97B46B51675C9F347F54B0463E25723763C1C1F7870BBFD65D1A6E1F34FB5ECA2CCFC55B27859D0C842EA92B1A12A9CF5717D52060748C77142F6E63266F022EDAE6689D29B488973B433B0591EBC205</license_key>
+        </license>
+        <license xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="functionLicense">
+            <module>Rosette</module>
+            <language>Catalan</language>
+            <function>morphology,sentences,tokens</function>
+            <license_key>F43528D8092771C13081F0E3967BD90E8BD48FF3BDBA52E26AC0EF990FC91C7F48D339A3F174BD8789A592A9F6C6F36C052F8FDD6DFC9EE1168D50359D437DCC5649B8A0BED759684E13EB47E46A903E</license_key>
+        </license>
+        <license xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="functionLicense">
+            <module>Rosette</module>
+            <language>Chinese</language>
+            <function>entities,entities-linked,events,morphology,semantics/similar,semantics/vector,sentences,tokens</function>
+            <license_key>D7E1734CFED5EE90E242D626E5DB60782C341963F387AC4E4259D45E6E9B78952CCFC55B27859D0C842EA92B1A12A9CF5717D52060748C77142F6E63266F022EDAE6689D29B4889755F037BD5EB4F946</license_key>
+        </license>
+        <license xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="functionLicense">
+            <module>Rosette</module>
+            <language>Chinese, Simplified</language>
+            <function>entities,entities-linked,events,morphology,sentences,tokens</function>
+            <license_key>2C3A92566AEFAE10B5CD86CE45518A962C341963F387AC4EA0B097379FA3DCB948D339A3F174BD8789A592A9F6C6F36C052F8FDD6DFC9EE1168D50359D437DCC5649B8A0BED75968391295F57CB02FF5A46ACAD596618C1C</license_key>
+        </license>
+        <license xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="functionLicense">
+            <module>Rosette</module>
+            <language>Chinese, Traditional</language>
+            <function>entities,entities-linked,events,morphology,sentences,tokens</function>
+            <license_key>024BA71832C7BBC3CB10D74E13159EA72C341963F387AC4E38540E2B5EC9348148D339A3F174BD8789A592A9F6C6F36C052F8FDD6DFC9EE1168D50359D437DCC5649B8A0BED75968391295F57CB02FF5A46ACAD596618C1C</license_key>
+        </license>
+        <license xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="functionLicense">
+            <module>Rosette</module>
+            <language>Czech</language>
+            <function>morphology,sentences,tokens</function>
+            <license_key>E5A482F7651D914D26D08EE365FC11A78BD48FF3BDBA52E227D340BB826E10A42CCFC55B27859D0C842EA92B1A12A9CF5717D52060748C77142F6E63266F022EDAE6689D29B48897A333E410E97FBE01</license_key>
+        </license>
+        <license xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="functionLicense">
+            <module>Rosette</module>
+            <language>Danish</language>
+            <function>morphology,sentences,tokens</function>
+            <license_key>4B914D3FEB9CCDFBCF000EBF3EDCB17BBC9EC618CB513614B3DDAD4D074732B348D339A3F174BD8789A592A9F6C6F36C052F8FDD6DFC9EE1168D50359D437DCC5649B8A0BED759684E13EB47E46A903E</license_key>
+        </license>
+        <license xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="functionLicense">
+            <module>Rosette</module>
+            <language>Dari</language>
+            <function>morphology,sentences,tokens</function>
+            <license_key>04DECAAF37F08E0AC59BC335B1E99FFB4E6EB7ACF89B15CB54402E11D43BDF3248D339A3F174BD8789A592A9F6C6F36C052F8FDD6DFC9EE1168D50359D437DCC5649B8A0BED759684E13EB47E46A903E</license_key>
+        </license>
+        <license xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="functionLicense">
+            <module>Rosette</module>
+            <language>Dutch</language>
+            <function>entities,entities-linked,events,morphology,sentences,tokens</function>
+            <license_key>1F3F3AA05A3B995B74B94D82CDDE35C06D1D2D061D3368953B0598C4E03F96B22CCFC55B27859D0C842EA92B1A12A9CF5717D52060748C77142F6E63266F022EDAE6689D29B488972C227D7F9871C13E</license_key>
+        </license>
+        <license xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="functionLicense">
+            <module>Rosette</module>
+            <language>English</language>
+            <function>address-similarity,categories,dependencies,entities,entities-linked,events,morphology,name-deduplication,name-similarity,name-translation,relationships,semantics/similar,semantics/vector,sentences,sentiment,tokens,topics</function>
+            <license_key>7573B267F53B0B4DF7EDE32B2CC44B89D73D0BF7DAB5CD78B97FB242A99C70352CCFC55B27859D0C842EA92B1A12A9CF5717D52060748C77142F6E63266F022EDAE6689D29B488977C1BC9F48B220323</license_key>
+        </license>
+        <license xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="functionLicense">
+            <module>Rosette</module>
+            <language>Estonian</language>
+            <function>morphology,sentences,tokens</function>
+            <license_key>C5B4FAEA829DCEAEA1AB33371669EB39D73D0BF7DAB5CD7806245C541AB3E95D48D339A3F174BD8789A592A9F6C6F36C052F8FDD6DFC9EE1168D50359D437DCC5649B8A0BED759684E13EB47E46A903E</license_key>
+        </license>
+        <license xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="functionLicense">
+            <module>Rosette</module>
+            <language>Finnish</language>
+            <function>morphology,sentences,tokens</function>
+            <license_key>ED667F93ACBC3F5A6042D4618FB47C474A88C3496F9601D9188158A4EE7C2BA248D339A3F174BD8789A592A9F6C6F36C052F8FDD6DFC9EE1168D50359D437DCC5649B8A0BED759684E13EB47E46A903E</license_key>
+        </license>
+        <license xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="functionLicense">
+            <module>Rosette</module>
+            <language>French</language>
+            <function>entities,entities-linked,events,morphology,semantics/similar,semantics/vector,sentences,sentiment,tokens</function>
+            <license_key>2CF7D8F3D4451A3872B74743E26C98254A88C3496F9601D95D1A6E1F34FB5ECA2CCFC55B27859D0C842EA92B1A12A9CF5717D52060748C77142F6E63266F022EDAE6689D29B488979FE417A4E0FFB8B2</license_key>
+        </license>
+        <license xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="functionLicense">
+            <module>Rosette</module>
+            <language>German</language>
+            <function>entities,entities-linked,events,morphology,semantics/similar,semantics/vector,sentences,tokens</function>
+            <license_key>9DC30528DC7902F0DD3B43034BC81204BC9EC618CB5136140858209AD8580C072CCFC55B27859D0C842EA92B1A12A9CF5717D52060748C77142F6E63266F022EDAE6689D29B4889755F037BD5EB4F946</license_key>
+        </license>
+        <license xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="functionLicense">
+            <module>Rosette</module>
+            <language>Greek</language>
+            <function>morphology,sentences,tokens</function>
+            <license_key>E0663E04CE5FCD2E8C3E072F72A1CAFBD73D0BF7DAB5CD783B0598C4E03F96B22CCFC55B27859D0C842EA92B1A12A9CF5717D52060748C77142F6E63266F022EDAE6689D29B48897A333E410E97FBE01</license_key>
+        </license>
+        <license xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="functionLicense">
+            <module>Rosette</module>
+            <language>Hebrew</language>
+            <function>entities,entities-linked,events,morphology,semantics/similar,semantics/vector,sentences,tokens</function>
+            <license_key>926061436DF7C11554F43ED83F053417532FE1FC817B1F18C6199EBC5CF5043A48D339A3F174BD8789A592A9F6C6F36C052F8FDD6DFC9EE1168D50359D437DCC5649B8A0BED75968834AC8996F8A1DFBA46ACAD596618C1C</license_key>
+        </license>
+        <license xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="functionLicense">
+            <module>Rosette</module>
+            <language>Hungarian</language>
+            <function>entities,entities-linked,events,morphology,semantics/similar,semantics/vector,sentences,tokens</function>
+            <license_key>70D539A4409B11B8F6C87F1133E243BD532FE1FC817B1F189022883CD06192462CCFC55B27859D0C842EA92B1A12A9CF5717D52060748C77142F6E63266F022EDAE6689D29B4889755F037BD5EB4F946</license_key>
+        </license>
+        <license xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="functionLicense">
+            <module>Rosette</module>
+            <language>Indonesian</language>
+            <function>entities,entities-linked,events,morphology,sentences,tokens</function>
+            <license_key>E07A980733768D96D1BC09CDFA7DB676CC18C6985192E1CC5087F4E9C134AC1C48D339A3F174BD8789A592A9F6C6F36C052F8FDD6DFC9EE1168D50359D437DCC5649B8A0BED75968391295F57CB02FF5A46ACAD596618C1C</license_key>
+        </license>
+        <license xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="functionLicense">
+            <module>Rosette</module>
+            <language>Italian</language>
+            <function>entities,entities-linked,events,morphology,semantics/similar,semantics/vector,sentences,tokens</function>
+            <license_key>3FCD45B7B0D7968690BF12714C2AD05DCC18C6985192E1CCD651280864507AD82CCFC55B27859D0C842EA92B1A12A9CF5717D52060748C77142F6E63266F022EDAE6689D29B4889755F037BD5EB4F946</license_key>
+        </license>
+        <license xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="functionLicense">
+            <module>Rosette</module>
+            <language>Japanese</language>
+            <function>entities,entities-linked,events,morphology,semantics/similar,semantics/vector,sentences,sentiment,tokens</function>
+            <license_key>5D00EF59F0A53724FDFE30BB49319493882A6696B824AF1113111D559B75DBAF2CCFC55B27859D0C842EA92B1A12A9CF5717D52060748C77142F6E63266F022EDAE6689D29B488979FE417A4E0FFB8B2</license_key>
+        </license>
+        <license xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="functionLicense">
+            <module>Rosette</module>
+            <language>Korean</language>
+            <function>entities,entities-linked,events,morphology,semantics/similar,semantics/vector,sentences,tokens</function>
+            <license_key>8D0F79A7558F56BE0DB61EEA49C8C92B485EA574261D502A90AF9D81A739CCAF2CCFC55B27859D0C842EA92B1A12A9CF5717D52060748C77142F6E63266F022EDAE6689D29B4889755F037BD5EB4F946</license_key>
+        </license>
+        <license xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="functionLicense">
+            <module>Rosette</module>
+            <language>Korean, North</language>
+            <function>morphology,semantics/similar,semantics/vector,sentences,tokens</function>
+            <license_key>53A4C241D8B61675AB3AEF19DE849B6F37AD7154312B918AF1C22736911C255F48D339A3F174BD8789A592A9F6C6F36C052F8FDD6DFC9EE1168D50359D437DCC5649B8A0BED75968C1975F7F86E498F1A46ACAD596618C1C</license_key>
+        </license>
+        <license xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="functionLicense">
+            <module>Rosette</module>
+            <language>Korean, South</language>
+            <function>morphology,semantics/similar,semantics/vector,sentences,tokens</function>
+            <license_key>273F8D65BF19D13C986D16C1B6A21C0137AD7154312B918AB4A4A011A89E1A5148D339A3F174BD8789A592A9F6C6F36C052F8FDD6DFC9EE1168D50359D437DCC5649B8A0BED75968C1975F7F86E498F1A46ACAD596618C1C</license_key>
+        </license>
+        <license xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="functionLicense">
+            <module>Rosette</module>
+            <language>Latvian</language>
+            <function>morphology,sentences,tokens</function>
+            <license_key>7F84AE3CE3B25D8C5503F3F76E9E3BFDAA56DCA3614C8A364399CBA149D7996548D339A3F174BD8789A592A9F6C6F36C052F8FDD6DFC9EE1168D50359D437DCC5649B8A0BED759684E13EB47E46A903E</license_key>
+        </license>
+        <license xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="functionLicense">
+            <module>Rosette</module>
+            <language>Malay</language>
+            <function>entities,entities-linked</function>
+            <license_key>049015EC404225BD21BF698C8FB9143CE855A850B2A9FEC6621E10A5F8DB9D2948D339A3F174BD8789A592A9F6C6F36C052F8FDD6DFC9EE1168D50359D437DCC5649B8A0BED75968F14EC344FC538467</license_key>
+        </license>
+        <license xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="functionLicense">
+            <module>Rosette</module>
+            <language>Malay, Standard</language>
+            <function>entities,entities-linked,events,morphology,sentences,tokens</function>
+            <license_key>5AFAE96C94BC9A47CF69B8D0DD53A5FE2C341963F387AC4E7B22477CA3F47D5A48D339A3F174BD8789A592A9F6C6F36C052F8FDD6DFC9EE1168D50359D437DCC5649B8A0BED75968391295F57CB02FF5A46ACAD596618C1C</license_key>
+        </license>
+        <license xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="functionLicense">
+            <module>Rosette</module>
+            <language>Norwegian</language>
+            <function>morphology,sentences,tokens</function>
+            <license_key>703B49ACD5102A4F49AE0CBA8B4415616D1D2D061D33689514A4D393781E3D6F48D339A3F174BD8789A592A9F6C6F36C052F8FDD6DFC9EE1168D50359D437DCC5649B8A0BED759684E13EB47E46A903E</license_key>
+        </license>
+        <license xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="functionLicense">
+            <module>Rosette</module>
+            <language>Norwegian Bokmal</language>
+            <function>morphology,sentences,tokens</function>
+            <license_key>4197C2B5E1D22A34504703645F03C49A6D1D2D061D33689578FA98206E8F74D048D339A3F174BD8789A592A9F6C6F36C052F8FDD6DFC9EE1168D50359D437DCC5649B8A0BED759684E13EB47E46A903E</license_key>
+        </license>
+        <license xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="functionLicense">
+            <module>Rosette</module>
+            <language>Norwegian Nynorsk</language>
+            <function>morphology,sentences,tokens</function>
+            <license_key>400608C912F0E13DAEE97FE826AC5A7E6D1D2D061D3368952372BEC1547CEAD948D339A3F174BD8789A592A9F6C6F36C052F8FDD6DFC9EE1168D50359D437DCC5649B8A0BED759684E13EB47E46A903E</license_key>
+        </license>
+        <license xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="functionLicense">
+            <module>Rosette</module>
+            <language>Persian</language>
+            <function>entities,entities-linked,events,morphology,semantics/similar,semantics/vector,sentences,sentiment,tokens</function>
+            <license_key>70E88C98258C8179041C7FCBD435F4D94A88C3496F9601D913111D559B75DBAF2CCFC55B27859D0C842EA92B1A12A9CF5717D52060748C77142F6E63266F022EDAE6689D29B488979FE417A4E0FFB8B2</license_key>
+        </license>
+        <license xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="functionLicense">
+            <module>Rosette</module>
+            <language>Polish</language>
+            <function>morphology,sentences,tokens</function>
+            <license_key>3B603D5086DAF216A9EF046589F60C6D4E6EB7ACF89B15CB3B0598C4E03F96B22CCFC55B27859D0C842EA92B1A12A9CF5717D52060748C77142F6E63266F022EDAE6689D29B48897A333E410E97FBE01</license_key>
+        </license>
+        <license xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="functionLicense">
+            <module>Rosette</module>
+            <language>Portuguese</language>
+            <function>entities,entities-linked,events,morphology,semantics/similar,semantics/vector,sentences,tokens</function>
+            <license_key>5A9F84A19AE2E2B9C6B6339D24F3BD634E6EB7ACF89B15CBD651280864507AD82CCFC55B27859D0C842EA92B1A12A9CF5717D52060748C77142F6E63266F022EDAE6689D29B4889755F037BD5EB4F946</license_key>
+        </license>
+        <license xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="functionLicense">
+            <module>Rosette</module>
+            <language>Pushto</language>
+            <function>entities,entities-linked,events,morphology,sentences,tokens</function>
+            <license_key>043C5C093BD53EF4A07AFE063F7335AC4E6EB7ACF89B15CB365B2330E5B161D548D339A3F174BD8789A592A9F6C6F36C052F8FDD6DFC9EE1168D50359D437DCC5649B8A0BED75968391295F57CB02FF5A46ACAD596618C1C</license_key>
+        </license>
+        <license xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="functionLicense">
+            <module>Rosette</module>
+            <language>Romanian</language>
+            <function>morphology,sentences,tokens</function>
+            <license_key>08C04169543CC54F005825444BF8413361F02988569450CA8272DCA813FEBA9248D339A3F174BD8789A592A9F6C6F36C052F8FDD6DFC9EE1168D50359D437DCC5649B8A0BED759684E13EB47E46A903E</license_key>
+        </license>
+        <license xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="functionLicense">
+            <module>Rosette</module>
+            <language>Russian</language>
+            <function>entities,entities-linked,events,morphology,semantics/similar,semantics/vector,sentences,tokens</function>
+            <license_key>1FA9C5626F96C6DC17DC12D8BA79737861F02988569450CA9022883CD06192462CCFC55B27859D0C842EA92B1A12A9CF5717D52060748C77142F6E63266F022EDAE6689D29B4889755F037BD5EB4F946</license_key>
+        </license>
+        <license xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="functionLicense">
+            <module>Rosette</module>
+            <language>Serbian</language>
+            <function>morphology,sentences,tokens</function>
+            <license_key>E57D1D5DE8EF13E962106996C98091952DE950F995406DACF1953865A20AB38E48D339A3F174BD8789A592A9F6C6F36C052F8FDD6DFC9EE1168D50359D437DCC5649B8A0BED759684E13EB47E46A903E</license_key>
+        </license>
+        <license xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="functionLicense">
+            <module>Rosette</module>
+            <language>Slovak</language>
+            <function>morphology,sentences,tokens</function>
+            <license_key>5C79CB3D78DDD774AE35BD83B8FEFFC82DE950F995406DACD1D3AEA2C0433DA148D339A3F174BD8789A592A9F6C6F36C052F8FDD6DFC9EE1168D50359D437DCC5649B8A0BED759684E13EB47E46A903E</license_key>
+        </license>
+        <license xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="functionLicense">
+            <module>Rosette</module>
+            <language>Spanish</language>
+            <function>entities,entities-linked,events,morphology,semantics/similar,semantics/vector,sentences,sentiment,tokens</function>
+            <license_key>BCB837798BE1E60BFA6AD6511B6CC826D73D0BF7DAB5CD7827D340BB826E10A42CCFC55B27859D0C842EA92B1A12A9CF5717D52060748C77142F6E63266F022EDAE6689D29B488979FE417A4E0FFB8B2</license_key>
+        </license>
+        <license xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="functionLicense">
+            <module>Rosette</module>
+            <language>Swedish</language>
+            <function>entities,entities-linked,events,morphology,sentences,tokens</function>
+            <license_key>E6132E7C89AF8EA0064025855B90603E2DE950F995406DAC6C8782DDE22ED1DD48D339A3F174BD8789A592A9F6C6F36C052F8FDD6DFC9EE1168D50359D437DCC5649B8A0BED75968391295F57CB02FF5A46ACAD596618C1C</license_key>
+        </license>
+        <license xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="functionLicense">
+            <module>Rosette</module>
+            <language>Tagalog</language>
+            <function>entities,entities-linked,morphology,semantics/similar,semantics/vector,sentences,tokens</function>
+            <license_key>60F3FE3E6F087474B8FBCD00BA92F28986BA7FB88DB49607559EC25C716348A948D339A3F174BD8789A592A9F6C6F36C052F8FDD6DFC9EE1168D50359D437DCC5649B8A0BED75968BF0D54F539F92DE3A46ACAD596618C1C</license_key>
+        </license>
+        <license xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="functionLicense">
+            <module>Rosette</module>
+            <language>Thai</language>
+            <function>morphology,sentences,tokens</function>
+            <license_key>4EF8B4FD5479133DF2D08622DFFC0AB786BA7FB88DB49607C7555F1D46DE724C48D339A3F174BD8789A592A9F6C6F36C052F8FDD6DFC9EE1168D50359D437DCC5649B8A0BED759684E13EB47E46A903E</license_key>
+        </license>
+        <license xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="functionLicense">
+            <module>Rosette</module>
+            <language>Turkish</language>
+            <function>morphology,sentences,tokens</function>
+            <license_key>AF45195FD5A739F6D4235F0C65AC5AEF86BA7FB88DB49607E22DD2719AE5B7B348D339A3F174BD8789A592A9F6C6F36C052F8FDD6DFC9EE1168D50359D437DCC5649B8A0BED759684E13EB47E46A903E</license_key>
+        </license>
+        <license xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="functionLicense">
+            <module>Rosette</module>
+            <language>Ukrainian</language>
+            <function>morphology,sentences,tokens</function>
+            <license_key>F9E0BFF13C5399C102DEE72C4665E16042B401123B195760B4A4A011A89E1A5148D339A3F174BD8789A592A9F6C6F36C052F8FDD6DFC9EE1168D50359D437DCC5649B8A0BED759684E13EB47E46A903E</license_key>
+        </license>
+        <license xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="functionLicense">
+            <module>Rosette</module>
+            <language>Urdu</language>
+            <function>entities,entities-linked,events,morphology,semantics/similar,semantics/vector,sentences,tokens</function>
+            <license_key>D796ED8F0EC8D405563420644300137542B401123B1957605D1A6E1F34FB5ECA2CCFC55B27859D0C842EA92B1A12A9CF5717D52060748C77142F6E63266F022EDAE6689D29B4889755F037BD5EB4F946</license_key>
+        </license>
+        <license xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="functionLicense">
+            <module>Rosette</module>
+            <language>Vietnamese</language>
+            <function>entities,entities-linked,events</function>
+            <license_key>BC5412115DF6C7E763FB1685F021F5EB29E44BBD470762C397A5C9029E6E82F348D339A3F174BD8789A592A9F6C6F36C052F8FDD6DFC9EE1168D50359D437DCC5649B8A0BED7596862512B149EEEDAE6A46ACAD596618C1C</license_key>
+        </license>
+        <license xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="functionLicense">
+            <module>Rosette</module>
+            <language>Western Farsi</language>
+            <function>morphology,sentences,tokens</function>
+            <license_key>369109385531752A16FB18DFF6B88BEB4E6EB7ACF89B15CB476594B4883FDBB348D339A3F174BD8789A592A9F6C6F36C052F8FDD6DFC9EE1168D50359D437DCC5649B8A0BED759684E13EB47E46A903E</license_key>
+        </license>
+    </BTLicense>
+  semantic-vectors-factory-config.yaml: |+
+    rblRootDirectory: ${rbl-root}
+
+    rootDirectory: ${tvec-root}
+
+    #language: { }
+
+    #granularities: [ ]
+
+    #forceReadOOV: { }
+
+    #allowWriteOOV: { }
+
+    #maxResults: 0
+
+    #numClosest: 0
+
+    #queryLanguage: { }
+
+    #resultLanguages: [ ]
+
+  sent-factory-config.yaml: |+
+    #Sets the root directory.
+    #The file structure under this directory should look like:
+    #data/
+    #  dnn/
+    #    eng/...
+    #  svm/
+    #    eng/...
+    #    spa/...
+    #licenses/
+    #  rlp-license.xml
+    #This option is required.
+    rootDirectory: ${ascent-root}
+
+    #The XML license content. This overrides 'licensePath'.
+    #licenseString: null
+
+    #The path of the license file.
+    #If not set, a default model will be used.
+    #licensePath: "${rootDirectory}/licenses/rlp-license.xml"
+
+    #Set the type of model.
+    #Options are SVM and DNN.
+    #modelType: SVM
+
+  similar-terms-factory-config.yaml: |+
+    rblRootDirectory: ${rbl-root}
+
+    rootDirectory: ${tvec-root}
+
+    #language: { }
+
+    #granularities: [ ]
+
+    #forceReadOOV: { }
+
+    #allowWriteOOV: { }
+
+    #maxResults: 0
+
+    #numClosest: 0
+
+    #queryLanguage: { }
+
+    #resultLanguages: [ ]
+
+  tokenization-factory-config.yaml: |+
+    # Required parameters for the tokenization endpoint
+
+    # rootDirectory is the location of the tokenization root
+    rootDirectory: ${rbl-root}
+
+    # universalPosTags sets universal POS tag processing
+    # values: true | false
+    universalPosTags: false
+
+    # analyze turns on analytical features (see tokenization for more detail)
+    # values: true | false
+    analyze: false
+
+    # disambiguate turnes on disambiguation
+    # values: true | false
+    disambiguate: false
+
+    # Optional parameters
+
+    # atMentions turns on @ mention processing
+    # values: true | false
+    atMentions: true
+
+    # emailAddresses turns on email address processing
+    # values: true | false
+    emailAddresses: true
+
+    # emoticons turns on emoticon processing
+    # values: true | false
+    emoticons: true
+
+    # hashtags turns on hashtag processing
+    # values: true | false
+    hashtags: true
+
+    # urls turns on URL processing
+    # values: true | false
+    urls: true
+
+
+
+
+  topics-factory-config.yaml: |+
+    #the path to the topics data root directory
+    rootDirectory: ${topics-root}
+
+  transport-rules.tsv: "/address-similarity\t*\tlocal:\n/categories\t*\tlocal:\n/dte\t*\tlocal:\n/entities\t*\tlocal:\n/events\t*\tlocal:\n/language\t*\tlocal:\n/morphology\t*\tlocal:\n/name-deduplication\t*\tlocal:\n/name-similarity\t*\tlocal:\n/name-translation\t*\tlocal:\n/relationships\t*\tlocal:\n/semantics/similar\t*\tlocal:\n/semantics/vector\t*\tlocal:\n/sentences\t*\tlocal:\n/sentiment\t*\tlocal:\n/syntax/dependencies\t*\tlocal:\n/text-embedding\t*\tlocal:\n/tokens\t*\tlocal:\n/topics\t*\tlocal:\n/transliteration\t*\tlocal:\n"
+  worker-config.yaml: |
+    # components: defines a list of component
+    # Each component sets up one or more SDK factories, as defined in the
+    # rosette-osgi project. These are objects that implement
+    # `RosetteComponentService`, and can deliver SDK factories in return for
+    # YAML configuration of those factories.
+
+    components:
+    # categorization via tcat
+    - componentName: categorization
+      factories:
+        default: cat-factory-config.yaml
+    - componentName: dependency-parsing
+      factories:
+        default: dp-factory-config.yaml
+    # RBL
+    - componentName: base-linguistics
+      factories:
+        default: rbl-factory-config.yaml
+        tokenize: tokenization-factory-config.yaml
+        analyze: analyze-factory-config.yaml
+    # RCT
+    - componentName: arabic-chat-transliterator
+      factories:
+        default: rct-factory-config.yaml
+    # REX
+    - componentName: entity-extraction
+      factories:
+        default: rex-factory-config.yaml
+        no-resolution: rex-no-resolution-factory-config.yaml
+    - componentName: event-extractor
+      factories:
+        default: event-extractor-factory-config.yaml
+    # RELAX
+    - componentName: relationship-extraction
+      factories:
+        default: relax-factory-config.yaml
+    # RLI
+    - componentName: language-identification
+      factories:
+        default: rli-factory-config.yaml
+    # RNT
+    - componentName: name-translation
+      factories:
+        default: rnt-factory-config.yaml
+    # RNI
+    - componentName: name-similarity
+      factories:
+        default: rni-factory-config.yaml
+    # RNI Dedupe
+    - componentName: name-deduplication
+      factories:
+        default: rni-dedupe-factory-config.yaml
+     #sentiment via tcat
+    - componentName: sentiment
+      factories:
+        default: sent-factory-config.yaml
+    # TVEC
+    - componentName: semantic-vectors
+      factories:
+        default: semantic-vectors-factory-config.yaml
+    - componentName: similar-terms
+      factories:
+        default: similar-terms-factory-config.yaml
+    # Topics
+    - componentName: topics
+      factories:
+        default: topics-factory-config.yaml
+    # Note: We don't have a factory because there's no SDK service
+    - componentName: address-similarity
+
+    #
+    # Pipelines
+    #
+    # To put the factories to work, the configuration defines a series
+    # of pipelines. Each pipeline handles a endpoint+language pair; either
+    # language or endpoint can be '*' to mean 'any'.  The pipeline is a
+    # series of components to run, defined in `steps`. For each component,
+    # the configuration calls out the factory for it's SDK.
+    # To specify any language, write `[ '*' ]`. Genre is optional.
+
+    textPipelines:
+    - endpoint: /syntax/dependencies
+      languages: [ '*' ]
+      steps:
+      - componentName: dependency-parsing
+    # Language detection. Not used, done in front end, delete?
+    - endpoint: /language
+      languages: [ '*' ]
+      steps:
+      - componentName: language-identification
+    # Morphology
+    - endpoint: /morphology
+      languages: [ '*' ]
+      steps:
+      - componentName: base-linguistics
+    # Entities
+    - endpoint: /entities
+      languages: [ '*' ]
+      steps:
+      - componentName: entity-extraction
+      # events
+    - endpoint: /events
+      languages: [ '*' ]
+      steps:
+        - componentName: event-extractor
+    # relationships
+    - endpoint: /relationships
+      languages: [ '*' ]
+      steps:
+      - componentName: base-linguistics
+        factoryName: analyze
+      - componentName: entity-extraction
+      - componentName: relationship-extraction
+    # sentiment
+    - endpoint: /sentiment
+      languages: [ 'ara', 'eng', 'fas', 'fra', 'jpn', 'spa', 'uen' ]
+      steps:
+      - componentName: entity-extraction
+      - componentName: sentiment
+    # categories
+    - endpoint: /categories
+      languages: [ 'eng', 'uen' ]
+      steps:
+      - componentName: base-linguistics
+        factoryName: tokenize
+      - componentName: categorization
+    # semantic vectors
+    - endpoint: /semantics/vector
+      languages: [ 'ara', 'deu', 'eng', 'fas', 'fra', 'heb', 'hun', 'ita', 'jpn', 'kor', 'por', 'qkp', 'qkr', 'rus', 'spa', 'tgl', 'urd', 'zho' ]
+      steps:
+      # No tokenization step is needed, since TVEC runs RBL itself
+      - componentName: semantic-vectors
+    - endpoint: /text-embedding
+      languages: [ 'ara', 'deu', 'eng', 'fas', 'fra', 'heb', 'hun', 'ita', 'jpn', 'kor', 'por', 'qkp', 'qkr', 'rus', 'spa', 'tgl', 'urd', 'zho' ]
+      steps:
+      - componentName: semantic-vectors
+    # similar terms
+    - endpoint: /semantics/similar
+      languages: [ 'ara', 'deu', 'eng', 'fas', 'fra', 'heb', 'hun', 'ita', 'jpn', 'kor', 'por', 'qkp', 'qkr', 'rus', 'spa', 'tgl', 'urd', 'zho' ]
+      steps:
+      # No tokenization step is needed, since TVEC runs RBL itself
+      - componentName: similar-terms
+    # sentences
+    - endpoint: /sentences
+      languages: [ '*' ]
+      steps:
+        - componentName: base-linguistics
+          factoryName: tokenize
+    # tokens
+    - endpoint: /tokens
+      languages: [ '*' ]
+      steps:
+        - componentName: base-linguistics
+          factoryName: tokenize
+    # transliteration
+    - endpoint: /transliteration
+      languages: [ '*' ]
+      steps:
+      - componentName: arabic-chat-transliterator
+    # topics
+    - endpoint: /topics
+      languages: [ 'eng' ]
+      steps:
+      - componentName: base-linguistics
+        factoryName: analyze
+      - componentName: entity-extraction
+        factoryName: no-resolution
+      - componentName: topics
+
+    # Non-TextPipelines
+    otherEndpoints:
+    - endpoint: /name-translation
+      componentName: name-translation
+    - endpoint: /name-similarity
+      componentName: name-similarity
+    - endpoint: /name-deduplication
+      componentName: name-deduplication
+    - endpoint: /address-similarity
+      componentName: address-similarity
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: rosette-pv-config-rosapi-configmap

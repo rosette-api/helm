@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "rosette-server.fullname" . }}-roots-claim
+  labels:
+    {{- include "rosette-server.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "rosette-server.selectorLabels" . | nindent 6 }}
+  storageClassName: default
+  volumeName: {{ include "rosette-server.fullname" . }}-roots-volume
+  accessModes:
+    - ReadOnlyMany
+  resources:
+    requests:
+      storage: 150G

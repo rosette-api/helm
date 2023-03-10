@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rosette-pv-deployment
+  labels:
+    app: rosette-pv
+    env: test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rosette-pv
+      env: test
+  template:
+    metadata:
+      labels:
+        app: rosette-pv
+        env: test
+    spec:
+      volumes:
+      - name: pv-conf
+        configMap:
+          name: rosette-pv-conf-configmap
+      - name: pv-roots-storage
+        persistentVolumeClaim:
+          claimName: rosette-pv-roots-claim
+      - name: pv-config
+        configMap:
+          name: rosette-pv-config-configmap
+      - name: pv-config-rosapi
+        configMap:
+          name: rosette-pv-config-rosapi-configmap
+      containers:
+        - name: rosette-pv-container
+          image: rosette/server-enterprise:1.24.1
+# Resource allocation is highly dependent on endpoint called, message size and language used.
+# this must be customized for your specific load
+          resources:
+            limits:
+              cpu: "8"
+              memory: "16G"
+            requests:
+              cpu: "4"
+              memory: "8G"
+          command: ["/bin/bash","-c"]
+          args: ["/rosette/server/bin/launch.sh console"]
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: "rosette-server"
+              containerPort: 8181
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /rest/metrics/health/worker
+              port: 8181
+            initialDelaySeconds: 120
+            periodSeconds: 20
+            failureThreshold: 1
+          readinessProbe:
+            httpGet:
+              path: /rest/metrics/health/worker
+              port: 8181
+            initialDelaySeconds: 120
+            periodSeconds: 20
+            failureThreshold: 1 
+          volumeMounts:
+          - mountPath: "/rosette/server/roots"
+            name: pv-roots-storage
+          - mountPath: "/rosette/server/launcher/config"
+            name: pv-config
+          - mountPath: "/rosette/server/launcher/config/rosapi"
+            name: pv-config-rosapi
+          - mountPath: "/rosette/server/conf"
+            name: pv-conf
+# used when using a non-root image
+#          securityContext:
+#            allowPrivilegeEscalation: false

@@ -1,0 +1,297 @@
+apiVersion: v1
+data:
+  com.basistech.downloadextract.cfg: |
+    # downloaderExtractorConfigFilePathname is the pathname of downloader extractor configuration file.
+    downloaderExtractorConfigFilePathname=${rosapi.config}/rosapi/downloaderExtractor.yaml
+
+    # constraintsPathname is the pathname of constraints file.
+    constraintsPathname=${rosapi.config}/rosapi/constraints.yaml
+  com.basistech.rli.cfg: |
+    # INTERNAL USE ONLY
+    # This file compensates for the fact that the RLI factory config does not allow a default value for some options.
+
+    # shortStringThreshold is the the minimum length of a long string, for short string processing.
+    # The shortStringThreshold does not support as many languages as the long string algorithm.
+    # values: change only if directed by engineering
+    shortStringThreshold=141
+  com.basistech.worker.service.cfg: |
+    # This file allows the WorkerService to start. The contents aren't important.
+
+    # dummy is an ignored property.
+    dummy=true
+  com.basistech.ws.addresses.cfg: |-
+    # maxFieldLength is the maximum length of a field in an address to process
+    # values: default is 500
+    #maxFieldLength=500
+  com.basistech.ws.cxf.cfg: |2
+
+    # urlBase is the host and port for the apache cxf
+    # values: must match the host/port entries in org.apache.cxf.http.jetty-main.cfg
+    urlBase=http://0.0.0.0:${rosapi.port}/rest
+  com.basistech.ws.dedupe.cfg: |
+    # This file compensates for the fact that the RNI factory config does not allow a default value for this option.
+
+    # maxNameLength sets the maximum name length for name deduplication
+    # values: 500 is the recommended, and default, value.
+    #maxNameLength=500
+  com.basistech.ws.doc.cfg: |
+    # docRoot is the path to the documentation
+    docRoot=${rosapi.config}/../../doc
+
+    # enable turns on the document server
+    # values = true|false
+    enable=true
+  com.basistech.ws.fe.health.cfg: |+
+    # INTERNAL USE ONLY
+
+    # outstandingRequestThreshold sets the maximum number of outstanding requests allowed before 'unhealthy' is returned.
+    outstandingRequestThreshold=500
+
+    # cloudwatchReport enables cloudwatch reporting of the total number of outstanding requests.
+    #cloudwatchReport=true
+
+    # cloudwatchReportInterval specifies the reporting interval.
+    # This only applies if cloudwatchReport is true
+    #cloudwatchReportInterval=PT1M (default)
+
+    # asyncReponseTimeoutMs sets a timeout value for checking callback failure.
+    # If for whatever reason the callback failed to show up, we would like to time it out
+    # so that the queue size is decremented accordingly.
+    # values: Make this slightly bigger than worker ELB timeout when deployed in AWS
+    asyncResponseTimeoutMs=310000
+
+  com.basistech.ws.frontend.cfg: |
+    # INTERNAL USE ONLY
+
+    # bindingVersions specifies the range of versions accepted from the client in [maven format](https://maven.apache.org/enforcer/enforcer-rules/versionRanges.html).
+    bindingVersions=[0.10,2.0)
+
+    # urlPrefix is appended to the CXF service prefix. We currently set this parameter to `/v1` and the CXF parameter to `/rest`, so that all of the front end URLs start with `/rest/v1`.
+    urlPrefix=/v1
+
+    # constraintsPathname is the pathname of the file defining request constraints
+    constraintsPathname=${rosapi.config}/rosapi/constraints.yaml
+
+    # profile data root folder that may contain profile-id/{rex,tcat} etc
+    # Caveat:  The folder structure beneath the root will be different if rosapi.feature.CUSTOM_PROFILE_UNDER_APP_ID is active.
+    #profile-data-root=file:///<where custom roots live>
+  com.basistech.ws.local.usage.tracker.cfg: |
+    # INTERNAL USE ONLY
+
+    # suppress disables local usage tracker, default is false
+    #suppress: true
+
+    # report interval in minutes, default is 1 minute
+    #reportInterval: 1
+
+    # Usage tracker root customizes the location of the rosette-usage.yaml file
+    # default location is  <rosette>/server/launcher/config.
+    # Change it to preferred location. Example: /var/log
+    #usage-tracker-root: /var/log
+
+    # enabled is a new flag that can be used to enable/disable local usage tracking.
+    # the suppress flag will be deprecated in a later release
+    # default is true.
+    enabled: false
+  com.basistech.ws.metrics.cfg: |
+    # INTERNAL USE ONLY
+
+    # Configuration for Metrics via statsd
+
+    # statsd.host is the hostname or IP of the statsd machine
+    #statsd.host=localhost
+
+    # statsd.port is the port on which statsd is listening
+    #statsd.port=
+
+    # statsd.prefix is used to prefix the output data
+    #statsd.prefix=
+
+    # suppress disables statsd output
+    #suppress=true
+
+    # cloudWatch.namespace is the namespace used for CloudWatch reporting
+    cloudWatch.namespace=RosetteAPI
+  com.basistech.ws.requesttracker.cfg: |
+    # INTERNAL USE ONLY
+    #
+    # set mongoUri to a valid uri to enable request logging, it's recommend to use w=-1 for async logging
+    # that doesn't block the response to the caller
+    #   see http://docs.mongodb.org/manual/reference/connection-string/ for details
+    #
+    # mongoUri = mongodb://{host}:{port}/{raas_req_db}.{raas_req_collection}?w=-1&maxPoolSize=300
+    # level    = none | partial | all
+    #
+    # For example
+
+    # mongoUri is the address of the mongo instance
+    #mongoUri=mongodb://localhost:27017/requestTrackerDb.requestTrackerCollection?w=-1&maxPoolSize=300
+
+    # trackerLevel indicates what should be tracked
+    # values: none | partial | all
+    #trackerLevel=all
+  com.basistech.ws.rni.cfg: |
+    # This file compensates for the fact that the RNI factory config does not allow a default value for this option.
+
+    # maxNameLength is the maximum length of a name to process
+    # values: default is 500
+    #maxNameLength=500
+  com.basistech.ws.rnt.cfg: |
+    # This file compensates for the fact that the RNI factory config does not allow a default value for this option.
+
+    # maxNameLength is the maximum length of a name to process
+    # values: default is 500
+    #maxNameLength=500
+  com.basistech.ws.tracker.logstash.cfg: |
+    # logstashAddress is the host:port for the logstash tcp input plugin.
+    #logstashAddress=
+
+    # maxPendingMessages is he size of the blocking queue that stores the messages for transit. If this fills, new messages spill into the log.
+    # Default is 10000
+    #maxPendingMessages=
+  com.basistech.ws.transport.embedded.cfg: |
+    # workerThreadCount is the number of threads that are created to do the actual work
+    # in the embedded local transport, for worker residing in the same machine. Default is 2.
+    # It is probably best to not go above 2-3x the number of physical cores on the host machine.
+    #workerThreadCount=2
+  com.basistech.ws.transport.http.cfg: |+
+    # INTERNAL USE ONLY
+
+    # rulesPathname is the pathname to transport rules
+    rulesPathname=${rosapi.config}/rosapi/transport-rules.tsv
+
+    # There's a desire to make this shorter to bail on things that have gotten stuck.
+
+    # workerTimeout is the amount of time to allow a worker to complete a ticket before timing out and failing it. This is in ISO format, see the javadoc for `Duration#parse`. `PT30S` is '30 seconds.'
+    workerTimeout=PT310S
+
+    # Flow control parameters
+
+    # workQueue.initialMaxOutstanding is for each distinct worker URL, the front-end will only allow this many requests to be pending.
+    workQueue.initialMaxOutstanding=10
+
+    # workQueue.decreaseThreshold controls the maxoutstanding value. If the average queue depth for a worker grows above this number, the 'maxOutstanding' value shrinks by decreaseAmount.
+    workQueue.decreaseThreshold=20
+
+    # workQueue.decreaseAmount controls the max number of outstanding requests by indicating how much to decrease the max number of outstanding requests when the queue size hits the 'decreaseThreshold'.
+    workQueue.decreaseAmount=10
+
+    # workQueue.increaseThreshold defines the max outstanding limit lower limit. If the queue size drops below this value, the max outstanding limit is increased by increaseAmount.
+    workQueue.increaseThreshold=5
+
+    # workQueue.increaseAmount controls how much to increase the max number of outstanding requests when the queue size falls to the increaseThreshold.
+    workQueue.increaseAmount=10
+
+    # workQueue.averageWindowTime controls the window time interval for averaging the queue size over this time interval, in ISO format.
+    workQueue.averageWindowTime=PT1M
+
+    # workQueue.adaptIntervalTime controls how often to compare the average queue size to the thresholds.
+    workQueue.adaptIntervalTime=PT1M
+
+    # maxHttpConnectionsPerUrl is the Maximum HTTP Connections Per URL default (1000).
+    maxHttpConnectionsPerUrl=1000
+
+    # Retry parameters
+
+    # maxRetries is the number of maximum retries.
+    maxRetries=3
+
+    # maxRetryDelay is the maximum delay for retry. If it is longer than the delay, don't retry.
+    maxRetryDelay=PT130S
+
+    # retryBackoffMultiple is a factor to multiply with retryCount and retryBackoffTime to delay the retry.
+    retryBackoffMultiple=2
+
+    # retryBackoffTime is the etry backoff time.
+    retryBackoffTime=PT0.05S
+
+    # connectionTimeToLive controls how long HttpClient connections should be kept, default to 1-day given we have a custom resolver to monitor DNS changes now
+    connectionTimeToLive=P1D
+
+    # dataFormat is the transport serialization format. Values can be SMILE (default) or JSON.
+    #dataFormat=SMILE
+
+  com.basistech.ws.worker.cfg: |
+    # configurationFilePathname is the pathname to the worker service configuration yaml.
+    configurationFilePathname=${rosapi.config}/rosapi/worker-config.yaml
+
+    # <component>-root is the pathname to the root directory for various component.
+    rbl-root=${rosapi.roots}/rbl/7.46.1.c68.0
+    rct-root=${rosapi.roots}/rct/3.0.13.c68.0
+    ascent-root=${rosapi.roots}/ascent/2.0.3.c68.0
+    tcat-root=${rosapi.roots}/tcat/2.0.14.c68.0
+    rli-root=${rosapi.roots}/rli/7.23.7.c68.0
+    rex-root=${rosapi.roots}/rex/7.55.4.c68.0
+    flinx-root=${rosapi.roots}/rex/7.55.4.c68.0/flinx
+    relax-root=${rosapi.roots}/relax/3.0.1.c68.0
+    dp-root=${rosapi.roots}/nlp4j/1.2.9.c68.0
+    rni-rnt-root=${rosapi.roots}/rni-rnt/7.40.0.c68.0
+    tvec-root=${rosapi.roots}/tvec/5.0.2.c68.0
+    topics-root=${rosapi.roots}/topics/2.0.0.c68.0
+
+    # healthCheckQueueSizeThreshold is used for ELB health check, change the default as desired. Default is 20.
+    #healthCheckQueueSizeThreshold=20
+
+    # workerThreadTimeout is the timeout value for worker threads. To avoid diminished return or even degradation
+    # It is recommended to keep the workerThreadTimeout < the maximum session (HTTP) timeout in RESTful.  In
+    # embedded mode, the value is entirely up to the user.
+    workerThreadTimeout=PT5M
+
+    # workerThreadCount is the number of threads in the worker that are created to do the actual work. Default is 2.
+    # it is probably best to not go above 2-3x the number of physical cores on the host machine.
+    #workerThreadCount=2
+
+    # cloudwatchReport indicates whether queue depth information will be reported by the worker to cloudwatch.
+    #cloudwatchReport=false
+
+    # cloudwatchReportInterval is the time interval in between reports to cloudwatch. The default is 'PT1M' -- report once per minute.
+    #cloudwatchReportInterval=PT1M
+
+    # warm up worker upon activation. The default is false.
+    warmUpWorker=false
+
+    # profile data root folder that may contain profile-id/{rex,tcat} etc
+    # Caveat:  The folder structure beneath the root will be different if rosapi.feature.CUSTOM_PROFILE_UNDER_APP_ID is active.
+    #profile-data-root=file:///<where custom roots live>
+
+    # download and text extractor
+    enableDte=true
+
+    # profileDeletionMonitorInterval controls how often to check for a profile deletion. The default is PT5S.
+    # Only used when profile-data-root is specified.
+    profileDeletionMonitorInterval=PT5S
+    overrideEndpointsPathname=${rosapi.config}/rosapi/allowed-endpoints.yaml
+  org.apache.cxf.http.jetty-main.cfg: |+
+    # Reference: see HTTPJettyTransportActivator in CXF
+    # The service is a managed service. So this file has to have "-xxx" at the end. This allows separate configurations for different ports; each such file gives parameters for a single port.
+
+    # The host/port must match the urlBase property in com.basistech.ws.cxf.cfg.
+
+    # host is the engine listen address.
+    # values: hostname or IP
+    host=0.0.0.0
+
+    # port is the jetty port.
+    port=${rosapi.port}
+
+    # continuationsEnabled indicates that continuations will be checked.
+    # values: true | false, default: true
+    continuationsEnabled=true
+
+    # reuseAddress allows the reuse of the service address.
+    reuseAddress=true
+
+    # maxIdleTime is the maximum idle time for a jetty connection. Timer is reset whenever there are any read or write actions on the underlying stream.
+    maxIdleTime=330000
+
+  org.apache.cxf.osgi.cfg: |
+    # The contents of this file are not actually used since we are no longer using a servlet container. We assume that the only CXF services are us.
+    # For the worker, this means urls like /rest/worker.
+    # The client adds /v1 for /rest/v1 in com.basistech.frontend.cfg
+
+    # org.apache.cxf.servlet.context is the prefix for all URLs for CXF services. We set this to `/rest`.
+    org.apache.cxf.servlet.context=/rest
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: rosette-pv-config-configmap
