@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "rosette-server.fullname" . }}-config-configmap
+  labels:
+    {{- include "rosette-server.labels" . | nindent 4 }}
+data:
+data:
+{{- $path := printf "%s/*" .Values.rsimage.configDirectory }}
+{{ (.Files.Glob $path).AsConfig | indent 2 }}

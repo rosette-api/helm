@@ -1,0 +1,4 @@
+endpoints:
+- /entities
+- /sentiment
+- /language

@@ -3,3 +3,5 @@
 **/*.iml
 **/.DS_Store
 **/.~*
+**/helm/rosette-server/conf
+**/helm/rosette-server/config/**
