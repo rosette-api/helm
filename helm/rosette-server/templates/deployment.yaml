@@ -43,20 +43,20 @@ spec:
           args: ["/rosette/server/bin/launch.sh console"]
           imagePullPolicy: {{ .Values.rsimage.pullPolicy }}
           ports:
-            - name: "rosette-server"
-              containerPort: {{ .Values.rsimage.port }}
+            - name: {{ .Values.rsimage.portName }}
+              containerPort: {{ .Values.rsimage.containerPort }}
               protocol: TCP
           livenessProbe:
             httpGet:
               path: /rest/metrics/health/worker
-              port: {{ .Values.rsimage.port }}
+              port: {{ .Values.rsimage.portName }}
             initialDelaySeconds: {{ .Values.rsimage.probeDelay }}
             periodSeconds: 20
             failureThreshold: 1
           readinessProbe:
             httpGet:
               path: /rest/metrics/health/worker
-              port: {{ .Values.rsimage.port }}
+              port: {{ .Values.rsimage.portName }}
             initialDelaySeconds: {{ .Values.rsimage.probeDelay }}
             periodSeconds: 20
             failureThreshold: 1 

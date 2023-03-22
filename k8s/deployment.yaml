@@ -52,14 +52,14 @@ spec:
           livenessProbe:
             httpGet:
               path: /rest/metrics/health/worker
-              port: 8181
+              port: "rosette-server"
             initialDelaySeconds: 120
             periodSeconds: 20
             failureThreshold: 1
           readinessProbe:
             httpGet:
               path: /rest/metrics/health/worker
-              port: 8181
+              port: "rosette-server"
             initialDelaySeconds: 120
             periodSeconds: 20
             failureThreshold: 1 

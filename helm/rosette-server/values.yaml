@@ -2,13 +2,14 @@
 # This deploys Rosette Server (RS) and uses a persistent volume that
 # was pre-populated with roots.
 # Configuration information is stored as ConfigMaps
-
+nameOverride: "rosette-pv"
 rsimage:
   # Full name is concatenation of imageName:imageVersion
   imageName: rosette/server-enterprise
   imageVersion: 1.24.1
   pullPolicy: IfNotPresent
-  port: 8181
+  containerPort: 8181
+  portName: "rosette-server"
   cpuLimit: 8
   cpuRequest: 4
   memoryRequest: 8G

@@ -11,7 +11,7 @@ spec:
   sessionAffinity: {{ .Values.loadbalancer.sessionAffinity }}
   ports:
     - port: {{ .Values.loadbalancer.port }}
-      targetPort: {{ .Values.rsimage.port }}
+      targetPort: {{ .Values.rsimage.portName }}
       protocol: TCP
       name: http
   

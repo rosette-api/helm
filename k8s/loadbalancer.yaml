@@ -13,6 +13,6 @@ spec:
   sessionAffinity: None
   ports:
     - port: 8181
-      targetPort: 8181
+      targetPort: "rosette-server"
       protocol: TCP
       name: http

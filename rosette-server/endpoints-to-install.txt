@@ -1,0 +1,17 @@
+language
+#morphology
+#sentences
+#tokens
+#entities
+#name-translation
+#name-similarity
+#name-deduplication
+#categories
+#sentiment
+#semantic-vectors
+#similar-terms
+#dependencies
+#transliteration
+#relationships
+#topics
+#events
