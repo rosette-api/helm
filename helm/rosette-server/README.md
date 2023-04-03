@@ -5,16 +5,18 @@ The data models for the different languages can be quite large (several GB). The
 ## Overview
 The Helm chart automates much of the k8s deployment by parameterizing Helm yaml templates which in turn produce k8s yaml files which are deployed. In addition, the Helm chart supports versioning and can be shared between users quite easily by packaging and version control.
 
-In order to  deploy the entire Rosette Enterprise application and components with Helm only one command needs to be executed `helm install demo ./rosette-server` This will install the Helm Chart in the ./rosette-server directory as the `rosette-server-demo` deployment. Executing `helm list` will show the newly created deployment. To delete all the resources for the deployment only a single command is needed `helm delete demo`.
+In order to  deploy the entire Rosette Enterprise application and components with Helm only one command needs to be executed `helm install demo ./rosette-server` This will install the Helm Chart from the ./rosette-server directory as the `demo-rosette-server` deployment. Executing `helm list` will show the newly created deployment. To delete all the resources for the deployment only a single command is needed `helm delete demo`.
 
 ### Prerequisites
-Prior to deploying the demo, as mentioned in `Rosette Enterprise k8s Persistent Volume Deployment` README, an NFS server with roots specific for the Rosette Enterprise version needs to be deployed. Note any type of Persistent Volume can be used, NFS was used in this example. The Rosette Enterprise configuration files need to be extracted and customized for your deployment (this includes the Rosette Server runtime configuration). Refer to the `rosette-server/README` for information on how to extract these components. Finally, the `rosette-license.xml` needs to be deployed to the `./rosette-server/config/rosapi` directory. Once the prerequisites are done the `./rosette-server/values.yaml` file can be updated with details about your deployment and Rosette Enterprise can be deployed. 
+Prior to deploying the demo, as mentioned in `Rosette Enterprise k8s Persistent Volume Deployment` README, an NFS server with roots specific for the Rosette Enterprise version needs to be deployed. Note any type of Persistent Volume can be used, NFS was used in this example. The Rosette Enterprise configuration files need to be extracted and customized for your deployment (this includes the Rosette Server runtime configuration). Refer to the `helm/rosette-server/README` for information on how to extract these components. Finally, the `rosette-license.xml` needs to be deployed to the `helm/helm/rosette-server/config/rosapi` directory. Once the prerequisites are done the `helm/helm/rosette-server/values.yaml` file can be updated with details about your deployment and Rosette Enterprise can be deployed. 
 
 #### Root (Model) Extraction 
-Please refer to the README file in the `../rosette-server` directory for information on how to pull the roots. 
+Please refer to the README file in the `helm/rosette-server` directory for information on how to pull the roots. 
 
 #### Configuration Extraction
-The configuration can be deployed by running `../rosette-server/install-config.sh` and specifying the `./helm/rosette-server` directory as an output directory. Note: the configuration files must be deployed inside the chart directory (`./helm/rosette-server`) if the configuration files were installed in a subdirectory then the `values.yaml` must be updated and the `confDirectory`, `configDirectory` and `configRosapiDirectory` values updated to point the subdirectory. This script assumes that the `rosette/server-enterprise:1.24.1` image has been loaded. Please refer to the README file in the ../rosette-server directory for more information.
+The configuration can be deployed by running `helm/rosette-server/install-config.sh` and specifying the `helm/helm/rosette-server` directory as an output directory. Note: the configuration files must be deployed inside the chart directory (`helm/helm/rosette-server`) if the configuration files were installed in a subdirectory then the `values.yaml` must be updated and the `confDirectory`, `configDirectory` and `configRosapiDirectory` values updated to point the subdirectory. This script assumes that the `rosette/server-enterprise:1.24.1` image has been loaded. Please refer to the README file in the `helm/rosette-server` directory for more information.
+
+same level as the values.yaml file.
 
 ### Helm Directory Structure
 The syntax for the parameter replacement in the templates is fairly straightforward. In the common case for a yaml file: `server: {{ .Values.nfsServer.address }}` tells the template engine to take the value from the values.yaml file (the leading . indicates the root of the project) with the remainder of the value following the hierarchy of the document. In this case server would end up with the value 10.23.2.1 e.g. `server: 10.23.2.1`:
@@ -47,37 +49,40 @@ For the rosette-server project the files are as follows:
 Most aspects of the deployment can be configured by modifying the values.yaml file. 
 |Key|Subkey|Purpose|
 |---|------|-------|
-|rsimage||Keys in this section refer to the Rosette Enterprise Docker image used for the deployment.|
-||imageName|The base image name being used. Default rosette/server-enterprise|
-||imageVersion|The version of the image to pull. Must be set. The final name will be the concatenation of `<imageName>:<imageVersion>` e.g. rosette/enterprise:1.19.0|
+|image||Keys in this section refer to the Rosette Enterprise Docker image used for the deployment.|
+||repository|The base image name being used. Default rosette/server-enterprise, the version is taken from the `appVersion` in the `Chart.yaml`|
 ||pullPolicy|Docker pull policy, default IfNotPresent|
-||port|The port Rosette Enterprise should listen on, default 8181|
-||cpuLimit|The resource limit on CPUs. Default is 8|
-||cpuRequest|The requested number of CPUs. Default is 4|
-||memoryLimit|The resource limit on memory. Default is 8G|
-||memoryRequest|The requested number of memory. Default is 16G|
+|rosetteServer||Values controlling where configuration have been placed (under `./rosette-server`)|
 ||confDirectory|The subdirectory holding the Rosette runtime configuration|
 ||configDirectory|The subdirectory holding the Rosette configuration|
 ||configRosapiDirectory|The subdirectory holding the Rosette customization configuration|
-||probeDelay|The number of seconds the readiness and liveness probes will wait before becoming active.|
-|nfsServer||Configuration for the NFS server|
+|rexTrainingServer||Not used in this deployment|
+|loadBalancer||
+||port|the port the load balancer will expose|
+||sessionAffinity|what type of affinity to use, session affinity is not required|
+|resources||Resource requests and limits|
+|livenessProbe||Configures timing of the liveness probe|
+|readinessProbe||Configures timing of the liveness probe|
+|storage||Details on the persistent storage|
+|nfs||Configuration for the NFS server|
+||enabled|Enables the NFS server.|
 ||address|DNS name or address of the server. Must be set.|
-||rootsMountPoint|The mount point that the Persistent Volume should use. Default /var/nfsshare/roots|
-|loadBalancer||Configuration of the ingress point|
-||port|The port to expose. Default 8181.|
-||sessionAffinity|What kind of session affinity should be used, default is None|
-|horizontalLoadBalancer||Configuration on how to scale|
-||targetCPUUtilizationPercent|What point should CPU trigger a scaling event. Default is 50%|
-||targetMinReplicas|The minimum number of replicas to keep active. Default is 1. Update based on your load.|
-||targetMaxReplicas|The maximum number of replicas to keep active at any one time. Default is 3. Update based on your load.|
+||storageClassName|Storage class name to use when connecting|
+||roots||Information about the root volume|
+||mountPoint|The mount point that the Persistent Volume should use. Default /var/nfsshare/roots|
+||claimRequestSize|Size of the claim|
+||storageCapacity|Capacity of the volume|
+|autoscaling||
+||enabled|Enables autoscaling|
+||minReplicas|Minimum number of replicas|
+||maxReplicas|Maximum number of replicas|
+||Metrics|Information to configure the horizontal autoscaler|
+|securityContext||Restricts security of the Pod|
+||runAsNonRoot|Runs a non-root user|
+||runAsUser|Run as user 2001, this matches the Rosette user|
 
 #### Notes
 The majority of the deployment of Rosette Enterprise is straight forward. There are a few points of interest which deserve some explanation. 
-
-In the `deployment.yaml`:
-1. The `livenessProbe` and `readinessProbe` will both wait 120 seconds before activating due to the time it could take Rosette Enterprise to start and warm up. The value, `initialDelaySeconds` for these probes can be adjusted downward depending on the specification of the Nodes that the application is being deployed on. The value can be adjusted by modifying the `rosentimage.probeDelay` key in the `values.yaml` file. The liveness and readiness probes both look at worker health to determine server readiness and health rather than using `/rest/v1/info` or `/rest/v1/ping` which may be active before workers are ready.
-2. Finally, each container maintains service logs which can be routed to stderr/stdout. Refer to `rosette-server/README.md` for information on how to redirect the logs. By default, the logs are kept in the container but can be exposed via mount point if desired.
-
 
 
 4. For the helm example, the `values.yaml` needs to be updated with information specific for your environment:
@@ -86,7 +91,6 @@ nfsServer:
   address: 10.150.0.39
   rootsMountPoint: /var/nfsshare/roots
 ```
-
 
 
 ### Setup k8s Environment for Helm

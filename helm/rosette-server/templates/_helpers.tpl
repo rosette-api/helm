@@ -41,8 +41,8 @@ helm.sh/chart: {{ include "rosette-server.chart" . }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
-{{- if .Values.rsimage.imageVersion }}
-rosette-server-version: {{ .Values.rsimage.imageVersion }}
+{{- if .Values.rosetteServer.version }}
+rosette-server-version: {{ .Values.rosetteServer.version }}
 {{- end }}
 {{- end -}}
 
@@ -52,9 +52,6 @@ Selector labels
 {{- define "rosette-server.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "rosette-server.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
-{{- if .Values.environment }}
-env: {{ .Values.environment }}
-{{- end }}
 {{- end -}}
 
 {{/*

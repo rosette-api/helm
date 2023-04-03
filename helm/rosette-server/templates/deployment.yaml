@@ -1,3 +1,17 @@
+#******************************************************************************
+# This data and information is proprietary to, and a valuable trade secret
+# of, Basis Technology Corp.  It is given in confidence by Basis Technology
+# and may only be used as permitted under the license agreement under which
+# it has been distributed, and in no other way.
+#
+# Copyright (c) 2023 Basis Technology Corporation All rights reserved.
+#
+# The technical data and information provided herein are provided with
+# `limited rights', and the computer software provided herein is provided
+# with `restricted rights' as those terms are defined in DAR and ASPR
+# 7-104.9(a).
+#******************************************************************************
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -5,7 +19,9 @@ metadata:
   labels:
     {{- include "rosette-server.labels" . | nindent 4 }}
 spec:
-  replicas: {{ .Values.horizontalLoadBalancer.targetMinReplicas }}
+  {{- if .Values.autoscaling.enabled }}
+  replicas: {{ .Values.autoscaling.minReplicas }}
+  {{- end }}
   selector:
     matchLabels:
       {{- include "rosette-server.selectorLabels" . | nindent 6 }}
@@ -13,7 +29,10 @@ spec:
     metadata:
       labels:
         {{- include "rosette-server.selectorLabels" . | nindent 8 }}
-    spec:
+    spec:    
+      serviceAccountName: {{ include "rosette-server.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.securityContext | nindent 8 }}
       volumes:
       - name: pv-roots-storage
         persistentVolumeClaim:
@@ -29,37 +48,33 @@ spec:
           name: {{ include "rosette-server.fullname" . }}-conf-configmap
       containers:
         - name: rosette-server-container
-# Resource allocation is highly dependent on endpoint called, message size and language used.
-# this must be tweaked for your specific load
-          resources:
-            limits:
-              cpu: {{ .Values.rsimage.cpuLimit }}
-              memory: {{ .Values.rsimage.memoryLimit }}
-            requests:
-              cpu: {{ .Values.rsimage.cpuRequest }}
-              memory: {{ .Values.rsimage.memoryRequest }}
-          image: {{ .Values.rsimage.imageName }}:{{ .Values.rsimage.imageVersion }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           command: ["/bin/bash","-c"]
           args: ["/rosette/server/bin/launch.sh console"]
-          imagePullPolicy: {{ .Values.rsimage.pullPolicy }}
+          imagePullPolicy: {{ .Values.rosetteServer.pullPolicy }}
           ports:
-            - name: {{ .Values.rsimage.portName }}
-              containerPort: {{ .Values.rsimage.containerPort }}
+            - name: "rs-svc"
+              containerPort: 8181
               protocol: TCP
           livenessProbe:
             httpGet:
               path: /rest/metrics/health/worker
-              port: {{ .Values.rsimage.portName }}
-            initialDelaySeconds: {{ .Values.rsimage.probeDelay }}
-            periodSeconds: 20
-            failureThreshold: 1
+              port: "rs-svc"
+            {{- toYaml .Values.livenessProbe | nindent 12}} 
           readinessProbe:
             httpGet:
               path: /rest/metrics/health/worker
-              port: {{ .Values.rsimage.portName }}
-            initialDelaySeconds: {{ .Values.rsimage.probeDelay }}
-            periodSeconds: 20
-            failureThreshold: 1 
+              port: "rs-svc"
+            {{- toYaml .Values.readinessProbe | nindent 12}} 
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          env:
+          {{- if .Values.rexTrainingServer.enabled }}
+          - name: RTS_URL
+            value: {{ .Values.rexTrainingServer.url | quote }}
+          - name: RTS_SOURCE_STRING
+            value: statistical
+          {{- end }}
           volumeMounts:
           - mountPath: "/rosette/server/roots"
             name: pv-roots-storage
@@ -69,6 +84,3 @@ spec:
             name: pv-config-rosapi
           - mountPath: "/rosette/server/conf"
             name: pv-conf
-# Used with non-root user containers
-#          securityContext:
-#            allowPrivilegeEscalation: false

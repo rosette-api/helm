@@ -1,42 +1,102 @@
+#******************************************************************************
+# This data and information is proprietary to, and a valuable trade secret
+# of, Basis Technology Corp.  It is given in confidence by Basis Technology
+# and may only be used as permitted under the license agreement under which
+# it has been distributed, and in no other way.
+#
+# Copyright (c) 2023 Basis Technology Corporation All rights reserved.
+#
+# The technical data and information provided herein are provided with
+# `limited rights', and the computer software provided herein is provided
+# with `restricted rights' as those terms are defined in DAR and ASPR
+# 7-104.9(a).
+#******************************************************************************
+
 # Default values for rosette-server.
 # This deploys Rosette Server (RS) and uses a persistent volume that
 # was pre-populated with roots.
 # Configuration information is stored as ConfigMaps
-nameOverride: "rosette-pv"
-rsimage:
-  # Full name is concatenation of imageName:imageVersion
-  imageName: rosette/server-enterprise
-  imageVersion: 1.24.1
+nameOverride: ""
+# So other services can easily find RS
+fullnameOverride: ""
+
+image:
+  repository: us-central1-docker.pkg.dev/platform-and-cloud-kubernetes/k8s/rosette-server-enterprise-cp
   pullPolicy: IfNotPresent
-  containerPort: 8181
-  portName: "rosette-server"
-  cpuLimit: 8
-  cpuRequest: 4
-  memoryRequest: 8G
-  memoryLimit: 16G
+
+rosetteServer:
   # These directories must be located inside the chart i.e. under ./rosette-server  
   confDirectory: conf
   configDirectory: config
   configRosapiDirectory: config/rosapi
 
-  # the number of seconds the readiness and liveness probes will wait before becoming active.
-  probeDelay: 120
+rexTrainingServer:
+  enabled: false
+  # This must match the RTS service name
+  url: http://mts-rts:9080
 
-# This will need to be updated for your environment and Persistent Volume type
-nfsServer:
-  address: 10.150.0.39
-  rootsMountPoint: /var/nfsshare/roots
-
-loadbalancer:
+loadBalancer:
   port: 8181
   sessionAffinity: None
 
-horizontalLoadBalancer:
-  targetCPUUtilizationPercent: 50
-  targetMinReplicas: 1
-  targetMaxReplicas: 3
+# Resource allocation is highly dependent on endpoint called, message size and language used.
+# this must be tweaked for your specific load
+#
+resources: 
+  limits:
+    cpu: "4"
+    memory: "12G"
+  requests:
+    cpu: "4"
+    memory: "8G"
 
-environment: "test"
+livenessProbe:
+  periodSeconds: 20
+  failureThreshold: 5
+  initialDelaySeconds: 120
+
+readinessProbe:
+  initialDelaySeconds: 120
+  periodSeconds: 20
+  failureThreshold: 5
+
+storage:
+  nfs:
+    enabled: true
+    address: 10.150.0.39
+    storageClassName: default
+    roots:
+      mountPoint: /var/nfsshare/roots
+      claimRequestSize: 150G
+      storageCapacity: 150G
+
+service:
+  port: 8181
+  sessionAffinity: None
+
+autoscaling:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 2
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 50
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+
+# UID maps to user rosette
+securityContext: 
+  runAsNonRoot: true
+  runAsUser: 2001  
+#  fsGroup: 2000
 
 imagePullSecrets: []
 
@@ -51,14 +111,6 @@ serviceAccount:
 
 podSecurityContext: {}
   # fsGroup: 2000
-
-securityContext: {}
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
-  # runAsUser: 1000
 
 nodeSelector: {}
 
