@@ -21,7 +21,7 @@ nameOverride: ""
 fullnameOverride: ""
 
 image:
-  repository: us-central1-docker.pkg.dev/platform-and-cloud-kubernetes/k8s/rosette-server-enterprise-cp
+  repository: rosette/server-enterprise
   pullPolicy: IfNotPresent
 
 rosetteServer:
@@ -69,10 +69,6 @@ storage:
       mountPoint: /var/nfsshare/roots
       claimRequestSize: 150G
       storageCapacity: 150G
-
-service:
-  port: 8181
-  sessionAffinity: None
 
 autoscaling:
   enabled: true
