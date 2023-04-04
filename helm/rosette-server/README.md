@@ -14,9 +14,7 @@ Prior to deploying the demo, as mentioned in `Rosette Enterprise k8s Persistent 
 Please refer to the README file in the `helm/rosette-server` directory for information on how to pull the roots. 
 
 #### Configuration Extraction
-The configuration can be deployed by running `helm/rosette-server/install-config.sh` and specifying the `helm/helm/rosette-server` directory as an output directory. Note: the configuration files must be deployed inside the chart directory (`helm/helm/rosette-server`) if the configuration files were installed in a subdirectory then the `values.yaml` must be updated and the `confDirectory`, `configDirectory` and `configRosapiDirectory` values updated to point the subdirectory. This script assumes that the `rosette/server-enterprise:1.24.1` image has been loaded. Please refer to the README file in the `helm/rosette-server` directory for more information.
-
-same level as the values.yaml file.
+The configuration can be deployed by running `helm/rosette-server/install-config.sh` and specifying the `helm/helm/rosette-server` directory as an output directory. Note: the configuration files must be deployed inside the chart directory (`helm/helm/rosette-server`) if the configuration files were installed in a subdirectory then the `values.yaml` must be updated and the `confDirectory`, `configDirectory` and `configRosapiDirectory` values updated to point the subdirectory. This Chart assumes that the `rosette/server-enterprise:1.25.1` image is being used. If a different version is being used please update `Chart.yaml` and update the `appVersion` Please refer to the README file in the `helm/rosette-server` directory for more information.
 
 ### Helm Directory Structure
 The syntax for the parameter replacement in the templates is fairly straightforward. In the common case for a yaml file: `server: {{ .Values.nfsServer.address }}` tells the template engine to take the value from the values.yaml file (the leading . indicates the root of the project) with the remainder of the value following the hierarchy of the document. In this case server would end up with the value 10.23.2.1 e.g. `server: 10.23.2.1`:

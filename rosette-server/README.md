@@ -1,5 +1,33 @@
-# Introduction
-## Making Rosette Server compliant with Containerization Best Practices
+# Instructions
+This process will pull the the Rosette Server image from dockerhub (at the time of this writing the latest version is 1.25.1, check [Rosette Server](https://hub.docker.com/r/rosette/server-enterprise/tags) for the latest image tag) and update the configuration in order to be deployed using Helm.
+
+1. Run `setup.sh` to create the `endpoints-to-install.sh` file.
+2. Edit the `endpoints-to-install.txt` and indicate the licensed endpoints to install.
+3. Edit the  `languages-to-install.txt` and indicate the licensed languages to install.
+4. Run `download-rosette-server-packages.sh` which will download all the required configuration and data files.
+5. Make any optional modifications to the configuration files per the descriptions in the `Advanced Configuration` section. Minimally change the following must be changed.
+    1. Edit `./config/com.basistech.ws.local.usage.tracker.cfg` file and set `enabled: false`
+    2. Edit `/conf/wrapper.conf` file and set `wrapper.logfile=` (set it to be empty)
+    3. Copy the `rosette-license.xml` file to `./config/rosapi`. You would have received this file from Basis Support.
+6. Run `install-config.sh` to copy the configuration directories into `./helm/helm/rosette-server`. These directories are used to create ConfigMaps.
+7. Run `extract-roots.sh` which will decompress the model tar.gz files into a target directory that the user is prompted for. This script is used to populate the persistent volume in the Helm deployment. Note: it is often recommended to copy the compressed root files to the machine hosting the persistent volume and then decompress them.
+8. Once the configuration files have been modified and models extracted then RS can be deployed using the instructions in the `helm` directory. Alternatively, RS' configuration can be tested using the `docker` deployment described in the `./docker` directory.
+
+## Other Scripts
+
+The script `clean-setup.sh` will delete the endpoints-to-install.txt file and comment out all languages to install. 
+
+The script `setup.sh` will create the endpoints-to-install.txt file and comment out all languages to install.
+
+## Other Notes
+If you are deploying a subset of endpoints you are licensed for on a k8s pod or container then refer to `./misc/README.md` for information on how to restrict the allowed endpoints. 
+
+|Directory|Purpose|
+|---------|-------|
+|docker|This directory contains docker files used to run Rosette Server locally (e.g. laptop running Docker). In this configuration the models, data files, and configuration information are mounted as simple volumes from the host OS. This configuration is used as a 'quick start' to get Rosette Server up and running locally to verify the extraction before running k8s.|
+
+## Background
+### Making Rosette Server compliant with Containerization Best Practices
 
 When referring to containerization best practices documents such as "Best practices for operating containers" (Google, Best practices for operating containers 2021). There are certain properties of containers that are considered to be of high importance. Those properties are: 
 
@@ -39,7 +67,7 @@ Currently the same endpoint is used for liveness and readiness `/rest/metrics/he
 }
 ```
 
-### Optional Configuration
+### Advanced Configuration
 It should be noted that the files contained in the `./conf`, `./config` and `./config/rosapi` directories behave just like the typical RS configuration. Therefore, any RS configuration documentation will apply to the files in these directories.
 
 ### Worker thread count
@@ -63,35 +91,6 @@ To set the minimum and maximum memory edit the `./conf/wrapper.conf`.
   * This will set the initial amount of memory (in megabytes) allocated by the JVM at startup
   * Note typically initmemory and maxmemory are equal to reduce the JVM from performing expensive memory allocations
 
-# Instructions
-This process will pull the latest RS image from dockerhub (at the time of this writing 1.24.1) and perform the following:
-
-1. Run `setup.sh` to create the `endpoints-to-install.sh` file.
-2. Edit the `endpoints-to-install.txt` and indicate the endpoints to install.
-3. Edit the  `languages-to-install.txt` and indicate the languages to install.
-4. Run `download-rosette-server-packages.sh` which will download all the required configuration and data files.
-5. Make modifications to the configuration files per the descriptions above. Minimally change the following.
-    1. Edit `./config/com.basistech.ws.local.usage.tracker.cfg` file and set `enabled: false`
-    2. Edit `/conf/wrapper.conf` file and set `wrapper.logfile=` (set it to be empty)
-    3. Copy the `rosette-server.xml` file to `./config/rosapi`. You would have received this file from Basis Support.
-6. Run `install-config.sh` to copy the configuration directories into a target directory that the user is prompted for. For example this script is used to assist in the creation of the Helm/k8s ConfigMaps.
-7. Run `extract-roots.sh` which will decompress the model tar.gz files into a target directory that the user is prompted for. For example this script is used to populate the persistent volume in the Helm/k8s deployment.
-8. Once the configuration files have been modified and models extracted then RS can be deployed using k8s using the instructions in the `helm` or `k8s` directories. Alternatively, RS' configuration can be tested using the `docker` deployment described below.
-
-## Other Scripts
-
-The script `clean-setup.sh` will delete the endpoints-to-install.txt file and comment out all languages to install. 
-
-The script `setup.sh` will create the endpoints-to-install.txt file and comment out all languages to install.
-
-## Other Notes
-If you are deploying a subset of endpoints you are licensed for on a k8s pod or container then refer to `./misc/README.md` for information on how to restrict the allowed endpoints. 
-
-|Directory|Purpose|
-|---------|-------|
-|docker|This directory contains docker files used to run Rosette Server locally (e.g. laptop running Docker). In this configuration the models, data files, and configuration information are mounted as simple volumes from the host OS. This configuration is used as a 'quick start' to get Rosette Server up and running locally to verify the extraction before running k8s.|
-
-
-References:
+# References
 
 Google. (2021, May 25). Best practices for operating containers. Cloud Architecture Center. https://cloud.google.com/architecture/best-practices-for-operating-containers#:~:text=Immutable%20means%20that%20a%20container,deployments%20safer%20and%20more%20repeatable. 
