@@ -82,8 +82,7 @@ Most aspects of the deployment can be configured by modifying the values.yaml fi
 #### Notes
 The majority of the deployment of Rosette Enterprise is straight forward. There are a few points of interest which deserve some explanation. 
 
-
-4. For the helm example, the `values.yaml` needs to be updated with information specific for your environment:
+For the helm example, the `values.yaml` needs to be updated with information specific for your environment:
 ```
 nfsServer:
   address: 10.150.0.39
