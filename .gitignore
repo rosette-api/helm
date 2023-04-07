@@ -5,3 +5,4 @@
 **/.~*
 **/helm/rosette-server/conf
 **/helm/rosette-server/config/**
+**/**/rosette-license.xml

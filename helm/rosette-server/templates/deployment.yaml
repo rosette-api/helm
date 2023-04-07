@@ -61,11 +61,11 @@ spec:
               path: /rest/metrics/health/worker
               port: "rs-svc"
             {{- toYaml .Values.livenessProbe | nindent 12}} 
-          readinessProbe:
+          startupProbe:
             httpGet:
               path: /rest/metrics/health/worker
               port: "rs-svc"
-            {{- toYaml .Values.readinessProbe | nindent 12}} 
+            {{- toYaml .Values.startupProbe | nindent 12}} 
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           env:

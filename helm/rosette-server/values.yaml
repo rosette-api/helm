@@ -53,12 +53,10 @@ resources:
 livenessProbe:
   periodSeconds: 20
   failureThreshold: 5
-  initialDelaySeconds: 120
 
-readinessProbe:
-  initialDelaySeconds: 120
+startupProbe:
   periodSeconds: 20
-  failureThreshold: 5
+  failureThreshold: 10
 
 storage:
   nfs:
