@@ -5,6 +5,8 @@ This example project describes how to deploy Rosette Enterprise in *docker* and 
 The key components of the *helm* deployment is outlined below.
 The Rosette Server image specified in the deployment will be deployed in one Pod. Horizontal scaling will be handled by a Horizontal Pod Autoscaler using CPU load and memory as a scaling metric. All Rosette Server configuration files and license file will be exposed to Pods using three ConfigMaps. One ConfigMap encapsulates the `./config` directory, another the `/config/rosapi` directory and the runtime configuration directory `./conf`. In this example a persistent volume hosted on NFS is being used.
 
+![overview](./images/helmRsDeployment.png "Figure 1: Deployment Overview")
+
 This deployment of the Rosette Server has the following advantages:
 1. The containers can start up faster since they do not need to unpack roots.
 2. The containers are smaller and will not exceed any Docker limit on container size.
