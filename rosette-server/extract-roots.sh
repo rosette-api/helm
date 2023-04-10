@@ -24,7 +24,7 @@ while true; do
         if [ ! -d "${SRC}" ]; then
             warn "${SRC} does not exist!"
         else
-            CNT=$(ls -1 "${SRC}/*.tar.gz" 2>/dev/null | wc -l)
+            CNT=$(ls -1 ${SRC}/*.tar.gz 2>/dev/null | wc -l)
             if [[ $CNT -eq 0 ]]; then
                 warn "No .tar.gz found in ${SRC}"
             else
