@@ -1,0 +1,34 @@
+#******************************************************************************
+# This data and information is proprietary to, and a valuable trade secret
+# of, Basis Technology Corp.  It is given in confidence by Basis Technology
+# and may only be used as permitted under the license agreement under which
+# it has been distributed, and in no other way.
+#
+# Copyright (c) 2023 Basis Technology Corporation All rights reserved.
+#
+# The technical data and information provided herein are provided with
+# `limited rights', and the computer software provided herein is provided
+# with `restricted rights' as those terms are defined in DAR and ASPR
+# 7-104.9(a).
+#******************************************************************************
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "rosette-server.fullname" . }}-roots-claim
+  labels:
+    {{- include "rosette-server.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "rosette-server.selectorLabels" . | nindent 6 }}
+  storageClassName: default
+  volumeName: {{ include "rosette-server.fullname" . }}-roots-volume
+  accessModes:
+    - ReadOnlyMany
+  resources:
+    requests:
+    {{- if .Values.storage.nfs.enabled }}
+      storage: {{ .Values.storage.nfs.roots.claimRequestSize }}
+    {{- else if .Values.storage.persistentDisk.enabled }}
+      storage: {{ .Values.storage.persistentDisk.roots.claimRequestSize }}
+    {{- end}}

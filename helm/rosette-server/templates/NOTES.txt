@@ -1,0 +1,4 @@
+1. Get the application URL by running these commands:
+  NOTE: It may take a few minutes for the LoadBalancer IP to be available.
+      kubectl get svc --namespace default {{ .Release.Name }}-rosette-server 
+      Using the EXTERNAL-IP, curl http://{EXTERNAL-IP}:{PORT}/rest/v1/ping

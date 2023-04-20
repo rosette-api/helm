@@ -1,0 +1,30 @@
+#******************************************************************************
+# This data and information is proprietary to, and a valuable trade secret
+# of, Basis Technology Corp.  It is given in confidence by Basis Technology
+# and may only be used as permitted under the license agreement under which
+# it has been distributed, and in no other way.
+#
+# Copyright (c) 2023 Basis Technology Corporation All rights reserved.
+#
+# The technical data and information provided herein are provided with
+# `limited rights', and the computer software provided herein is provided
+# with `restricted rights' as those terms are defined in DAR and ASPR
+# 7-104.9(a).
+#******************************************************************************
+{{- if .Values.autoscaling.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "rosette-server.fullname" . }}
+  labels:
+    {{- include "rosette-server.labels" . | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "rosette-server.fullname" . }}-deployment
+  minReplicas: {{ .Values.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.autoscaling.maxReplicas }}
+  metrics:
+    {{- toYaml .Values.autoscaling.metrics | nindent 2 }}
+{{- end }}

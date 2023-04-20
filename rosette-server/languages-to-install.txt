@@ -1,0 +1,67 @@
+# Copyright 2023 Basis Technology Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Languages to install
+# License File Name, iso639-3
+# Note some language roots do not explicitly exist and may cause
+# errors when being pulled, this is a known condition.
+#Albanian
+#Arabic
+#Bulgarian
+#Catalan
+#Chinese
+#Croatian
+#Czech
+#Danish
+#Dari
+#Dutch
+#English
+#English_upper_case
+#Estonian
+#Farsi,_Western
+#Finnish
+#French
+#German
+#Greek
+#Hebrew
+#Hungarian
+#Indonesian
+#Italian
+#Japanese
+#Korean
+#Latvian
+#Malay
+#North_Korean
+#Norwegian
+#Norwegian_Bokmal
+#Norwegian_Nynorsk
+#Persian
+#Polish
+#Portuguese
+#Pushto
+#Romanian
+#Russian
+#Serbian
+#Slovak
+#Slovenian
+#South_Korean
+#Spanish
+#Swedish
+#Tagalog
+#Thai
+#Turkish
+#Ukrainian
+#Urdu
+#Vietnamese
+#

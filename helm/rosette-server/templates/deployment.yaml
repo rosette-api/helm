@@ -1,0 +1,86 @@
+#******************************************************************************
+# This data and information is proprietary to, and a valuable trade secret
+# of, Basis Technology Corp.  It is given in confidence by Basis Technology
+# and may only be used as permitted under the license agreement under which
+# it has been distributed, and in no other way.
+#
+# Copyright (c) 2023 Basis Technology Corporation All rights reserved.
+#
+# The technical data and information provided herein are provided with
+# `limited rights', and the computer software provided herein is provided
+# with `restricted rights' as those terms are defined in DAR and ASPR
+# 7-104.9(a).
+#******************************************************************************
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "rosette-server.fullname" . }}-deployment
+  labels:
+    {{- include "rosette-server.labels" . | nindent 4 }}
+spec:
+  {{- if .Values.autoscaling.enabled }}
+  replicas: {{ .Values.autoscaling.minReplicas }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "rosette-server.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "rosette-server.selectorLabels" . | nindent 8 }}
+    spec:    
+      serviceAccountName: {{ include "rosette-server.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.securityContext | nindent 8 }}
+      volumes:
+      - name: pv-roots-storage
+        persistentVolumeClaim:
+          claimName: {{ include "rosette-server.fullname" . }}-roots-claim
+      - name: pv-config
+        configMap:
+          name: {{ include "rosette-server.fullname" . }}-config-configmap
+      - name: pv-config-rosapi
+        configMap:
+          name: {{ include "rosette-server.fullname" . }}-config-rosapi-configmap
+      - name: pv-conf
+        configMap:
+          name: {{ include "rosette-server.fullname" . }}-conf-configmap
+      containers:
+        - name: rosette-server-container
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          command: ["/bin/bash","-c"]
+          args: ["/rosette/server/bin/launch.sh console"]
+          imagePullPolicy: {{ .Values.rosetteServer.pullPolicy }}
+          ports:
+            - name: "rs-svc"
+              containerPort: 8181
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /rest/metrics/health/worker
+              port: "rs-svc"
+            {{- toYaml .Values.livenessProbe | nindent 12}} 
+          startupProbe:
+            httpGet:
+              path: /rest/metrics/health/worker
+              port: "rs-svc"
+            {{- toYaml .Values.startupProbe | nindent 12}} 
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          env:
+          {{- if .Values.rexTrainingServer.enabled }}
+          - name: RTS_URL
+            value: {{ .Values.rexTrainingServer.url | quote }}
+          - name: RTS_SOURCE_STRING
+            value: statistical
+          {{- end }}
+          volumeMounts:
+          - mountPath: "/rosette/server/roots"
+            name: pv-roots-storage
+          - mountPath: "/rosette/server/launcher/config"
+            name: pv-config
+          - mountPath: "/rosette/server/launcher/config/rosapi"
+            name: pv-config-rosapi
+          - mountPath: "/rosette/server/conf"
+            name: pv-conf
