@@ -8,10 +8,10 @@ The Helm chart automates much of the k8s deployment by parameterizing Helm yaml 
 In order to  deploy the entire Rosette Enterprise application and components with Helm only one command needs to be executed `helm install demo ./rosette-server` This will install the Helm Chart from the ./rosette-server directory as the `demo-rosette-server` deployment. Executing `helm list` will show the newly created deployment. To delete all the resources for the deployment only a single command is needed `helm delete demo`.
 
 ### Prerequisites
-Prior to deploying the demo, as mentioned in `Rosette Enterprise k8s Persistent Volume Deployment` README, an NFS server with roots specific for the Rosette Enterprise version needs to be deployed. Note any type of Persistent Volume can be used, NFS was used in this example. The Rosette Enterprise configuration files need to be extracted and customized for your deployment (this includes the Rosette Server runtime configuration). Refer to the `helm/rosette-server/README` for information on how to extract these components. Finally, the `rosette-license.xml` needs to be deployed to the `helm/helm/rosette-server/config/rosapi` directory. Once the prerequisites are done the `helm/helm/rosette-server/values.yaml` file can be updated with details about your deployment and Rosette Enterprise can be deployed. 
+Prior to deploying the demo, as mentioned in `Rosette Enterprise k8s Persistent Volume Deployment` README, an NFS server with roots specific for the Rosette Enterprise version needs to be deployed. Note any type of Persistent Volume can be used, NFS was used in this example. The Rosette Enterprise configuration files need to be extracted and customized for your deployment (this includes the Rosette Server runtime configuration). Refer to the [helm/rosette-server/README](/rosette-server/README.md) for information on how to extract these components. Finally, the `rosette-license.xml` needs to be deployed to the `helm/helm/rosette-server/config/rosapi` directory. Once the prerequisites are done the `helm/helm/rosette-server/values.yaml` file can be updated with details about your deployment and Rosette Enterprise can be deployed.
 
-#### Root (Model) Extraction 
-Please refer to the README file in the `helm/rosette-server` directory for information on how to pull the roots. 
+#### Root (Model) Extraction
+Please refer to the [README](/rosette-server/README.md) file in the `helm/rosette-server` directory for information on how to pull the roots.
 
 #### Configuration Extraction
 The configuration can be deployed by running `helm/rosette-server/install-config.sh` and specifying the `helm/helm/rosette-server` directory as an output directory. Note: the configuration files must be deployed inside the chart directory (`helm/helm/rosette-server`) if the configuration files were installed in a subdirectory then the `values.yaml` must be updated and the `confDirectory`, `configDirectory` and `configRosapiDirectory` values updated to point the subdirectory. This Chart assumes that the `rosette/server-enterprise:1.25.1` image is being used. If a different version is being used please update `Chart.yaml` and update the `appVersion` Please refer to the README file in the `helm/rosette-server` directory for more information.
@@ -29,22 +29,22 @@ For the rosette-server project the files are as follows:
 |File|Purpose|
 |----|-------|
 |Chart.yaml|Contains high level version and project information|
-|values.yaml|This file contains values that will be replaced in the template files, this file must be customized for your environment.| 
+|values.yaml|This file contains values that will be replaced in the template files, this file must be customized for your environment.|
 |/templates|This directory contains template files for the resources in the project.|
-|/templates/serviceaccount.yaml|Definition of the service account used for this project. Empty for this sample.| 
+|/templates/serviceaccount.yaml|Definition of the service account used for this project. Empty for this sample.|
 |/templates/roots-persistent-volume.yaml|Defines the Persistent Volume that maps to the NFS server hosting the roots.|
-|/templates/roots-persistent-volume-claim.yaml|The claim for the roots volume| 
+|/templates/roots-persistent-volume-claim.yaml|The claim for the roots volume|
 |/templates/config-configmap.yaml|ConfigMap for files found in `/config` directory|
 |/templates/config-rosapi-configmap.yaml|ConfigMap for configuration files and license file found in `/config/rosapi`|
 |/templates/conf-configmap.yaml|ConfigMap for Rosette Server runtime configuration|
-|/templates/horizontal-autoscale.yaml|Horizontal Pod Autoscaler|  
+|/templates/horizontal-autoscale.yaml|Horizontal Pod Autoscaler|
 |/templates/loadbalancer.yaml|Ingress point for the application|
 |/templates/deployment.yaml|The deployment descriptor for the application|
 |/templates/_helpers.tbl|Helper macros used in the templates|
 |/templates/NOTES.txt|Text that is displayed when the chart is deployed|
 
 #### values.yaml
-Most aspects of the deployment can be configured by modifying the values.yaml file. 
+Most aspects of the deployment can be configured by modifying the values.yaml file.
 |Key|Subkey|Purpose|
 |---|------|-------|
 |image||Keys in this section refer to the Rosette Enterprise Docker image used for the deployment.|
@@ -80,7 +80,7 @@ Most aspects of the deployment can be configured by modifying the values.yaml fi
 ||runAsUser|Run as user 2001, this matches the Rosette user|
 
 #### Notes
-The majority of the deployment of Rosette Enterprise is straight forward. There are a few points of interest which deserve some explanation. 
+The majority of the deployment of Rosette Enterprise is straight forward. There are a few points of interest which deserve some explanation.
 
 For the helm example, the `values.yaml` needs to be updated with information specific for your environment:
 ```
@@ -104,7 +104,7 @@ $ helm list
 # list deployments made by helm
 $ helm list
 NAME         	NAMESPACE	REVISION	UPDATED                             	STATUS  	CHART          	APP VERSION
-demo	        default  	1       	2020-03-09 16:20:04.119739 -0400 EDT	deployed	rosette-server-0.1.0	1.18.0     
+demo	        default  	1       	2020-03-09 16:20:04.119739 -0400 EDT	deployed	rosette-server-0.1.0	1.18.0
 
 # To deploy the Rosette Persistent Volume Demo using NFS make sure
 # 1) A k8s cluster exists
@@ -114,7 +114,7 @@ demo	        default  	1       	2020-03-09 16:20:04.119739 -0400 EDT	deployed	ro
 # 4) There is a Rosette Enterprise container in the registry and the values.yaml has been updated with the name, and version.
 # check for basic errors in the files
 # helm lint <directory containing the Chart>
-$ helm lint ./rosette-server 
+$ helm lint ./rosette-server
 
 # install the Chart
 # helm install <name> <directory containing the Chart>
