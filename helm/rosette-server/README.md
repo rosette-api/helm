@@ -141,6 +141,49 @@ $ helm list
 # For example:
 $ helm delete demo
 ```
+### Monitoring
+
+First enable the usage tracker in Rosette Server with a configuration file:
+
+`config/com.basistech.ws.local.usage.tracker.cfg`
+```
+usage-tracker-root: /var/tmp
+enabled: true
+```
+
+Above enables a Prometheus endpoint at `/rest/usage/metrics`.
+
+#### Prometheus with Helm
+1. Install [Prometheus via Helm](https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus) first.
+2. Add following annotations to pods:
+
+```
+  template:
+    metadata:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: /rest/usage/metrics
+        prometheus.io/port: "8181"
+```
+
+#### Prometheus Operator
+1. Install [Prometheus Operator](https://prometheus-operator.dev/).
+2. Add a ServiceMonitor for the instance:
+
+```
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: rosette-monitor
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: <helm-instance-name>
+      app.kubernetes.io/name: rosette-server
+  endpoints:
+  - port: http
+    path: /rest/usage/metrics
+```
 
 ### Trouble Shooting
 #### Liveness
