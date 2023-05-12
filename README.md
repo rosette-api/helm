@@ -16,7 +16,7 @@ This deployment of the Rosette Server has the following advantages:
 ## Deployment Outline
 0. Obtain a Rosette Enterprise license file. This would have been part of your shipment email.
 1. Decide on the persistent volume type to use and set it up. Note: for all endpoints and all languages you will need approximately 100G. 
-2. Extract and configure the configuration files from Rosette Server as outlined in the `helm/rosette-server` directory. 
+2. Extract and configure the configuration files from Rosette Server as outlined in the [helm/rosette-server](helm/rosette-server) directory.
 3. Download the compressed data models (roots) in preparation for deploying them to the persistent volume as outlined in the `helm/rosette-server` directory.
 4. Create the ConfigMaps from the configuration files. 
 5. Deploy the compressed data models and install them into the persistent volume. When copying the models it is often faster to copy the tar.gz roots from the downloaded models and then expanding them in the peristent volume target. Instructions for downloading models are in the `helm/rosette-server` directory. 
@@ -87,6 +87,6 @@ sudo firewall-cmd --permanent --zone=public --add-service=rpc-bind
 `showmount -e localhost`
 
 ### Use Helm to Deploy Rosette Enterprise
-In order to use Helm a few configuration values in the values.yaml file need to be set. These are described in the `helm/helm/rosette-server` README. Once configured the Rosette Enterprise can be deployed with  `helm install demo ./rosent-server` from this directory.\
+In order to use Helm a few configuration values in the values.yaml file need to be set. These are described in the [helm/rosette-server](helm/rosette-server) README. Once configured the Rosette Enterprise can be deployed with  `helm install demo ./rosent-server` from this directory.\
 
 

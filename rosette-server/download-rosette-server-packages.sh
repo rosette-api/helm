@@ -89,6 +89,9 @@ function make_dockername() {
     # Strip off everything from the tar.gz filename starting with -root
     # ex. rex-root-hun-7.47.0.c62.2 -> rex
     TMP=$(echo $TAR | sed 's/-root.*$/-root/g')
+    if [[ $TMP == "nlp4j-root" ]] ; then
+        TMP="dp-root"
+    fi
     # Look for the root name in the worker config file
     VERSION=$(grep -i -E "^$TMP" $VERSIONS)
     # Version will be everything after the last slash
