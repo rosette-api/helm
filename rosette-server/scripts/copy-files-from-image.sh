@@ -48,7 +48,17 @@ then
     fi
 fi
 
-docker pull --quiet $image 
+# Check if the image exists locally and if not try to pull it
+if [[ $(docker images -q $image) == "" ]]; then
+  echo "Docker image $image not found locally, trying to pull it..."
+  docker pull --quiet $image
+  if [[ $? -eq 0 ]]; then
+    echo "Docker image $image pulled successfully"
+  else
+    echo "Docker image $image pull failed"
+    exit 1
+  fi
+fi
 
 containerId=$(docker create $image)
 if [[ $containerId == "" ]]; then
