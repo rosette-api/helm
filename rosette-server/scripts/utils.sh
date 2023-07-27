@@ -115,3 +115,11 @@ function create_endpoint_file {
         fi
     fi
 }
+function sed_replace {
+    local FN=$RANDOM
+    if [[ "$OSTYPE" == "linux-gnu" ]] ; then
+	    sed -i "$1" $2
+    else
+	    sed -i '' "$1" $2
+    fi
+}
