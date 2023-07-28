@@ -1,11 +1,11 @@
 # Instructions
-This process will pull the Rosette Server image matching the appVersion specified in the [Chart file](/helm/rosette-server/Chart.yaml)  from dockerhub ([Rosette Server](https://hub.docker.com/r/rosette/server-enterprise/tags)) and update the configuration in order to be deployed using Helm.
+This process will pull the Rosette Server image matching the appVersion specified in the [Chart file](/helm/rosette-server/Chart.yaml) from dockerhub ([Rosette Server](https://hub.docker.com/r/rosette/server-enterprise/tags)) and update the configuration in order to be deployed using Helm.
 
 1. Copy the `rosette-license.xml` file to the directory with `stage-rosette-server.sh`.
 2. Edit the `endpoints-to-install.txt` and indicate the licensed endpoints to install.
 3. Edit the  `languages-to-install.txt` and indicate the licensed languages to install.
 4. Run `stage-rosette-server.sh`. This script will make the required changes to the default Rosette Server configuration, and create a staging directory holding the Rosette Server docker image and the persistent volume contents.
-5. Deploy the staged persistent volume files to the NFS Server and extract them 
+5. Deploy the staged persistent volume files to the NFS Server and extract them (by using the `extract-roots.sh` you can extract all roots to a target directory).
 6. If applicable, load the Rosette Server docker image from the containers directory, tag it with the repository you will be using and push it.
 7. Configure the helm chart with the name of the NFS Server, the mount point and size of the persistent volume and update the repository the docker image is stored in.
 8. Once the configuration files have been modified and models extracted then RS can be deployed using the instructions in the `helm` directory. Alternatively, RS' configuration can be tested using the `docker` deployment described in the `./docker` directory.

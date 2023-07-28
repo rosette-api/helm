@@ -17,7 +17,7 @@ BASE_DIR="$( cd "$( dirname "$0" )" && pwd )"
 source ${BASE_DIR}/scripts/utils.sh
 
 while true; do
-    SRC="$(get_input "Where are the compressed Rosette Server roots? " "${BASE_DIR}/root")"
+    SRC="$(get_input "Where are the compressed Rosette Server roots? " "${BASE_DIR}/../stage/persistent-volumes/roots")"
     if [[ ${SRC} == "" || ${SRC} == "Y" || ${SRC} == "y" ]]; then
         warn "Roots directory can not be ${SRC}"
     else
