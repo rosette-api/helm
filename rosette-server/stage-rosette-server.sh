@@ -285,7 +285,7 @@ if [[ $WRITERSCONFIG -eq 1 ]]; then
     info "Disabling log file"
     sed -i 's/^#[ ]*enabled:.*/enabled: false/g' "$RSCONFIGDIR/com.basistech.ws.local.usage.tracker.cfg"
     info "Copying license file"
-    cp "$LICENSE" "$RSCONFIGDIR/rosapi"
+    cp "$LICENSE" "$RSCONFIGDIR/rosapi/rosette-license.xml"
 fi
 
 if [[ $WRITERSCONF -eq 1 ]]; then
