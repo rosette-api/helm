@@ -1,16 +1,13 @@
 # Instructions
-This process will pull the the Rosette Server image from dockerhub (at the time of this writing the latest version is 1.25.1, check [Rosette Server](https://hub.docker.com/r/rosette/server-enterprise/tags) for the latest image tag) and update the configuration in order to be deployed using Helm.
+This process will pull the Rosette Server image matching the appVersion specified in the [Chart file](/helm/rosette-server/Chart.yaml) from dockerhub ([Rosette Server](https://hub.docker.com/r/rosette/server-enterprise/tags)) and update the configuration in order to be deployed using Helm.
 
-1. Run `setup.sh` to create the `endpoints-to-install.sh` file.
+1. Copy the `rosette-license.xml` file to the directory with `stage-rosette-server.sh`.
 2. Edit the `endpoints-to-install.txt` and indicate the licensed endpoints to install.
 3. Edit the  `languages-to-install.txt` and indicate the licensed languages to install.
-4. Run `download-rosette-server-packages.sh` which will download all the required configuration and data files.
-5. Make any optional modifications to the configuration files per the descriptions in the `Advanced Configuration` section. Minimally change the following must be changed.
-    1. Edit `./config/com.basistech.ws.local.usage.tracker.cfg` file and set `enabled: false`
-    2. Edit `/conf/wrapper.conf` file and set `wrapper.logfile=` (set it to be empty)
-    3. Copy the `rosette-license.xml` file to `./config/rosapi`. You would have received this file from Basis Support.
-6. Run `install-config.sh` to copy the configuration directories into `./helm/helm/rosette-server`. These directories are used to create ConfigMaps.
-7. Run `extract-roots.sh` which will decompress the model tar.gz files into a target directory that the user is prompted for. This script is used to populate the persistent volume in the Helm deployment. Note: it is often recommended to copy the compressed root files to the machine hosting the persistent volume and then decompress them.
+4. Run `stage-rosette-server.sh`. This script will make the required changes to the default Rosette Server configuration, and create a staging directory holding the Rosette Server docker image and the persistent volume contents.
+5. Deploy the staged persistent volume files to the NFS Server and extract them (by using the `extract-roots.sh` you can extract all roots to a target directory).
+6. If applicable, load the Rosette Server docker image from the containers directory, tag it with the repository you will be using and push it.
+7. Configure the helm chart with the name of the NFS Server, the mount point and size of the persistent volume and update the repository the docker image is stored in.
 8. Once the configuration files have been modified and models extracted then RS can be deployed using the instructions in the `helm` directory. Alternatively, RS' configuration can be tested using the `docker` deployment described in the `./docker` directory.
 
 ## Other Scripts

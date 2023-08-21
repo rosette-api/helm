@@ -1,5 +1,5 @@
 # Overview
-The `run-docker.sh` script assumes `./roots`, `./config`, `./config/rosapi`, and `./conf` have been created/populated and the rosette-license.xml has been copied to `./config/rosapi/`. These directories can be created by running `../rosette-server/install-config.sh` and `../rosette-server/extract-roots.sh` and installing the roots and configuration to the `docker` directory. You will have received the `rosette-license.xml` file from Basis Technology. 
+The `run-docker.sh` script assumes `./roots`, `./config`, `./config/rosapi`, and `./conf` have been created/populated and the rosette-license.xml has been copied to `./config/rosapi/`. These directories can be created by running `../rosette-server/stage-rosette-server.sh` and `../rosette-server/extract-roots.sh` and installing the roots and configuration to the `docker` directory (The configuration directories will be created in the [`helm/helm/rosette-server`](/helm/rosette-server) directory). You will have received the `rosette-license.xml` file from Basis Technology. 
 
 The `run-docker.sh` performs the following:
 ```
