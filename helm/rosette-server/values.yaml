@@ -30,11 +30,6 @@ rosetteServer:
   configDirectory: config
   configRosapiDirectory: config/rosapi
 
-rexTrainingServer:
-  enabled: false
-  # This must match the RTS service name
-  url: http://mts-rts:9080
-
 loadBalancer:
   port: 8181
   sessionAffinity: None
@@ -61,7 +56,7 @@ startupProbe:
 storage:
   nfs:
     enabled: true
-    address: 10.150.0.39
+    address: 10.128.15.202
     storageClassName: default
     roots:
       mountPoint: /var/nfsshare/roots

@@ -68,13 +68,6 @@ spec:
             {{- toYaml .Values.startupProbe | nindent 12}} 
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-          env:
-          {{- if .Values.rexTrainingServer.enabled }}
-          - name: RTS_URL
-            value: {{ .Values.rexTrainingServer.url | quote }}
-          - name: RTS_SOURCE_STRING
-            value: statistical
-          {{- end }}
           volumeMounts:
           - mountPath: "/rosette/server/roots"
             name: pv-roots-storage
