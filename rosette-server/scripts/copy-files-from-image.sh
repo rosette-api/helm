@@ -30,7 +30,7 @@ if [ $# -ne 3 ]; then
     echo "$0 image source destination"
     echo ""
     echo "Example:"
-    echo "$0 rosette/server-enterprise:1.15.1 /rosette/server/launcher/config ./rosent-pv/config"
+    echo "$0 rosette/server-enterprise:1.27.0 /rosette/server/launcher/config ./rosent-pv/config"
     echo ""
     echo "Notes:" 
     echo -e "\t The destination directory will be created."

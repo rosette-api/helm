@@ -26,7 +26,7 @@ BASE_DIR="$( cd "$( dirname "$0" )" && pwd )"
 function usage() {
     echo ""
     echo -e "usage $0 -r rosette image -d base directory holding the volumes to mount"
-    echo -e "\t-r the Rosette Server container image to use e.g. rosette/server-enterprise:1.24.1"
+    echo -e "\t-r the Rosette Server container image to use e.g. rosette/server-enterprise:1.27.0"
     echo -e "\t-d the base directory holding the volumes to mount e.g. ./"
     echo -e "\tThis script assumes the following directories exist:"
     echo -e "\t\t{base directory}/roots"

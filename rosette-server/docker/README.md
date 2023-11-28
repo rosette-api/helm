@@ -7,7 +7,7 @@ docker run -d -p 8181:8181 \
 -v ${BASE_DIR}/roots:/rosette/server/roots \
 -v ${BASE_DIR}/config:/rosette/server/launcher/config \
 -v ${BASE_DIR}/conf:/rosette/server/conf \
- rosette/server-enterprise:1.24.1 bash \
+ rosette/server-enterprise:1.27.0 bash \
  -c '/rosette/server/bin/launch.sh console'
 ```
 
