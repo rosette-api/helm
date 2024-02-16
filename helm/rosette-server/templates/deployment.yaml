@@ -51,7 +51,7 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           command: ["/bin/bash","-c"]
           args: ["/rosette/server/bin/launch.sh console"]
-          imagePullPolicy: {{ .Values.rosetteServer.pullPolicy }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - name: "rs-svc"
               containerPort: 8181
@@ -77,3 +77,11 @@ spec:
             name: pv-config-rosapi
           - mountPath: "/rosette/server/conf"
             name: pv-conf
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 12 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
