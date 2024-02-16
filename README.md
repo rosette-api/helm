@@ -1,4 +1,8 @@
 # Rosette Enterprise k8s Persistent Volume Deployment
+
+## Support
+For support issues, email [helpdesk@babelstreet.com](mailto:helpdesk@babelstreet.com) or visit [our support site](https://babelstreet.my.site.com/support/s/).
+
 ## Overview
 This example project describes how to deploy Rosette Enterprise in *docker* and *helm*. 
 
