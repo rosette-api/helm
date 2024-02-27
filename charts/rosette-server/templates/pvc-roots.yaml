@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "rosette-server.fullname" . }}-roots-claim
+  labels:
+    {{- include "rosette-server.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "rosette-server.selectorLabels" . | nindent 6 }}
+{{- if not ( quote .Values.storageClassName | empty) }}
+  storageClassName: {{ .Values.storageClassName | quote }}
+{{- end }}
+{{- if not ( .Values.rootsVolumeName | empty) }}
+  volumeName: {{ .Values.rootsVolumeName | quote }}
+{{- end }}
+  accessModes:
+    - {{ .Values.rootsAccessMode }}
+  resources:
+    requests:
+      storage: {{ .Values.rootsResourceRequest }}

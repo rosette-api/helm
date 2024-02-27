@@ -1,0 +1,148 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "rosette-server.fullname" . }}
+  labels:
+    {{- include "rosette-server.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "rosette-server.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/conf: {{ print .Values.conf | sha256sum }}
+        checksum/config: {{ print .Values.config | sha256sum }}
+        checksum/rosapi: {{ print .Values.rosapi | sha256sum }}
+        checksum/license-file: {{ print .Values.licenseSecretName | sha256sum }}
+        checksum/enabledLanguages: {{ print .Values.enabledLanguages | sha256sum }}
+        checksum/roots-versions: {{ print .Values.rosette.roots | sha256sum }}
+        {{ with .Values.podAnnotations }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        {{- include "rosette-server.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "rosette-server.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      initContainers:
+        - name: rosette-endpoints-override
+          image: {{ include "initContainer-image" . | quote }}
+          env:
+            - name: ENDPOINTS
+              value: {{ join " " .Values.enabledEndpoints }}
+          command: [ 'bash', '-c',
+                     'bash /init-scripts/override-endpoints.sh'
+                    ]
+          volumeMounts:
+            - mountPath: "/configs"
+              name: config
+            - mountPath: "/override"
+              name: init-override
+            - mountPath: "/init-scripts"
+              name: init-scripts
+        - name: rosette-root-versions-override
+          image: {{ include "initContainer-image" . | quote }}
+          command: [ 'bash', '-c',
+                     'bash /init-scripts/override-roots-versions.sh'
+          ]
+          volumeMounts:
+            - mountPath: "/configs"
+              name: config
+            - mountPath: "/override"
+              name: init-override
+            - mountPath: "/init-scripts"
+              name: init-scripts
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          command: ["/bin/bash","-c"]
+          args: ["/rosette/server/bin/launch.sh console"]
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: ROSAPI_LICENSE_PATH
+              value: /rosette/server/config/rosapi/rosette-license.xml
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /rest/v1/info
+              port: http
+            {{- toYaml .Values.probes | nindent 12 }}
+          readinessProbe:
+            httpGet:
+              path: /rest/v1/info
+              port: http
+            {{- toYaml .Values.probes | nindent 12 }}
+          volumeMounts:
+            - mountPath: "/rosette/server/config/rosapi/rosette-license.xml"
+              subPath: "rosette-license.xml"
+              name: rosette-license
+              readOnly: true
+            {{- range $file, $content := .Values.config -}}
+              {{- if not (eq $file "com.basistech.ws.worker.cfg") }}
+            - mountPath: {{ print "/rosette/server/launcher/config/" $file | quote }}
+              name: config
+              subPath: {{ print $file }}
+              {{- end }}
+            {{- end }}
+            - mountPath: "/rosette/server/launcher/config/rosapi"
+              name: config-rosapi
+            - mountPath: "/rosette/server/conf"
+              name: server-conf
+            - mountPath: "/rosette/server/roots"
+              name: roots
+            - mountPath: "/rosette/server/launcher/config/com.basistech.ws.worker.cfg"
+              name: init-override
+              subPath: "com.basistech.ws.worker.cfg"
+            - mountPath: "/rosette/server/override/config/enabled-endpoints.yaml"
+              name: init-override
+              subPath: "enabled-endpoints.yaml"
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+        - name: rosette-license
+          secret:
+            secretName: {{ .Values.licenseSecretName }}
+        - name: config
+          configMap:
+            name: {{ include "rosette-server.fullname" . }}-config
+        - name: config-rosapi
+          configMap:
+            name: {{ include "rosette-server.fullname" . }}-rosapi
+        - name: server-conf
+          configMap:
+            name: {{ include "rosette-server.fullname" . }}-conf
+        - name: roots
+          persistentVolumeClaim:
+            claimName: {{ include "rosette-server.fullname" . }}-roots-claim
+        - name: init-scripts
+          configMap:
+            name: {{ include "rosette-server.fullname" . }}-init-scripts
+        - name: init-override
+          emptyDir:
+            sizeLimit: 5Mi
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

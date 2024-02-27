@@ -1,0 +1,100 @@
+{{ $roots := dict "rootsVolumeName" "roots-storage" }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}-populate-roots
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-delete-policy": hook-succeeded,hook-failed
+    "helm.sh/hook-weight": "0"
+spec:
+  template:
+    metadata:
+      name: {{ .Release.Name }}-populate-roots
+    spec:
+      {{- if eq .Values.rootsAccessMode "ReadWriteOnce" }}
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: app.kubernetes.io/name
+                    operator: In
+                    values:
+                      - {{ include "rosette-server.name" . }}
+                  - key: app.kubernetes.io/instance
+                    operator: In
+                    values:
+                      - {{ .Release.Name }}
+              topologyKey: "kubernetes.io/hostname"
+      {{- end }}
+      securityContext:
+      {{- with .Values.rootsExtractionSecurityContext }}
+        {{- toYaml . | nindent 8}}
+      {{- end }}
+      serviceAccountName: {{ include "rosette-server.fullname" . }}-patch-deployment-sa
+      volumes:
+        - name: {{ $roots.rootsVolumeName }}
+          persistentVolumeClaim:
+            claimName: {{ include "rosette-server.fullname" . }}-roots-claim
+        - name: roots-config-override-scripts
+          configMap:
+            name: {{ include "rosette-server.fullname" . }}-roots-configs-override-scripts
+        {{- with .Values.rootsOverride }}
+        {{- if eq .enabled "true" }}
+          {{- if .overrideVolumeClaimName }}
+        - name: roots-config-override
+          persistentVolumeClaim:
+            claimName: {{ print .overrideVolumeClaimName }}
+          {{- end }}
+          {{- if .backupVolumeClaimName }}
+        - name: roots-config-backup
+          persistentVolumeClaim:
+            claimName: {{ print .backupVolumeClaimName }}
+          {{- end }}
+        {{- end }}
+        {{- end }}
+      restartPolicy: Never
+      initContainers:
+        - name: set-mount-permissions
+          image: busybox
+          command: ["/bin/sh"]
+          args: ["-c","chown -v 2001:0 /roots-vol; chmod 770 /roots-vol"]
+          volumeMounts:
+            - mountPath: "/roots-vol"
+              name: roots-storage
+        {{- include "rosette.root-extraction.containers" (merge $roots .) | nindent 8}}
+      containers:
+        - name: rosette-roots-override
+          image: {{ include "initContainer-image" . | quote }}
+          {{- if eq .Values.rootsOverride.enabled  "true" }}
+          command: ['bash','-c','bash /workspace/install-upgrade.sh']
+          {{- else }}
+          command: ['bash','-c','source /workspace/utils.sh && info "Roots override is not enabled" && info "Rolling the Rosette Server deployment" && rollout-restart-rosette-server-deployment']
+          {{- end }}
+          env:
+            - name: HELM_RELEASE_NAME
+              value: {{ .Release.Name | quote }}
+            - name: HELM_RELEASE_REVISION
+              value: {{ .Release.Revision | quote }}
+            - name: SEPARATOR
+              value: {{ include "hooks-separator-string" . | quote }}
+            - name: RS_DEPLOYMENT
+              value: {{ include "rosette-server.fullname" . | quote }}
+          volumeMounts:
+            - mountPath: "/roots"
+              name: {{ $roots.rootsVolumeName }}
+            - mountPath: "/workspace"
+              name: roots-config-override-scripts
+            {{- with .Values.rootsOverride }}
+            {{- if eq .enabled "true" }}
+            {{- if .overrideVolumeClaimName }}
+            - mountPath: "/override"
+              name: roots-config-override
+              {{- end }}
+              {{- if .backupVolumeClaimName }}
+            - mountPath: "/backup"
+              name: roots-config-backup
+              {{- end }}
+            {{- end }}
+            {{- end }}
