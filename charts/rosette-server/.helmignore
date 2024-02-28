@@ -2,4 +2,4 @@
 .helmignore
 .idea/
 tools
-**/rosette-license.xml
+rosette-license.xml
