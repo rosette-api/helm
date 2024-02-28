@@ -48,7 +48,7 @@ type: application
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 0.2.2
+version: 0.2.3
 
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application. Versions are not expected to
@@ -61,10 +61,8 @@ appVersion: "1.27.0"
 annotations:
   artifacthub.io/category: ai-machine-learning
   artifacthub.io/changes: |
-    - kind: added
-      description: Artifact Hub metadata file.
-    - kind: added
-      description: Additional project metadata.
+    - kind: changed
+      description: Square icon.
   artifacthub.io/containsSecurityUpdates: "false"
   artifacthub.io/license: Apache-2.0
   artifacthub.io/links: |
