@@ -1,4 +1,4 @@
-<a href="https://www.babelstreet.com/rosette"><img src="https://charts.babelstreet.com/icon.png" width="181" height="47" /></a>
+<a href="https://www.babelstreet.com/rosette"><img src="https://charts.babelstreet.com/icon.png" width="60" height="75" /></a>
 
 ---
 
