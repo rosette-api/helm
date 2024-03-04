@@ -16,7 +16,9 @@ If you don't have a license already available in the namespace, you can create o
     - _Your license file will be included in the shipment from Rosette Support._
 - A static persistent volume or a storage class capable of dynamically provisioning persistent volumes for the Rosette Roots and the corresponding
 key set in **values.yaml** or provided during installation like `--set storageClassName=<storage class>` and/or `--set rootsVolumeName=<volume>`.
-For more instructions on how to dynamically setup the roots storage, see [examples](#rosette-roots-storage-examples).
+  - The persistent volume should have ownership of `2001:0` and a permission mode of `775` or `770`.
+    This can be done for you with an Init Container.  See [**Persistent Volume Permissions Parameters**](#persistent-volume-permissions-parameters) for more information.
+  - For more instructions on how to dynamically setup the roots storage, see [examples](#rosette-roots-storage-examples).
 
 # Installation
 Before installing or updating the chart you can set the desired endpoints and languages in **values.yaml** by uncommenting the values or by providing them to the command like
@@ -96,23 +98,35 @@ the Rosette Roots persistent volume, depending on its reclaim policy.
 
 ## Rosette Roots extraction parameters
 
-| Name                                  | Description                                                                                                                                                                                                                             | Value         |
-|---------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------|
-| rosette.roots.rex                     | The version of the REX root                                                                                                                                                                                                             | 7.55.8.c71.0  |
-| rosette.roots.rbl                     | The version of the RBL root                                                                                                                                                                                                             | 7.47.0.c71.0  |
-| rosette.roots.rli                     | The version of the RLI root                                                                                                                                                                                                             | 7.23.10.c71.0 |
-| rosette.roots.tvec                    | The version of the TVEC root                                                                                                                                                                                                            | 6.0.1.c71.0   |
-| rosette.roots.rnirnt                  | The version of the RNI-RNT root                                                                                                                                                                                                         | 7.43.0.c71.0  |
-| rosette.roots.tcat                    | The version of the TCAT root                                                                                                                                                                                                            | 2.0.17.c71.0  |
-| rosette.roots.ascent                  | The version of the ASCENT root                                                                                                                                                                                                          | 2.0.7.c71.0   |
-| rosette.roots.nlp4j                   | The version of the NLP4J root                                                                                                                                                                                                           | 1.2.12.c71.0  |
-| rosette.roots.rct                     | The version of the RCT root                                                                                                                                                                                                             | 3.0.16.c71.0  |
-| rosette.roots.relax                   | The version of the RELAX root                                                                                                                                                                                                           | 3.0.4.c71.0   |
-| rosette.roots.topics                  | The version of the TOPICS root                                                                                                                                                                                                          | 2.0.3.c71.0   |
-| enabledEndpoints                      | A list of Rosette Server endpoints to enable                                                                                                                                                                                            | [language]    |
-| enabledLanguages                      | A list of languages to be enabled for roots split by languages                                                                                                                                                                          | [eng]         |
-| rootsExtractionSecurityContext        | Security context for the root extraction pod                                                                                                                                                                                            | {}            |
-| rootsImageRepository                  | The repository prefix to use when downloading Rosette Roots images. The default "rosette/" will download from DockerHub                                                                                                                 | "rosette/"    |
+| Name                 | Description                                                                                                             | Value         |
+|----------------------|-------------------------------------------------------------------------------------------------------------------------|---------------|
+| rosette.roots.rex    | The version of the REX root                                                                                             | 7.55.9.c72.0  |
+| rosette.roots.rbl    | The version of the RBL root                                                                                             | 7.47.1.c72.0  |
+| rosette.roots.rli    | The version of the RLI root                                                                                             | 7.23.11.c72.0 |
+| rosette.roots.tvec   | The version of the TVEC root                                                                                            | 6.0.2.c72.0   |
+| rosette.roots.rnirnt | The version of the RNI-RNT root                                                                                         | 7.44.0.c72.0  |
+| rosette.roots.tcat   | The version of the TCAT root                                                                                            | 2.0.18.c72.0  |
+| rosette.roots.ascent | The version of the ASCENT root                                                                                          | 2.0.8.c72.0   |
+| rosette.roots.nlp4j  | The version of the NLP4J root                                                                                           | 1.2.13.c72.0  |
+| rosette.roots.rct    | The version of the RCT root                                                                                             | 3.0.17.c72.0  |
+| rosette.roots.relax  | The version of the RELAX root                                                                                           | 3.0.5.c72.0   |
+| rosette.roots.topics | The version of the TOPICS root                                                                                          | 2.0.4.c72.0   |
+| enabledEndpoints     | A list of Rosette Server endpoints to enable                                                                            | [language]    |
+| enabledLanguages     | A list of languages to be enabled for roots split by languages                                                          | [eng]         |
+| rootsImageRepository | The repository prefix to use when downloading Rosette Roots images. The default "rosette/" will download from DockerHub | "rosette/"    |
+
+## Persistent Volume Permissions Parameters
+
+| Name                                                  | Description                                                                                                                                      | Value          |
+|-------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------|----------------|
+| volumePermissions.enabled                             | Run the Init Container that sets permissions for the root extraction directory.  Will also set the security context for the root extraction pod. | false          |
+| volumePermissions.initContainer.runAsUserId           | The user ID that the container process should run as.                                                                                            | 0              |
+| volumePermissions.initContainer.imagePullPolicy       | The pull policy for the image.                                                                                                                   | "IfNotPresent" |
+| volumePermissions.rootVolume.chown.userId             | The user ID to pass to `chown`                                                                                                                   | 2001           |
+| volumePermissions.rootVolume.chown.groupId            | The group ID to pass to `chown`                                                                                                                  | 0              |
+| volumePermissions.rootVolume.chmod.octalMode          | The octal model to pass to `chmod`. The Rosette Server container needs at least read and execute permissions on the roots volume.                | 775            |
+| volumePermissions.securityContext.fsGroup             | The fsGroup group ID to use in the root extraction security context                                                                              | ""             |
+| volumePermissions.securityContext.fsGroupChangePolicy | The change policy to use in the root extraction security context                                                                                 | ""             |
 
 ## Overrides for configurations located in Root storage parameters
 
@@ -167,11 +181,6 @@ sure the [timeout](https://helm.sh/docs/intro/using_helm/#helpful-options-for-in
 To allow the root extraction process to work properly, `rootsAccessMode` should, preferably, be `ReadWriteMany`. If the persistent volume doesn't allow `many` access, `ReadWriteOnce`
 works as well. In this case, the job is scheduled to the same node as the Rosette Server pod(s), with a required affinity. Make sure that this node has enough
 resources for the job, otherwise a deadlock situation can arise if the extraction of new roots are expected.
-
-**TODO:  SETH pushed the `InitContainer` execution that does the perm change.  Decide if that's the right thing.** 
-
-The runtime user for the Root extraction images and Rosette Server is `2001`. If user `2001` doesn't have write access on the volume, the extraction will fail. To avoid this, you can give user id `2001` write access on your volume,
-or set `rootsExtractionSecurityContext` in **values.yaml**, and change the user inside the containers.
 
 The Rosette Server startup fails if all required roots are not found, so the Rosette Server pods might restart a few times while the root extraction is ongoing. During the extraction of the
 last root, Rosette Server will be able to start up, but endpoints relying on the root being extracted will fail if they receive a request before the extraction is complete.
@@ -433,7 +442,7 @@ The following is the process to launch the chart with persistent disk storage:
 
 If the populate-roots pod is stuck or constantly errors out, make sure to set the userId in the pod or containers to one that can write to the disk
 - run `kubectl logs pod <populate-roots-pod> <container>`. If it prints Permission Denied messages the user in the container doesn't have privileges to write to the disk
-- set `rootsExtractionSecurityContext` in **values.yaml** to change the pod's securityContext
+- enable the [init container](#persistent-volume-permissions-parameters) to overwrite volume permissions for Rosette Roots extraction  
 ## NFS server
 ### NFS storage class
 Kubernetes does not have an internal NFS provisioner. To dynamically create persistent volumes using NFS the [documentation](https://kubernetes.io/docs/concepts/storage/storage-classes/#nfs) suggests 2 external providers.
@@ -543,10 +552,10 @@ If no rosette license secret exists in the cluster, create one by running
 ```
 kubectl create secret generic rosette-license-file --from-file=<path-to-license-file>
 ```
-### 4. Fix PVC template
+### Fix PVC template
 Remove the `spec.selector` object from `templates/pvc-roots.yaml` as the provisioner does not support it.  Ensure you retain `spec`.
 
-### 5. Setup values.yaml
+### Setup values.yaml
 - Set `licenseSecretName` to the name of the secret created from the license file
     - in the above example it would be `rosette-license-file`
 - Set `storageClassName` to `rosette-roots-nfs-example-sc`
@@ -554,10 +563,10 @@ Remove the `spec.selector` object from `templates/pvc-roots.yaml` as the provisi
 - Set the `probes` values to make sure the container has enough time to avoid a restart loop because the server doesn't have enough time to startup
 - Set `rootsResourceRequest` depending on the number of [endpoints and languages enabled](#disk-space-requirements)
 
-### 6. Run helm install
+### Run helm install
 Depending on the number of endpoints and roots enabled the install process can be lengthy so make sure to set a reasonable [timeout](https://helm.sh/docs/intro/using_helm/#helpful-options-for-installupgraderollback) considering your system resources
 
 ### Note
 If the populate-roots pod is stuck or constantly errors out, make sure to set the userId in the pod or containers to one that can write to the disk
 - run `kubectl logs pod <populate-roots-pod> <container>`. If it prints Permission Denied messages the user in the container doesn't have privileges to write to the disk
-- set `rootsExtractionSecurityContext` in **values.yaml** to change the pod's securityContext
+- enable the [init container](#persistent-volume-permissions-parameters) to overwrite volume permissions for Rosette Roots extraction

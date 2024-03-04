@@ -28,9 +28,16 @@ spec:
                       - {{ .Release.Name }}
               topologyKey: "kubernetes.io/hostname"
       {{- end }}
+      {{- if .Values.volumePermissions.enabled }}
       securityContext:
-      {{- with .Values.rootsExtractionSecurityContext }}
-        {{- toYaml . | nindent 8}}
+        runAsUser: {{ .Values.volumePermissions.rootVolume.chown.userId }}
+        runAsGroup: {{ .Values.volumePermissions.rootVolume.chown.groupId }}
+        {{- if .Values.volumePermissions.securityContext.fsGroup }}
+        fsGroup: {{ .Values.volumePermissions.securityContext.fsGroup }}
+        {{- end }}
+        {{- if .Values.volumePermissions.securityContext.fsGroupChangePolicy }}
+        fsGroupChangePolicy: {{ .Values.volumePermissions.securityContext.fsGroupChangePolicy }}
+        {{- end }}
       {{- end }}
       serviceAccountName: {{ include "rosette-server.fullname" . }}-patch-deployment-sa
       volumes:
@@ -51,6 +58,18 @@ spec:
         {{- end }}
       restartPolicy: Never
       initContainers:
+        {{- if .Values.volumePermissions.enabled }}
+        - name: set-volume-permissions
+          image: {{ include "initContainer-image" . | quote }}
+          imagePullPolicy: {{ .Values.volumePermissions.initContainer.imagePullPolicy }}
+          securityContext:
+            runAsUser: {{ .Values.volumePermissions.initContainer.runAsUserId }}
+          command: ["/bin/sh"]
+          args: ["-c", "chown -v {{ .Values.volumePermissions.rootVolume.chown.userId}}:{{ .Values.volumePermissions.rootVolume.chown.groupId}} /roots-vol; chmod {{ .Values.volumePermissions.rootVolume.chmod.octalMode}} /roots-vol"]
+          volumeMounts:
+            - mountPath: "/roots-vol"
+              name: {{ $roots.rootsVolumeName }}
+        {{- end}}
         {{- include "rosette.root-extraction.containers" (merge $roots .) | nindent 8}}
       containers:
         - name: rosette-roots-override
