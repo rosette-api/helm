@@ -1,0 +1,9 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "rosette-server.fullname" . }}-role
+rules:
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    resourceNames: [ {{ include "rosette-server.fullname" . | quote }}]
+    verbs: ["get", "patch"]

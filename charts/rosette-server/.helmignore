@@ -1,0 +1,5 @@
+.git/
+.helmignore
+.idea/
+tools
+rosette-license.xml

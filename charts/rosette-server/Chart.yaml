@@ -1,0 +1,79 @@
+apiVersion: v2
+name: rosette-server
+kubeVersion: ">=1.26.0-0"
+description: A Helm chart for Kubernetes deployments of Rosette Server.
+home: https://babelstreet.com/rosette
+icon: https://charts.babelstreet.com/icon.png
+sources:
+  - https://github.com/rosette-api/helm
+keywords:
+  - address similarity
+  - ai
+  - analyze language
+  - babel street
+  - entity extraction
+  - entity linking
+  - event extraction
+  - extract and link information
+  - fuzzy matching
+  - interpret content
+  - language identification
+  - lemmatization
+  - machine learning
+  - match identity
+  - morphological analysis
+  - morphology
+  - name similarity
+  - name translation
+  - natural language processing
+  - nlp
+  - part of speech tagging
+  - relationships
+  - rosette
+  - semantic similarity
+  - semantic vectors
+  - sentiment analysis
+  - text analytics
+  - tokenization
+
+# A chart can be either an 'application' or a 'library' chart.
+#
+# Application charts are a collection of templates that can be packaged into versioned archives
+# to be deployed.
+#
+# Library charts provide useful utilities or functions for the chart developer. They're included as
+# a dependency of application charts to inject those utilities and functions into the rendering
+# pipeline. Library charts do not define any templates and therefore cannot be deployed.
+type: application
+
+# This is the chart version. This version number should be incremented each time you make changes
+# to the chart and its templates, including the app version.
+# Versions are expected to follow Semantic Versioning (https://semver.org/)
+version: 1.0.0
+
+# This is the version number of the application being deployed. This version number should be
+# incremented each time you make changes to the application. Versions are not expected to
+# follow Semantic Versioning. They should reflect the version the application is using.
+# It is recommended to use it with quotes.
+appVersion: "1.28.0"
+
+# Artifact Hub Annotations
+# https://artifacthub.io/docs/topics/annotations/helm/#supported-annotations
+annotations:
+  artifacthub.io/category: ai-machine-learning
+  artifacthub.io/changes: |
+    - kind: changed
+      description: Upgraded appVersion to 1.28.0
+    - kind: changed
+      description: Upgraded configuration files to match Rosette Server 1.28.0
+    - kind: changed
+      description: Release Notes for Rosette Server 1.28.0 https://support.rosette.com/hc/en-us/articles/360052810292-Rosette-Server-Release-Notes
+  artifacthub.io/containsSecurityUpdates: "false"
+  artifacthub.io/license: Apache-2.0
+  artifacthub.io/links: |
+    - name: support
+      url: https://babelstreet.my.site.com/support/s/
+  artifacthub.io/maintainers: |
+    - name: Rosette Server Helm Maintainers
+      email: rosette-server-helm@babelstreet.com
+  artifacthub.io/prerelease: "false"
