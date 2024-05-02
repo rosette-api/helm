@@ -1,3 +1,4 @@
+{{- $customProfilesMountPath := "/rosette/server/custom-profiles" -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -34,29 +35,27 @@ spec:
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       initContainers:
-        - name: rosette-endpoints-override
-          image: {{ include "initContainer-image" . | quote }}
-          env:
-            - name: ENDPOINTS
-              value: {{ join " " .Values.enabledEndpoints }}
-          command: [ 'bash', '-c',
-                     'bash /init-scripts/override-endpoints.sh'
-                    ]
-          volumeMounts:
-            - mountPath: "/configs"
-              name: config
-            - mountPath: "/override"
-              name: init-override
-            - mountPath: "/init-scripts"
-              name: init-scripts
-        - name: rosette-root-versions-override
+        - name: rosette-server-init
           image: {{ include "initContainer-image" . | quote }}
           command: [ 'bash', '-c',
-                     'bash /init-scripts/override-roots-versions.sh'
+                     'bash /init-scripts/init.sh'
           ]
+          env:
+            - name : ENDPOINTS
+              value: {{ join " " .Values.enabledEndpoints }}
+            {{- if (eq .Values.indoccoref.enabled true) }}
+            - name: COREF_URL
+              value: {{ include "indoc-coref.fullname" .Subcharts.indoccoref }}:{{ .Subcharts.indoccoref.Values.service.port }}
+            {{- end }}
+            {{- if .Values.customProfilesVolumeClaimName }}
+            - name: CUSTOM_PROFILES_PATH
+              value: {{ $customProfilesMountPath }}
+            {{- end }}
           volumeMounts:
             - mountPath: "/configs"
               name: config
+            - mountPath: "/rosapi"
+              name: config-rosapi
             - mountPath: "/override"
               name: init-override
             - mountPath: "/init-scripts"
@@ -92,14 +91,34 @@ spec:
               name: rosette-license
               readOnly: true
             {{- range $file, $content := .Values.config -}}
-              {{- if not (eq $file "com.basistech.ws.worker.cfg") }}
+              {{- $initOverridables := list "com.basistech.ws.worker.cfg" "com.basistech.ws.frontend.cfg" }}
+              {{- if not (has $file $initOverridables) }}
             - mountPath: {{ print "/rosette/server/launcher/config/" $file | quote }}
               name: config
               subPath: {{ print $file }}
+              {{- else }}
+                {{- if and (eq $file "com.basistech.ws.frontend.cfg") (not $.Values.customProfilesVolumeClaimName) }}
+            - mountPath: {{ print "/rosette/server/launcher/config/" $file | quote }}
+              name: config
+              subPath: {{ print $file }}
+                {{- end }}
               {{- end }}
             {{- end }}
+            {{- if (eq .Values.indoccoref.enabled true) }}
+              {{- range $file, $content := .Values.rosapi -}}
+                {{- if not (eq $file "rex-factory-config.yaml") }}
+            - mountPath: {{ print "/rosette/server/launcher/config/rosapi/" $file | quote }}
+              name: config-rosapi
+              subPath: {{ print $file }}
+                {{- end }}
+              {{- end }}
+            - mountPath: "/rosette/server/launcher/config/rosapi/rex-factory-config.yaml"
+              name: init-override
+              subPath: "rex-factory-config.yaml"
+            {{- else }}
             - mountPath: "/rosette/server/launcher/config/rosapi"
               name: config-rosapi
+            {{- end }}
             - mountPath: "/rosette/server/conf"
               name: server-conf
             - mountPath: "/rosette/server/roots"
@@ -110,6 +129,14 @@ spec:
             - mountPath: "/rosette/server/override/config/enabled-endpoints.yaml"
               name: init-override
               subPath: "enabled-endpoints.yaml"
+            {{- if .Values.customProfilesVolumeClaimName }}
+            - mountPath: {{ $customProfilesMountPath }}
+              name: custom-profiles
+            - mountPath: "/rosette/server/launcher/config/com.basistech.ws.frontend.cfg"
+              name: init-override
+              subPath: "com.basistech.ws.frontend.cfg"
+            {{- end }}
+
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       volumes:
@@ -128,6 +155,11 @@ spec:
         - name: roots
           persistentVolumeClaim:
             claimName: {{ include "rosette-server.fullname" . }}-roots-claim
+        {{- if .Values.customProfilesVolumeClaimName }}
+        - name: custom-profiles
+          persistentVolumeClaim:
+            claimName: {{ .Values.customProfilesVolumeClaimName }}
+        {{- end }}
         - name: init-scripts
           configMap:
             name: {{ include "rosette-server.fullname" . }}-init-scripts

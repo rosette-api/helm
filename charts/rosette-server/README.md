@@ -22,8 +22,9 @@ key set in **values.yaml** or provided during installation like `--set storageCl
 
 # Installation
 Before installing or updating the chart you can set the desired endpoints and languages in **values.yaml** by uncommenting the values or by providing them to the command like
-`--set "enabledEndpoints={language,morphology}" --set "enabledLanguages={eng,fra}"`. This will start a post hook job, that extracts the necessary Rosette Roots
- to the persistent volume provided. See more details about the job at the [root extraction section](#rosette-roots-extraction)
+`--set "enabledEndpoints={language,morphology}" --set "enabledLanguages={eng,fra}"`. These lists are comma separated WITHOUT spaces.  This will start a post hook job,
+that extracts the necessary Rosette Roots to the persistent volume provided.
+See more details about the job at the [root extraction section](#rosette-roots-extraction)
 
 To add the repo to helm, run
 ```shell
@@ -39,6 +40,9 @@ This command will create a deployment for Rosette Server and a persistent volume
 The extraction of the roots can be a lengthy process, depending on which endpoints and languages are enabled and also on available system resources.
 Make sure to set a long enough timeout for the process to finish considering your resources.
 
+### Download the templates
+Use this [link](https://charts.babelstreet.com/rosette-server-1.1.0.tgz) to download the chart and its templates
+
 # Uninstall
 To uninstall the release, run
 ```shell
@@ -51,69 +55,69 @@ the Rosette Roots persistent volume, depending on its reclaim policy.
 
 ## Common parameters
 
-| Name                                          | Description                                                                                                                                                                                                | Value                     |
-|-----------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------|
-| replicaCount                                  | Number of desired Rosette Server pods                                                                                                                                                                      | 1                         |
-| image.repository                              | The repository and image name for the Rosette Server containers                                                                                                                                            | rosette/server-enterprise |
-| image.pullPolicy                              | The pull policy for the Rosette Server image                                                                                                                                                               | IfNotPresent              |
-| image.tag                                     | The tag of the Rosette Server image. If not provided, defaults to `appVersion` from **Chart.yaml**.                                                                                                        | ""                        |
-| imagePullSecrets                              | An optional list of references to secrets in the same namespace to use for pulling any of the images                                                                                                       | []                        |
-| nameOverride                                  | String to partially override rosette-server.fullname template used in naming Kubernetes objects. The release name will be maintained.                                                                      | ""                        |
-| fullnameOverride                              | String to override rosette-server.fullname template used in naming Kubernetes objects                                                                                                                      | ""                        |
-| serviceAccount.create                         | Specifies whether a service account should be created for Rosette Server pods                                                                                                                              | true                      |
-| serviceAccount.annotations                    | Annotations to add to the service account                                                                                                                                                                  | {}                        |
-| serviceAccount.name                           | The name of the service account to use. If not set and create is true, a name is generated using the fullname template                                                                                     | ""                        |
-| podAnnotations                                | Annotations added to the Rosette Server pods                                                                                                                                                               | {}                        |
-| podSecurityContext                            | Security context for the Rosette Server pods                                                                                                                                                               | {}                        |
-| securityContext                               | Security context to for the Rosette Server containers                                                                                                                                                      | {}                        |
-| initContainer.image                           | The image to run init scripts. Must be capable of running bash files and curl queries. If not provided the Rosette Server image is used.                                                                   | ""                        |
-| initContainer.tag                             | Tag of the init container's image                                                                                                                                                                          | ""                        |
-| service.type                                  | Type of the Rosette Server service                                                                                                                                                                         | ClusterIP                 |
-| service.port                                  | The port on which Rosette Server is available in the containers. Need to match what is in `conf.wrapper.conf`.                                                                                             | 8181                      |
-| ingress.enabled                               | Set to true to enable ingress object creation for the Rosette Server service                                                                                                                               | false                     |
-| ingress.className                             | The ingress class to use for the ingress object                                                                                                                                                            | ""                        |
-| ingress.annotations                           | Annotations added to the ingress object. Check your Ingress controllers annotations for configuring your ingress object.                                                                                   | {}                        |
-| ingress.hosts                                 | The ingress rules to use                                                                                                                                                                                   | []                        |
-| ingress.hosts.[].host                         | The host the rule applies to                                                                                                                                                                               |                           |
-| ingress.hosts.[].paths                        | The paths used for the given host. All map to the Rosette Server service.                                                                                                                                  |                           |
-| ingress.hosts.[].paths.[].path                | A path to map to the Rosette Server service with the  given host                                                                                                                                           |                           |
-| ingress.hosts.[].paths.[].pathType            | The type of the given path. Determines path matching behaviour.                                                                                                                                            |                           |
-| ingress.tls                                   | Ingress TLS configurations                                                                                                                                                                                 | []                        |
-| ingress.tls.[].secretName                     | The TLS secret to use with the given hosts. For how to create the secret, check the [Kubernetes documentation](https://kubernetes.io/docs/concepts/services-networking/ingress/#tls).                      |                           |
-| ingress.tls.[].hosts                          | A list of hosts using the secret                                                                                                                                                                           |                           |
-| resources                                     | Resource requests and limitations for the Rosette Server containers. For more detail on how you can calculate your resource requirements, see the [Resource requirements section](#resource-requirements). |                           |
-| resources.requests.ephemeral-storage          | The ephemeral storage requested for the Rosette Server containers                                                                                                                                          | 2Gi                       |
-| autoscaling.enabled                           | Set to true to enable horizontal pod autoscaling for the Rosette Server pods                                                                                                                               | false                     |
-| autoscaling.minReplicas                       | The lower limit for the number of replicas to which the autoscaler can scale down                                                                                                                          | 1                         |
-| autoscaling.maxReplicas                       | The upper limit for the number of pods that can be set by the autoscaler                                                                                                                                   | 100                       |
-| autoscaling.targetCPUUtilizationPercentage    | The target average CPU utilization (represented as a percentage of requested CPU) over all the pods                                                                                                        | 80                        |
-| autoscaling.targetMemoryUtilizationPercentage | The target average memory utilization (represented as a percentage of requested memory) over all the pods                                                                                                  | 80                        |
-| nodeSelector                                  | Selector which must match a node's labels for the Rosette Server pods to be scheduled on that node                                                                                                         | {}                        |
-| tolerations                                   | Tolerations for Rosette Server pods                                                                                                                                                                        | []                        |
-| affinity                                      | Affinity constraints for Rosette Server pods                                                                                                                                                               | {}                        |
-| probes.initialDelaySeconds                    | Number of seconds after the container has started before liveness/readiness probes are initiated                                                                                                           | 60                        |
-| probes.timeoutSeconds                         | Number of seconds after which the liveness/readiness probe times out                                                                                                                                       | 5                         |
-| probes.periodSeconds                          | How often to perform the liveness/readiness probe                                                                                                                                                          | 30                        |
-| probes.failureThreshold                       | Minimum consecutive failures for the liveness/readiness probe to be considered failed after having succeeded                                                                                               | 3                         |
+| Name                                          | Description                                                                                                                                                                                                                         | Value                     |
+|-----------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------|
+| replicaCount                                  | Number of desired Rosette Server pods                                                                                                                                                                                               | 1                         |
+| image.repository                              | The repository and image name for the Rosette Server containers                                                                                                                                                                     | rosette/server-enterprise |
+| image.pullPolicy                              | The pull policy for the Rosette Server image                                                                                                                                                                                        | IfNotPresent              |
+| image.tag                                     | The tag of the Rosette Server image. If not provided, defaults to `appVersion` from **Chart.yaml**.                                                                                                                                 | ""                        |
+| imagePullSecrets                              | An optional list of references to secrets in the same namespace to use for pulling Rosette Server, Rosette Roots or initContainer images. For pulling Indoc Coref Server images, see [this section](#indoc-coref-server-parameters) | []                        |
+| nameOverride                                  | String to partially override rosette-server.fullname template used in naming Kubernetes objects. The release name will be maintained.                                                                                               | ""                        |
+| fullnameOverride                              | String to override rosette-server.fullname template used in naming Kubernetes objects                                                                                                                                               | ""                        |
+| serviceAccount.create                         | Specifies whether a service account should be created for Rosette Server pods                                                                                                                                                       | true                      |
+| serviceAccount.annotations                    | Annotations to add to the service account                                                                                                                                                                                           | {}                        |
+| serviceAccount.name                           | The name of the service account to use. If not set and create is true, a name is generated using the fullname template                                                                                                              | ""                        |
+| podAnnotations                                | Annotations added to the Rosette Server pods                                                                                                                                                                                        | {}                        |
+| podSecurityContext                            | Security context for the Rosette Server pods                                                                                                                                                                                        | {}                        |
+| securityContext                               | Security context to for the Rosette Server containers                                                                                                                                                                               | {}                        |
+| initContainer.image                           | The image to run init scripts. Must be capable of running bash files and curl queries. If not provided the Rosette Server image is used.                                                                                            | ""                        |
+| initContainer.tag                             | Tag of the init container's image                                                                                                                                                                                                   | ""                        |
+| service.type                                  | Type of the Rosette Server service                                                                                                                                                                                                  | ClusterIP                 |
+| service.port                                  | The port on which Rosette Server is available in the containers. Need to match what is in `conf.wrapper.conf`.                                                                                                                      | 8181                      |
+| ingress.enabled                               | Set to true to enable ingress object creation for the Rosette Server service                                                                                                                                                        | false                     |
+| ingress.className                             | The ingress class to use for the ingress object                                                                                                                                                                                     | ""                        |
+| ingress.annotations                           | Annotations added to the ingress object. Check your Ingress controllers annotations for configuring your ingress object.                                                                                                            | {}                        |
+| ingress.hosts                                 | The ingress rules to use                                                                                                                                                                                                            | []                        |
+| ingress.hosts.[].host                         | The host the rule applies to                                                                                                                                                                                                        |                           |
+| ingress.hosts.[].paths                        | The paths used for the given host. All map to the Rosette Server service.                                                                                                                                                           |                           |
+| ingress.hosts.[].paths.[].path                | A path to map to the Rosette Server service with the  given host                                                                                                                                                                    |                           |
+| ingress.hosts.[].paths.[].pathType            | The type of the given path. Determines path matching behaviour.                                                                                                                                                                     |                           |
+| ingress.tls                                   | Ingress TLS configurations                                                                                                                                                                                                          | []                        |
+| ingress.tls.[].secretName                     | The TLS secret to use with the given hosts. For how to create the secret, check the [Kubernetes documentation](https://kubernetes.io/docs/concepts/services-networking/ingress/#tls).                                               |                           |
+| ingress.tls.[].hosts                          | A list of hosts using the secret                                                                                                                                                                                                    |                           |
+| resources                                     | Resource requests and limitations for the Rosette Server containers. For more detail on how you can calculate your resource requirements, see the [Resource requirements section](#resource-requirements).                          |                           |
+| resources.requests.ephemeral-storage          | The ephemeral storage requested for the Rosette Server containers                                                                                                                                                                   | 2Gi                       |
+| autoscaling.enabled                           | Set to true to enable horizontal pod autoscaling for the Rosette Server pods                                                                                                                                                        | false                     |
+| autoscaling.minReplicas                       | The lower limit for the number of replicas to which the autoscaler can scale down                                                                                                                                                   | 1                         |
+| autoscaling.maxReplicas                       | The upper limit for the number of pods that can be set by the autoscaler                                                                                                                                                            | 100                       |
+| autoscaling.targetCPUUtilizationPercentage    | The target average CPU utilization (represented as a percentage of requested CPU) over all the pods                                                                                                                                 | 80                        |
+| autoscaling.targetMemoryUtilizationPercentage | The target average memory utilization (represented as a percentage of requested memory) over all the pods                                                                                                                           | 80                        |
+| nodeSelector                                  | Selector which must match a node's labels for the Rosette Server pods to be scheduled on that node                                                                                                                                  | {}                        |
+| tolerations                                   | Tolerations for Rosette Server pods                                                                                                                                                                                                 | []                        |
+| affinity                                      | Affinity constraints for Rosette Server pods                                                                                                                                                                                        | {}                        |
+| probes.initialDelaySeconds                    | Number of seconds after the container has started before liveness/readiness probes are initiated                                                                                                                                    | 60                        |
+| probes.timeoutSeconds                         | Number of seconds after which the liveness/readiness probe times out                                                                                                                                                                | 5                         |
+| probes.periodSeconds                          | How often to perform the liveness/readiness probe                                                                                                                                                                                   | 30                        |
+| probes.failureThreshold                       | Minimum consecutive failures for the liveness/readiness probe to be considered failed after having succeeded                                                                                                                        | 3                         |
 
 ## Rosette Roots extraction parameters
 
-| Name                 | Description                                                                                                             | Value         |
-|----------------------|-------------------------------------------------------------------------------------------------------------------------|---------------|
-| rosette.roots.rex    | The version of the REX root                                                                                             | 7.55.9.c72.0  |
-| rosette.roots.rbl    | The version of the RBL root                                                                                             | 7.47.1.c72.0  |
-| rosette.roots.rli    | The version of the RLI root                                                                                             | 7.23.11.c72.0 |
-| rosette.roots.tvec   | The version of the TVEC root                                                                                            | 6.0.2.c72.0   |
-| rosette.roots.rnirnt | The version of the RNI-RNT root                                                                                         | 7.44.0.c72.0  |
-| rosette.roots.tcat   | The version of the TCAT root                                                                                            | 2.0.18.c72.0  |
-| rosette.roots.ascent | The version of the ASCENT root                                                                                          | 2.0.8.c72.0   |
-| rosette.roots.nlp4j  | The version of the NLP4J root                                                                                           | 1.2.13.c72.0  |
-| rosette.roots.rct    | The version of the RCT root                                                                                             | 3.0.17.c72.0  |
-| rosette.roots.relax  | The version of the RELAX root                                                                                           | 3.0.5.c72.0   |
-| rosette.roots.topics | The version of the TOPICS root                                                                                          | 2.0.4.c72.0   |
-| enabledEndpoints     | A list of Rosette Server endpoints to enable                                                                            | [language]    |
-| enabledLanguages     | A list of languages to be enabled for roots split by languages                                                          | [eng]         |
-| rootsImageRepository | The repository prefix to use when downloading Rosette Roots images. The default "rosette/" will download from DockerHub | "rosette/"    |
+| Name                 | Description                                                                                                                             | Value         |
+|----------------------|-----------------------------------------------------------------------------------------------------------------------------------------|---------------|
+| rosette.roots.rex    | The version of the REX root                                                                                                             | 7.55.11.c73.0 |
+| rosette.roots.rbl    | The version of the RBL root                                                                                                             | 7.47.2.c73.0  |
+| rosette.roots.rli    | The version of the RLI root                                                                                                             | 7.23.12.c73.0 |
+| rosette.roots.tvec   | The version of the TVEC root                                                                                                            | 7.0.0.c73.0   |
+| rosette.roots.rnirnt | The version of the RNI-RNT root                                                                                                         | 7.45.0.c73.0  |
+| rosette.roots.tcat   | The version of the TCAT root                                                                                                            | 3.0.0.c73.0   |
+| rosette.roots.ascent | The version of the ASCENT root                                                                                                          | 3.0.0.c73.0   |
+| rosette.roots.nlp4j  | The version of the NLP4J root                                                                                                           | 2.0.0.c73.0   |
+| rosette.roots.rct    | The version of the RCT root                                                                                                             | 3.0.18.c73.0  |
+| rosette.roots.relax  | The version of the RELAX root                                                                                                           | 4.0.0.c73.0   |
+| rosette.roots.topics | The version of the TOPICS root                                                                                                          | 3.0.0.c73.0   |
+| enabledEndpoints     | A list of Rosette Server endpoints to enable.  When passed as a command line property; comma separated and no spaces.                   | {language}    |
+| enabledLanguages     | A list of languages to be enabled for roots split by languages.  When passed as a command line property; comma separated and no spaces. | {eng}         |
+| rootsImageRepository | The repository prefix to use when downloading Rosette Roots images. The default "rosette/" will download from DockerHub                 | "rosette/"    |
 
 ## Persistent Volume Permissions Parameters
 
@@ -150,21 +154,69 @@ the Rosette Roots persistent volume, depending on its reclaim policy.
 
 ## Rosette Server parameters
 
-| Name                      | Description                                                                                                                                                                                                      | Value           |
-|---------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------|
-| licenseSecretName         | The name of a secret created from the Rosette License file                                                                                                                                                       | ""              |
-| storageClassName          | The storage class of the Rosette Roots persistent volume claim. Immutable after installation.                                                                                                                    | ""              |
-| rootsVolumeName           | The name of the persistent volume the Rosette Roots persistent volume claim should bind to. Immutable after installation.                                                                                        | ""              |
-| rootsAccessMode           | The access mode of the Rosette Roots persistent volume claim. Can be ReadWriteOnce or ReadWriteMany. Immutable after installation.                                                                               | "ReadWriteMany" |
-| rootsResourceRequest      | The requested storage size for the Rosette Roots persistent volume claim. For more detail on how you can calculate your storage requirements, see the [Resource requirements section](#disk-space-requirements). | "150Gi"         |
-| conf                      | Rosette Server logging and Tanuki Wrapper configuration files                                                                                                                                                    |                 |
-| conf.java_opts.conf       | A file used by Tanuki internally                                                                                                                                                                                 |                 |
-| conf.log4j2.xml           | The log4j logger's configuration file used by the Rosette Server instance                                                                                                                                        |                 |
-| conf.logging.properties   | Logging properties file supplied to the JVM                                                                                                                                                                      |                 |
-| conf.wrapper.conf         | The Tanuki Wrapper's configuration file                                                                                                                                                                          |                 |
-| conf.wrapper-license.conf | The Tanuki configuration file. Do not change.                                                                                                                                                                    |                 |
-| config                    | Rosette Server system configuration files. For more detail see the [User Guide](https://support.rosette.com/hc/en-us/articles/360049878432-Configuration-files#UUID-eeb37d25-91f6-75ae-5f91-6ca3b853f9d9)        |                 |
-| rosapi                    | Individual endpoint configuration files. For more detail see the [User Guide](https://support.rosette.com/hc/en-us/articles/360049878432-Configuration-files#UUID-2891ac06-0339-4a4c-8344-8cfdb8a0dec9)          |                 |
+| Name                          | Description                                                                                                                                                                                                      | Value           |
+|-------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------|
+| licenseSecretName             | The name of a secret created from the Rosette License file                                                                                                                                                       | ""              |
+| storageClassName              | The storage class of the Rosette Roots persistent volume claim. Immutable after installation.                                                                                                                    | ""              |
+| rootsVolumeName               | The name of the persistent volume the Rosette Roots persistent volume claim should bind to. Immutable after installation.                                                                                        | ""              |
+| rootsAccessMode               | The access mode of the Rosette Roots persistent volume claim. Can be ReadWriteOnce or ReadWriteMany. Immutable after installation.                                                                               | "ReadWriteMany" |
+| rootsResourceRequest          | The requested storage size for the Rosette Roots persistent volume claim. For more detail on how you can calculate your storage requirements, see the [Resource requirements section](#disk-space-requirements). | "150Gi"         |
+| rootsUseSelectorLabels        | Set to true to use the selector labels for the Rosette Roots persistent volume claim.                                                                                                                            | "true"          | 
+| customProfilesVolumeClaimName | A persistent volume claim that is bound to a persistent volume with the custom profile directories                                                                                                               | ""              | 
+| conf                          | Rosette Server logging and Tanuki Wrapper configuration files                                                                                                                                                    |                 |
+| conf.java_opts.conf           | A file used by Tanuki internally                                                                                                                                                                                 |                 |
+| conf.log4j2.xml               | The log4j logger's configuration file used by the Rosette Server instance                                                                                                                                        |                 |
+| conf.logging.properties       | Logging properties file supplied to the JVM                                                                                                                                                                      |                 |
+| conf.wrapper.conf             | The Tanuki Wrapper's configuration file                                                                                                                                                                          |                 |
+| conf.wrapper-license.conf     | The Tanuki configuration file. Do not change.                                                                                                                                                                    |                 |
+| config                        | Rosette Server system configuration files. For more detail see the [User Guide](https://support.rosette.com/hc/en-us/articles/360049878432-Configuration-files#UUID-eeb37d25-91f6-75ae-5f91-6ca3b853f9d9)        |                 |
+| rosapi                        | Individual endpoint configuration files. For more detail see the [User Guide](https://support.rosette.com/hc/en-us/articles/360049878432-Configuration-files#UUID-2891ac06-0339-4a4c-8344-8cfdb8a0dec9)          |                 |
+
+## Indoc Coref Server parameters
+The Indoc Coref Server enhances the Rosette Entity Extractor's results by finding coreferences of the entities.
+When enabled, a deployment of the Indoc Coref Server will be deployed alongside the Rosette Server deployment, which is automatically configured to be able to
+communicate with it. The Indoc Coref Server is deployed as a subchart. By default, it only has the `indoccoref.enabled` parameter in the Rosette Server **values.yaml**,
+but it can be further customized with the following parameters:
+
+| Name                                                     | Description                                                                                                                                                                           | Default      |
+|----------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------|
+| indoccoref.enabled                                       | Enables the Indoc Coref Server deployment                                                                                                                                             | false        |
+| indoccoref.replicaCount                                  | Number of desired Indoc Coref Server pods                                                                                                                                             | 1            |
+| indoccoref.image.repository                              | The repository and image name for the Indoc Coref Server containers                                                                                                                   | TODO         |
+| indoccoref.image.pullPolicy                              | The pull policy for the Indoc Coref Server image                                                                                                                                      | IfNotPresent |
+| indoccoref.image.tag                                     | The tag of the Indoc Coref Server image. If not provided uses default version for the accompanying Rosette Server                                                                     | ""           |
+| indoccoref.imagePullSecrets                              | An optional list of references to secrets in the same namespace to use for pulling the Indoc Coref Server image.                                                                      | []           |
+| indoccoref.nameOverride                                  | String to partially override indoc-coref.fullname template used in naming Kubernetes objects. The release name will be maintained.                                                    | ""           |
+| indoccoref.fullnameOverride                              | String to override indoc-coref.fullname template used in naming Kubernetes objects                                                                                                    | ""           |
+| indoccoref.serviceAccount.create                         | Specifies whether a service account should be created for Indoc Coref Server pods                                                                                                     | true         |
+| indoccoref.serviceAccount.annotations                    | Annotations to add to the service account                                                                                                                                             | {}           |
+| indoccoref.serviceAccount.name                           | The name of the service account to use. If not set and create is true, a name is generated using the fullname template                                                                | ""           |
+| indoccoref.podAnnotations                                | Annotations added to the Indoc Coref Server pods                                                                                                                                      | {}           |
+| indoccoref.podLabels                                     | Labels added to the Indoc Coref Server pods                                                                                                                                           | {}           |
+| indoccoref.podSecurityContext                            | Security context for the Indoc Coref Server pods                                                                                                                                      | {}           |
+| indoccoref.securityContext                               | Security context to for the Indoc Coref Server containers                                                                                                                             | {}           |
+| indoccoref.service.type                                  | Type of the Indoc Coref Server service                                                                                                                                                | ClusterIP    |
+| indoccoref.service.port                                  | The port on which Indoc Coref Server is available in the containers. For the base image this is `5000`.                                                                               | 5000         |
+| indoccoref.ingress.enabled                               | Set to true to enable ingress object creation for the Indoc Coref Server service                                                                                                      | false        |
+| indoccoref.ingress.className                             | The ingress class to use for the ingress object                                                                                                                                       | ""           |
+| indoccoref.ingress.annotations                           | Annotations added to the ingress object. Check your Ingress controllers annotations for configuring your ingress object.                                                              | {}           |
+| indoccoref.ingress.hosts                                 | The ingress rules to use                                                                                                                                                              | []           |
+| indoccoref.ingress.hosts.[].host                         | The host the rule applies to                                                                                                                                                          |              |
+| indoccoref.ingress.hosts.[].paths                        | The paths used for the given host. All map to the Indoc Coref Server service.                                                                                                         |              |
+| indoccoref.ingress.hosts.[].paths.[].path                | A path to map to the Indoc Coref Server service with the  given host                                                                                                                  |              |
+| indoccoref.ingress.hosts.[].paths.[].pathType            | The type of the given path. Determines path matching behaviour.                                                                                                                       |              |
+| indoccoref.ingress.tls                                   | Ingress TLS configurations                                                                                                                                                            | []           |
+| indoccoref.ingress.tls.[].secretName                     | The TLS secret to use with the given hosts. For how to create the secret, check the [Kubernetes documentation](https://kubernetes.io/docs/concepts/services-networking/ingress/#tls). |              |
+| indoccoref.ingress.tls.[].hosts                          | A list of hosts using the secret                                                                                                                                                      |              |
+| indoccoref.resources                                     | Resource requests and limitations for the Indoc Coref Server containers.                                                                                                              | {}           |
+| indoccoref.autoscaling.enabled                           | Set to true to enable horizontal pod autoscaling for the Indoc Coref Server pods                                                                                                      | false        |
+| indoccoref.autoscaling.minReplicas                       | The lower limit for the number of replicas to which the autoscaler can scale down                                                                                                     | 1            |
+| indoccoref.autoscaling.maxReplicas                       | The upper limit for the number of pods that can be set by the autoscaler                                                                                                              | 100          |
+| indoccoref.autoscaling.targetCPUUtilizationPercentage    | The target average CPU utilization (represented as a percentage of requested CPU) over all the pods                                                                                   | 80           |
+| indoccoref.autoscaling.targetMemoryUtilizationPercentage | The target average memory utilization (represented as a percentage of requested memory) over all the pods                                                                             | 80           |
+| indoccoref.nodeSelector                                  | Selector which must match a node's labels for the Indoc Coref Server pods to be scheduled on that node                                                                                | {}           |
+| indoccoref.tolerations                                   | Tolerations for Indoc Coref Server pods                                                                                                                                               | []           |
+| indoccoref.affinity                                      | Affinity constraints for Indoc Coref Server pods                                                                                                                                      | {}           |
 
 # Rosette Roots extraction
 This chart needs a persistent volume to store the Rosette Roots. It can be provided in two ways:
@@ -242,7 +294,7 @@ You will need a license that includes the `/entities` endpoint.
         EOF
         ```
 - [Install the chart](#installation)
-    - During the installation, make sure the `/entities` endpoint is enabled, and `rootsOverride.overrideVolumeClaimName` is set to the previously created PVC.
+    - During the installation, make sure the `/entities` endpoint and `rootsOverride.enabled` are enabled, and `rootsOverride.overrideVolumeClaimName` is set to the previously created PVC.
 - Make an `/entities` request to observe the default behavior.  The response should return a single entity of type `LOCATION` for `Italy`.
   ```
   curl -H "content-type: application/json" \
@@ -296,6 +348,13 @@ the request should return with both `FOOD` types in it.  Running
 helm rollback <release> 2
 ```
 should return with only `Pizza` being identified as a `FOOD`.
+
+# Custom profiles
+To use custom profiles with Rosette Server, set `customProfilesVolumeClaimName` to a persistent volume claim in the same namespace as the chart.
+When this value is set the volume will be mounted into the Rosette Server pods, so make sure if using multiple Rosette Server pods that the volume has read access for many. 
+The Rosette Server instances will automatically be configured to use this volume as their `profile-data-root` directory. Any other configuration changes 
+(like rosapi.feature.CUSTOM_PROFILE_UNDER_APP_ID) must be made in their respective configuration files.
+Read more about Rosette Server's custom profiles at the [official documentation](https://support.rosette.com/hc/en-us/articles/360050335831-Custom-profiles).
 
 # Resource requirements
 
@@ -427,13 +486,13 @@ The following is the process to launch the chart with persistent disk storage:
   ```
   kubectl create secret generic rosette-license-file --from-file=<path-to-license-file>
   ```
-- Remove the `spec.selector` object from `templates/pvc-roots.yaml` as the driver does not support it
 - Set up **values.yaml**
     - Set `licenseSecretName` to the name of the secret created from the license file
         - in the above example it would be `rosette-license-file`
     - Set `storageClassName` to `rosette-roots-gcp-pd-example-sc`
     - Set `rootsAccessMode` to `ReadWriteOnce` and `replicaCount` to `1`. The persistent disk driver doesn't support `ReadWriteMany`. This will force Kubernetes to schedule all pods to the same node.
         - Make sure that the node has enough resources to run the root extraction pod and 2 of the rosette-server pods for rolling the deployment.
+    - Set `rootsUseSelectorLabels` to `false`. The persistent disk driver doesn't support selector labels. 
     - Set the `probes` values to make sure the container has enough time to avoid a restart loop because the server doesn't have enough time to startup.
     - Set `rootsResourceRequest` depending on the number of [endpoints and languages enabled](#disk-space-requirements)
 - Run `helm install`.
@@ -552,14 +611,13 @@ If no rosette license secret exists in the cluster, create one by running
 ```
 kubectl create secret generic rosette-license-file --from-file=<path-to-license-file>
 ```
-### Fix PVC template
-Remove the `spec.selector` object from `templates/pvc-roots.yaml` as the provisioner does not support it.  Ensure you retain `spec`.
 
 ### Setup values.yaml
 - Set `licenseSecretName` to the name of the secret created from the license file
     - in the above example it would be `rosette-license-file`
 - Set `storageClassName` to `rosette-roots-nfs-example-sc`
 - Set `rootsAccessMode` to `ReadWriteMany`
+- Set `rootsUseSelectorLabels` to `false`. The NFS provisioner doesn't support selector labels.
 - Set the `probes` values to make sure the container has enough time to avoid a restart loop because the server doesn't have enough time to startup
 - Set `rootsResourceRequest` depending on the number of [endpoints and languages enabled](#disk-space-requirements)
 

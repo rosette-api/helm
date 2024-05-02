@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# rootVersions.sh is defined in templates/cm-init-scripts.yaml
 source /init-scripts/rootVersions.sh
 
 function update-root-version() {
@@ -25,8 +26,10 @@ function update-flinx-version() {
 }
 
 WORKER_CFG="/override/com.basistech.ws.worker.cfg"
+# Should be already in the override partition from the previous init scripts, but just in case something changes in the
+# future, we'll copy it over if it's not there.
 if [[ ! -f $WORKER_CFG ]]; then
-  WORKER_CFG="/configs/com.basistech.ws.worker.cfg"
+  cp "/configs/com.basistech.ws.worker.cfg" $WORKER_CFG
 fi
 update-root-version $WORKER_CFG "ascent-root" "ascent" $ASCENT
 update-root-version $WORKER_CFG "dp-root" "nlp4j" $NLP4J

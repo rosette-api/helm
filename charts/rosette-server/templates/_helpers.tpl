@@ -83,6 +83,6 @@ Create initContainer image name, or use Rosette Serve's if one is not provided
             {{ print .Values.initContainer.image }}
         {{- end -}}
     {{- else -}}
-    {{- print  .Values.image.repository ":" ( default .Values.image.tag .Chart.AppVersion ) }}
+    {{- print  .Values.image.repository ":" ( default .Chart.AppVersion .Values.image.tag ) }}
     {{- end }}
 {{- end }}

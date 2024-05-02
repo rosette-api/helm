@@ -3,8 +3,11 @@ kind: ConfigMap
 metadata:
   name: {{ include "rosette-server.fullname" . }}-init-scripts
 data:
+{{ (.Files.Glob "scripts/init.sh").AsConfig | indent 2 }}
 {{ (.Files.Glob "scripts/override-endpoints.sh").AsConfig | indent 2 }}
 {{ (.Files.Glob "scripts/override-roots-versions.sh").AsConfig | indent 2 }}
+{{ (.Files.Glob "scripts/configure-indoc-coref-connection.sh").AsConfig | indent 2 }}
+{{ (.Files.Glob "scripts/configure-custom-profiles.sh").AsConfig | indent 2 }}
   rootVersions.sh: |2+
 {{- range $root, $version := .Values.rosette.roots }}
 {{ printf "%s=%s" (upper $root) $version | indent 4 }}

@@ -42,7 +42,7 @@ Template that creates a list of containers for root extraction based on enabledE
     - mountPath: "/roots-vol"
       name: {{ $.rootsVolumeName }}
         {{- end }}
-        {{- if or (eq $ep "name-translation") (eq $ep "name-similarity") (eq $ep "name-deduplication") (eq $ep "address-similarity") }}
+        {{- if or (eq $ep "name-translation") (eq $ep "name-similarity") (eq $ep "name-deduplication") (eq $ep "address-similarity") (eq $ep "record-similarity") }}
             {{- if not (has "names" $installedRoots) }}
 - name: {{ print $.Release.Name "-populate-" $ep | quote }}
   image: {{ print $.Values.rootsImageRepository "root-rni-rnt:" $.Values.rosette.roots.rnirnt | quote }}

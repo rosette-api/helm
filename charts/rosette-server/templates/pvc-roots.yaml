@@ -5,9 +5,11 @@ metadata:
   labels:
     {{- include "rosette-server.labels" . | nindent 4 }}
 spec:
+{{- if eq .Values.rootsUseSelectorLabels "true" }}
   selector:
     matchLabels:
       {{- include "rosette-server.selectorLabels" . | nindent 6 }}
+{{- end }}
 {{- if not ( quote .Values.storageClassName | empty) }}
   storageClassName: {{ .Values.storageClassName | quote }}
 {{- end }}
