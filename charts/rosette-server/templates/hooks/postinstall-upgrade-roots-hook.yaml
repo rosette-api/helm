@@ -2,7 +2,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ .Release.Name }}-populate-roots
+  name: {{ .Release.Name }}-upgrade-populate-roots
   annotations:
     "helm.sh/hook": post-install,post-upgrade
     "helm.sh/hook-delete-policy": hook-succeeded,hook-failed
@@ -10,7 +10,7 @@ metadata:
 spec:
   template:
     metadata:
-      name: {{ .Release.Name }}-populate-roots
+      name: {{ .Release.Name }}-upgrade-populate-roots
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
