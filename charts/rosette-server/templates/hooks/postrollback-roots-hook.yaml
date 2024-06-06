@@ -3,14 +3,16 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: {{ .Release.Name }}-populate-roots
-  annotations:
-    "helm.sh/hook": post-rollback
-    "helm.sh/hook-delete-policy": hook-succeeded,hook-failed
-    "helm.sh/hook-weight": "0"
+  {{- if .Values.rootsInit.rollbackJobAnnotations }}
+  annotations: {{- toYaml .Values.rootsInit.rollbackJobAnnotations | nindent 4 }}
+  {{- end }}
 spec:
   template:
     metadata:
       name: {{ .Release.Name }}-populate-roots
+      {{- if .Values.rootsInit.podAnnotations }}
+      annotations: {{- toYaml .Values.rootsInit.podAnnotations | nindent 8 }}
+      {{- end }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
