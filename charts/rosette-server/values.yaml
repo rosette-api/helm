@@ -121,6 +121,17 @@ volumePermissions:
 # There are certain configuration settings that are set within an endpoint's data model directories, as opposed to the regular configuration directory.
 # If you modify those settings and would like the changes to be carried through the helm upgrade/rollback process, you'll use this block to do so.
 # For more details check the documentation and see the section in the README titled "Root configurations overrides."
+rootsInit:
+  installJobAnnotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-delete-policy": hook-succeeded,hook-failed
+    "helm.sh/hook-weight": "0"
+  rollbackJobAnnotations:
+    "helm.sh/hook": post-rollback
+    "helm.sh/hook-delete-policy": hook-succeeded,hook-failed
+    "helm.sh/hook-weight": "0"
+  podAnnotations: {}
+
 rootsOverride:
   enabled: "false"
   overrideVolumeClaimName: ""
