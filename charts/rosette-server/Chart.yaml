@@ -49,13 +49,13 @@ type: application
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 1.1.0
+version: 1.2.0
 
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application. Versions are not expected to
 # follow Semantic Versioning. They should reflect the version the application is using.
 # It is recommended to use it with quotes.
-appVersion: "1.29.0"
+appVersion: "1.30.0"
 
 # Artifact Hub Annotations
 # https://artifacthub.io/docs/topics/annotations/helm/#supported-annotations
@@ -63,19 +63,15 @@ annotations:
   artifacthub.io/category: ai-machine-learning
   artifacthub.io/changes: |
     - kind: changed
-      description: Upgraded appVersion to 1.29.0
+      description: Upgraded appVersion to 1.30.0
     - kind: changed
-      description: Upgraded configuration files to match Rosette Server 1.29.0
+      description: Upgraded configuration files to match Rosette Server 1.30.0
     - kind: changed
-      description: Release Notes for Rosette Server 1.29.0 https://support.rosette.com/hc/en-us/articles/360052810292-Rosette-Server-Release-Notes
+      description: Release Notes for Rosette Server 1.30.0 https://babelstreet.my.site.com/support/s/article/Rosette-Server-Release-Notes
+    - kind: changed
+      description: The populate-roots jobs' name now have a prefix so they are more easily differentiated
     - kind: added
-      description: Added support for Indoc Coref Server
-    - kind: added
-      description: Added support to mount custom profiles persistent volume claim
-    - kind: added
-      description: ImagePullSecrets now apply to Rosette Root extraction pods
-    - kind: added
-      description: Added switch to values.yaml to disable selector labels on the Rosette Roots persistent volume claim
+      description: The populate-roots jobs' and their pods' annotations are now configurable
   artifacthub.io/containsSecurityUpdates: "false"
   artifacthub.io/license: Apache-2.0
   artifacthub.io/links: |

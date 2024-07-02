@@ -2,15 +2,23 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ .Release.Name }}-populate-roots
+  name: {{ .Release.Name }}-upgrade-populate-roots
   annotations:
+    #https://stackoverflow.com/questions/59795596/how-to-make-nested-variables-optional-in-helm
+    {{- if ((.Values.rootsExtraction).upgrade).annotations }}
+      {{- toYaml .Values.rootsExtraction.upgrade.annotations | nindent 4 }}
+    {{- else }}
     "helm.sh/hook": post-install,post-upgrade
     "helm.sh/hook-delete-policy": hook-succeeded,hook-failed
     "helm.sh/hook-weight": "0"
+    {{- end }}
 spec:
   template:
     metadata:
-      name: {{ .Release.Name }}-populate-roots
+      name: {{ .Release.Name }}-upgrade-populate-roots
+      {{- if ((.Values.rootsExtraction).upgrade).podAnnotations }}
+      annotations: {{- toYaml .Values.rootsExtraction.upgrade.podAnnotations | nindent 8 }}
+      {{- end }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:

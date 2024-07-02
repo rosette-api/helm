@@ -140,19 +140,37 @@ rootsOverride:
 
 rootsImageRepository: "rosette/"
 
+# To change the annotations of the Rosette Roots extraction job, you can use the following block
+# e.g. ArgoCD cannot handle Helm hooks, so you can use this block to provide the jobs with appropriate annotations
+# If not set it will provide the jobs with helm hook annotations for the charts default behaviour, which are the following:
+
+#rootsExtraction:
+#  upgrade:
+#    annotations:
+#      "helm.sh/hook": post-install,post-upgrade
+#      "helm.sh/hook-delete-policy": hook-succeeded,hook-failed
+#      "helm.sh/hook-weight": "0"
+#    podAnnotations: {}
+#  rollback:
+#    annotations:
+#      "helm.sh/hook": post-rollback
+#      "helm.sh/hook-delete-policy": hook-succeeded,hook-failed
+#      "helm.sh/hook-weight": "0"
+#    podAnnotations: {}
+
 rosette:
   roots:
-    ascent: 3.0.0.c73.0
-    nlp4j: 2.0.0.c73.0
-    rbl: 7.47.2.c73.0
-    rct: 3.0.18.c73.0
-    relax: 4.0.0.c73.0
-    rex: 7.55.11.c73.0
-    rli: 7.23.12.c73.0
-    rnirnt: 7.45.0.c73.0
-    tcat: 3.0.0.c73.0
-    topics: 3.0.0.c73.0
-    tvec: 7.0.0.c73.0
+    ascent: 3.0.1.c74.0
+    nlp4j: 2.0.1.c74.0
+    rbl: 7.47.3.c74.0
+    rct: 3.0.19.c74.0
+    relax: 4.0.1.c74.0
+    rex: 7.55.13.c74.0
+    rli: 7.23.13.c74.0
+    rnirnt: 7.46.0.c74.0
+    tcat: 3.0.1.c74.0
+    topics: 3.0.1.c74.0
+    tvec: 7.0.1.c74.0
 
 enabledEndpoints:
 #- address-similarity
@@ -247,6 +265,9 @@ config:
     # so that the queue size is decremented accordingly.
     # values: Make this slightly bigger than worker ELB timeout when deployed in AWS
     asyncResponseTimeoutMs=310000
+    # Should the health/services endpoint list external services' health
+    # Default is false
+    #showExternalServicesHealth=true
   com.basistech.ws.frontend.cfg: |
     # INTERNAL USE ONLY
     # bindingVersions specifies the range of versions accepted from the client in [maven format](https://maven.apache.org/enforcer/enforcer-rules/versionRanges.html).
@@ -349,18 +370,18 @@ config:
     # configurationFilePathname is the pathname to the worker service configuration yaml.
     configurationFilePathname=${rosapi.config}/rosapi/worker-config.yaml
     # <component>-root is the pathname to the root directory for various component.
-    rbl-root=${rosapi.roots}/rbl/7.47.2.c73.0
-    rct-root=${rosapi.roots}/rct/3.0.18.c73.0
-    ascent-root=${rosapi.roots}/ascent/3.0.0.c73.0
-    tcat-root=${rosapi.roots}/tcat/3.0.0.c73.0
-    rli-root=${rosapi.roots}/rli/7.23.12.c73.0
-    rex-root=${rosapi.roots}/rex/7.55.11.c73.0
-    flinx-root=${rosapi.roots}/rex/7.55.11.c73.0/flinx
-    relax-root=${rosapi.roots}/relax/4.0.0.c73.0
-    dp-root=${rosapi.roots}/nlp4j/2.0.0.c73.0
-    rni-rnt-root=${rosapi.roots}/rni-rnt/7.45.0.c73.0
-    tvec-root=${rosapi.roots}/tvec/7.0.0.c73.0
-    topics-root=${rosapi.roots}/topics/3.0.0.c73.0
+    rbl-root=${rosapi.roots}/rbl/7.47.3.c74.0
+    rct-root=${rosapi.roots}/rct/3.0.19.c74.0
+    ascent-root=${rosapi.roots}/ascent/3.0.1.c74.0
+    tcat-root=${rosapi.roots}/tcat/3.0.1.c74.0
+    rli-root=${rosapi.roots}/rli/7.23.13.c74.0
+    rex-root=${rosapi.roots}/rex/7.55.13.c74.0
+    flinx-root=${rosapi.roots}/rex/7.55.13.c74.0/flinx
+    relax-root=${rosapi.roots}/relax/4.0.1.c74.0
+    dp-root=${rosapi.roots}/nlp4j/2.0.1.c74.0
+    rni-rnt-root=${rosapi.roots}/rni-rnt/7.46.0.c74.0
+    tvec-root=${rosapi.roots}/tvec/7.0.1.c74.0
+    topics-root=${rosapi.roots}/topics/3.0.1.c74.0
     # healthCheckQueueSizeThreshold is used for ELB health check, change the default as desired. Default is 20.
     #healthCheckQueueSizeThreshold=20
     # workerThreadTimeout is the timeout value for worker threads. To avoid diminished return or even degradation
@@ -1142,8 +1163,6 @@ rosapi:
   framework-override.properties: |
     # disable stacktrace in Felix SCR
     ds.showerrors=false
-  indoc-coref-server-factory-config.yaml: |
-    #serverUrl: http://localhost:5000/
   rbl-factory-config.yaml: |
     #Whether to tokenize and analyze emoticons.
     emoticons: true
@@ -2797,7 +2816,7 @@ conf:
     # Do not start if the pid file already exists.
     #wrapper.pidfile.strict=TRUE
     # Title to use when running as a console
-    wrapper.console.title=Rosette Server Edition
+    # wrapper.console.title=Rosette Server Edition
     #********************************************************************
     # Wrapper JVM Checks
     #********************************************************************
