@@ -2,7 +2,7 @@
 Expand the name of the chart.
 */}}
 {{- define "rosette-server.name" -}}
-{{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
+{{- default "restful-server" .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
@@ -14,7 +14,7 @@ If release name contains chart name it will be used as a full name.
 {{- if .Values.fullnameOverride }}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
 {{- else }}
-{{- $name := default .Chart.Name .Values.nameOverride }}
+{{- $name := default "restful-server" .Values.nameOverride }}
 {{- if contains $name .Release.Name }}
 {{- .Release.Name | trunc 63 | trimSuffix "-" }}
 {{- else }}
@@ -27,7 +27,7 @@ If release name contains chart name it will be used as a full name.
 Create chart name and version as used by the chart label.
 */}}
 {{- define "rosette-server.chart" -}}
-{{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
+{{- printf "%s-%s" "restful-server" .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
@@ -73,7 +73,17 @@ Create a separator string for roots config override scripts to work with
 {{- end }}
 
 {{/*
-Create initContainer image name, or use Rosette Serve's if one is not provided
+Define the image and tag to use for the Rosette Serve container
+*/}}
+{{- define "rosette-server.image" -}}
+{{- print  .Values.image.repository ":" ( default .Chart.AppVersion .Values.image.tag ) }}
+{{- end }}
+
+{{/*
+*/}}
+
+{{/*
+Create initContainer image name, or use Rosette Server's if one is not provided
 */}}
 {{- define "initContainer-image" -}}
     {{- if .Values.initContainer.image -}}
@@ -83,6 +93,6 @@ Create initContainer image name, or use Rosette Serve's if one is not provided
             {{ print .Values.initContainer.image }}
         {{- end -}}
     {{- else -}}
-    {{- print  .Values.image.repository ":" ( default .Chart.AppVersion .Values.image.tag ) }}
+    {{- include "rosette-server.image" . -}}
     {{- end }}
 {{- end }}

@@ -1,0 +1,42 @@
+{{- if .Values.apikeys.enabled -}}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "rosette-server.fullname" . }}-apikeys-db-backup
+  labels:
+    {{- include "rosette-server.labels" . | nindent 4 }}
+spec:
+  schedule: {{ .Values.apikeys.backup.cronSchedule | quote}}
+  jobTemplate:
+    spec:
+      ttlSecondsAfterFinished: {{ .Values.apikeys.backup.ttlSecondsAfterFinished }}
+      backoffLimit: {{ .Values.apikeys.backup.backoffLimit }}
+      template:
+        metadata:
+          labels:
+            {{- include "rosette-server.labels" . | nindent 12 }}
+        spec:
+          {{- with .Values.imagePullSecrets }}
+          imagePullSecrets:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          serviceAccountName: {{ include "rosette-server-apikeys.serviceAccountName" . }}
+          containers:
+            - name: apikeys-database-backup
+              image:  {{ include "rosette-server.image" .  | quote }}
+              imagePullPolicy: {{ .Values.image.pullPolicy }}
+              env:
+                {{- include "apikeys-database-env-variables" . | nindent 16 }}
+              command: ["bash", "-c"]
+              args:
+                - |
+                  BACKUP_FILE=$DB_NAME-$(date '+%Y-%m-%d'T'%H:%M').zip
+                  echo "Backing up database to $BACKUP_FILE";
+                  java -cp /rosette/server/cli-lib/h2*.jar org.h2.tools.Shell -url "jdbc:h2:tcp:$APIKEYS_URL/$DB_NAME" -user $DB_USER -password $DB_PASSWORD -sql "BACKUP TO '/database/$BACKUP_FILE'" | grep -i "exception";
+                  if [ $? -eq 0 ]; then
+                    echo "ERROR: Backup thrown an exception";
+                    exit 1;
+                  fi
+                  echo "Backup completed";
+          restartPolicy: {{ .Values.apikeys.backup.restartPolicy }}
+{{- end }}

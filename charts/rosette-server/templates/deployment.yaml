@@ -12,6 +12,7 @@ spec:
   selector:
     matchLabels:
       {{- include "rosette-server.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: "restful-server"
   template:
     metadata:
       annotations:
@@ -20,12 +21,13 @@ spec:
         checksum/rosapi: {{ print .Values.rosapi | sha256sum }}
         checksum/license-file: {{ print .Values.licenseSecretName | sha256sum }}
         checksum/enabledLanguages: {{ print .Values.enabledLanguages | sha256sum }}
-        checksum/roots-versions: {{ print .Values.rosette.roots | sha256sum }}
+        checksum/roots-versions: {{ print .Values.roots.version | sha256sum }}
         {{ with .Values.podAnnotations }}
           {{- toYaml . | nindent 8 }}
         {{- end }}
       labels:
         {{- include "rosette-server.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: "restful-server"
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -35,8 +37,8 @@ spec:
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       initContainers:
-        - name: rosette-server-init
-          image: {{ include "initContainer-image" . | quote }}
+        - name: restful-server-init
+          image:  {{ include "rosette-server.image" .  | quote }}
           command: [ 'bash', '-c',
                      'bash /init-scripts/init.sh'
           ]
@@ -46,6 +48,9 @@ spec:
             {{- if (eq .Values.indoccoref.enabled true) }}
             - name: COREF_URL
               value: {{ include "indoc-coref.fullname" .Subcharts.indoccoref }}:{{ .Subcharts.indoccoref.Values.service.port }}
+            {{- end }}
+            {{- if (eq .Values.apikeys.enabled true) }}
+              {{- include "apikeys-database-env-variables" . | nindent 12 }}
             {{- end }}
             {{- if .Values.customProfilesVolumeClaimName }}
             - name: CUSTOM_PROFILES_PATH
@@ -60,11 +65,13 @@ spec:
               name: init-override
             - mountPath: "/init-scripts"
               name: init-scripts
+            - mountPath: "/conf"
+              name: server-conf
       containers:
-        - name: {{ .Chart.Name }}
+        - name: restful-server
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          image:  {{ include "rosette-server.image" .  | quote }}
           command: ["/bin/bash","-c"]
           args: ["/rosette/server/bin/launch.sh console"]
           imagePullPolicy: {{ .Values.image.pullPolicy }}
@@ -90,20 +97,35 @@ spec:
               subPath: "rosette-license.xml"
               name: rosette-license
               readOnly: true
+
             {{- range $file, $content := .Values.config -}}
-              {{- $initOverridables := list "com.basistech.ws.worker.cfg" "com.basistech.ws.frontend.cfg" }}
+              {{- $initOverridables := list "com.basistech.ws.worker.cfg" "com.basistech.ws.frontend.cfg" "com.basistech.ws.apikeys.cfg" -}}
               {{- if not (has $file $initOverridables) }}
             - mountPath: {{ print "/rosette/server/launcher/config/" $file | quote }}
               name: config
               subPath: {{ print $file }}
               {{- else }}
+
                 {{- if and (eq $file "com.basistech.ws.frontend.cfg") (not $.Values.customProfilesVolumeClaimName) }}
             - mountPath: {{ print "/rosette/server/launcher/config/" $file | quote }}
               name: config
               subPath: {{ print $file }}
                 {{- end }}
+
+  {{/* If the feature is enabled mount it from the overrides volume instead of the config-map created from the values.yaml */}}
+                {{- if and (eq $file "com.basistech.ws.apikeys.cfg") }}
+            - mountPath: "/rosette/server/launcher/config/com.basistech.ws.apikeys.cfg"
+                  {{- if (eq $.Values.apikeys.enabled true) }}
+              name: init-override
+                  {{- else }}
+              name: config  
+                  {{- end }}
+              subPath: "com.basistech.ws.apikeys.cfg"
+                {{- end }}
+
               {{- end }}
             {{- end }}
+
             {{- if (eq .Values.indoccoref.enabled true) }}
               {{- range $file, $content := .Values.rosapi -}}
                 {{- if not (eq $file "rex-factory-config.yaml") }}
@@ -119,8 +141,23 @@ spec:
             - mountPath: "/rosette/server/launcher/config/rosapi"
               name: config-rosapi
             {{- end }}
+
+            {{- if (eq .Values.apikeys.enabled true) }}
+              {{- range $file, $content := .Values.conf -}}
+                {{- if not (eq $file "wrapper.conf") }}
+            - mountPath: {{ print "/rosette/server/conf/" $file | quote }}
+              name: server-conf
+              subPath: {{ print $file }}
+                {{- end }}
+              {{- end }}
+            - mountPath: "/rosette/server/conf/wrapper.conf"
+              name: init-override
+              subPath: "wrapper.conf"
+            {{- else }}
             - mountPath: "/rosette/server/conf"
               name: server-conf
+            {{- end }}
+
             - mountPath: "/rosette/server/roots"
               name: roots
             - mountPath: "/rosette/server/launcher/config/com.basistech.ws.worker.cfg"
@@ -129,6 +166,7 @@ spec:
             - mountPath: "/rosette/server/override/config/enabled-endpoints.yaml"
               name: init-override
               subPath: "enabled-endpoints.yaml"
+
             {{- if .Values.customProfilesVolumeClaimName }}
             - mountPath: {{ $customProfilesMountPath }}
               name: custom-profiles

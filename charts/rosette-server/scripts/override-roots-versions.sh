@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # rootVersions.sh is defined in templates/cm-init-scripts.yaml
-source /init-scripts/rootVersions.sh
+source $INIT_SCRIPTS_DIR/rootVersions.sh
 
 function update-root-version() {
   local FILE=$1
@@ -25,11 +25,11 @@ function update-flinx-version() {
   echo -e "\nflinx-root=\${rosapi.roots}/rex/${VERSION}/flinx\n" >> ${FILE}
 }
 
-WORKER_CFG="/override/com.basistech.ws.worker.cfg"
+WORKER_CFG="$OVERRIDE_DIR/com.basistech.ws.worker.cfg"
 # Should be already in the override partition from the previous init scripts, but just in case something changes in the
 # future, we'll copy it over if it's not there.
 if [[ ! -f $WORKER_CFG ]]; then
-  cp "/configs/com.basistech.ws.worker.cfg" $WORKER_CFG
+  cp "$CONFIG_DIR/com.basistech.ws.worker.cfg" $WORKER_CFG
 fi
 update-root-version $WORKER_CFG "ascent-root" "ascent" $ASCENT
 update-root-version $WORKER_CFG "dp-root" "nlp4j" $NLP4J

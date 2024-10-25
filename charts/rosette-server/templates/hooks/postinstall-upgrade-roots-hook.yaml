@@ -2,7 +2,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ .Release.Name }}-upgrade-populate-roots
+  name: {{ include "rosette-server.fullname" . }}-upgrade-populate-roots
   annotations:
     #https://stackoverflow.com/questions/59795596/how-to-make-nested-variables-optional-in-helm
     {{- if ((.Values.rootsExtraction).upgrade).annotations }}
@@ -10,7 +10,7 @@ metadata:
     {{- else }}
     "helm.sh/hook": post-install,post-upgrade
     "helm.sh/hook-delete-policy": hook-succeeded,hook-failed
-    "helm.sh/hook-weight": "0"
+    "helm.sh/hook-weight": "1"
     {{- end }}
 spec:
   template:
@@ -58,7 +58,7 @@ spec:
             claimName: {{ include "rosette-server.fullname" . }}-roots-claim
         - name: roots-config-override-scripts
           configMap:
-            name: {{ include "rosette-server.fullname" . }}-roots-configs-override-scripts
+            name: {{ include "rosette-server.fullname" . }}-roots-cfg-ovr-scripts
         {{- with .Values.rootsOverride }}
         {{- if eq .enabled "true" }}
           {{- if .overrideVolumeClaimName }}

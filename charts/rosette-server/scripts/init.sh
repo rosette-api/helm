@@ -1,26 +1,26 @@
 #!/bin/bash
 
-OVERRIDE_DIR="/override"
-CONFIG_DIR="/configs"
-INIT_SCRIPTS_DIR="/init-scripts"
-ROSAPI_DIR="/rosapi"
+# these are set in the deployment.yaml
+export OVERRIDE_DIR="/override"
+export CONFIG_DIR="/configs"
+export INIT_SCRIPTS_DIR="/init-scripts"
+export ROSAPI_DIR="/rosapi"
+export CONF_DIR="/conf"
 
 if [[ ! -d $OVERRIDE_DIR ]]; then
-  echo "/override directory doesn't exist."
+  echo "$OVERRIDE_DIR directory doesn't exist."
   exit 1
 fi
 if [[ ! -d $CONFIG_DIR ]]; then
-  echo "/configs directory doesn't exist."
+  echo "$CONFIG_DIR directory doesn't exist."
   exit 1
 fi
 if [[ ! -d $INIT_SCRIPTS_DIR ]]; then
-  echo "/init-scripts directory doesn't exist."
+  echo "$INIT_SCRIPTS_DIR directory doesn't exist."
   exit 1
 fi
-if [[ ! -d $ROSAPI_DIR ]]; then
-  echo "/rosapi directory doesn't exist."
-  exit 1
-fi
+
+
 
 echo "Configuring enabled endpoints"
 if [[ -z $ENDPOINTS ]]; then
@@ -39,6 +39,10 @@ bash ${INIT_SCRIPTS_DIR}/override-roots-versions.sh
 if [[ -z $COREF_URL ]]; then
   echo "Indoc coref is not enabled. Not configuring"
 else
+  if [[ ! -d $ROSAPI_DIR ]]; then
+    echo "$ROSAPI_DIR directory doesn't exist."
+    exit 1
+  fi
   echo "Configuring indoc coref connection"
   bash ${INIT_SCRIPTS_DIR}/configure-indoc-coref-connection.sh
 fi
@@ -50,4 +54,13 @@ else
   bash ${INIT_SCRIPTS_DIR}/configure-custom-profiles.sh
 fi
 
-
+if [[ -z $APIKEYS_URL ]]; then
+    echo "Not configuring API keys"
+else
+  if [[ ! -d $CONF_DIR ]]; then
+    echo "$CONF_DIR directory doesn't exist."
+    exit 1
+  fi
+  echo "Configuring API keys"
+  bash ${INIT_SCRIPTS_DIR}/configure-api-keys.sh
+fi

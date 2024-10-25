@@ -1,27 +1,27 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ include "rosette-server.fullname" . }}-roots-configs-override-scripts
+  name: {{ include "rosette-server.fullname" . }}-roots-cfg-ovr-scripts
 data:
   {{- $separator := include "hooks-separator-string" . }}
   new-entry.txt: |2+
   {{- if .Values.rootsOverride.add }}
     {{- range $addInfo := .Values.rootsOverride.add }}
-      {{- $rootVersion := get $.Values.rosette.roots $addInfo.root }}
+      {{- $rootVersion := get $.Values.roots.version $addInfo.root }}
       {{- print "\n" $addInfo.root $separator $rootVersion $separator $addInfo.originPath $separator $addInfo.targetPath | indent 4 }}
     {{- end }}
   {{- end }}
   override-entry.txt: |2+
   {{- if .Values.rootsOverride.override }}
     {{- range $overrideInfo := .Values.rootsOverride.override }}
-      {{- $rootVersion := get $.Values.rosette.roots $overrideInfo.root }}
+      {{- $rootVersion := get $.Values.roots.version $overrideInfo.root }}
       {{- print "\n" $overrideInfo.root $separator $rootVersion $separator $overrideInfo.originPath $separator $overrideInfo.targetPath | indent 4 }}
     {{- end }}
   {{- end }}
   delete-entry.txt: |2+
   {{- if .Values.rootsOverride.delete }}
     {{- range $deleteInfo := .Values.rootsOverride.delete }}
-      {{- $rootVersion := get $.Values.rosette.roots $deleteInfo.root }}
+      {{- $rootVersion := get $.Values.roots.version $deleteInfo.root }}
       {{- print "\n" $deleteInfo.root $separator $rootVersion $separator $deleteInfo.targetPath | indent 4 }}
     {{- end }}
   {{- end }}

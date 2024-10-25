@@ -100,6 +100,62 @@ rootsResourceRequest: "150Gi"
 rootsUseSelectorLabels: "true"
 customProfilesVolumeClaimName: ""
 
+apikeys:
+  enabled: false
+
+  persistentVolumeClaimName: ""
+  # Adds write permissions for all users to the PVC's root directory's files
+  volumePermissionOverride:
+    enabled: false
+    userId: 0
+
+  dbName: "apikeys"
+  dbAccessSecretName: ""
+  backup:
+    cronSchedule: "0 * * * *" #hourly
+    # Restart failed backup job pods or create new ones for retries
+    restartPolicy: Never
+    # How long to keep a failed/completed backup job's pod
+    ttlSecondsAfterFinished: 600
+    # How many times a failed backup should be reattempted
+    backoffLimit: 3
+
+  # During upgrades a post hook job will wait for the main database to update before scaling down to one replica
+  # This includes two wait processes, one for the pod to be running with the new revision's configuration and one for the database to be available
+  # This value configures how many seconds to wait before failing the update for each process separately
+  upgradeTimeoutSeconds: 300
+  # Annotations for the database server scaling hook job
+  hookAnnotations:
+    "helm.sh/hook": post-install,post-upgrade,post-rollback
+    "helm.sh/hook-delete-policy": hook-succeeded,before-hook-creation
+    "helm.sh/hook-weight": "0"
+
+  service:
+    type: ClusterIP
+    port: 9092
+  clusterDomain: cluster.local
+
+  serviceAccount:
+    create: true
+    annotations: {}
+    name: ""
+
+  podAnnotations: {}
+  podLabels: {}
+  podSecurityContext: {}
+  securityContext: {}
+  resources: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+  probes:
+    initialDelaySeconds: 5
+    timeoutSeconds: 10
+    periodSeconds: 10
+    failureThreshold: 5
+
+
 # Some dynamically created persistent volumes will need their permissions updated before the
 # roots can be extracted.  These parameters allow you to enable and control that process via an InitContainer.
 volumePermissions:
@@ -149,28 +205,28 @@ rootsImageRepository: "rosette/"
 #    annotations:
 #      "helm.sh/hook": post-install,post-upgrade
 #      "helm.sh/hook-delete-policy": hook-succeeded,hook-failed
-#      "helm.sh/hook-weight": "0"
+#      "helm.sh/hook-weight": "1"
 #    podAnnotations: {}
 #  rollback:
 #    annotations:
 #      "helm.sh/hook": post-rollback
 #      "helm.sh/hook-delete-policy": hook-succeeded,hook-failed
-#      "helm.sh/hook-weight": "0"
+#      "helm.sh/hook-weight": "1"
 #    podAnnotations: {}
 
-rosette:
-  roots:
-    ascent: 3.0.1.c74.0
-    nlp4j: 2.0.1.c74.0
-    rbl: 7.47.3.c74.0
-    rct: 3.0.19.c74.0
-    relax: 4.0.1.c74.0
-    rex: 7.55.13.c74.0
-    rli: 7.23.13.c74.0
-    rnirnt: 7.46.0.c74.0
-    tcat: 3.0.1.c74.0
-    topics: 3.0.1.c74.0
-    tvec: 7.0.1.c74.0
+roots:
+  version:
+    ascent: 3.0.2.c75.0
+    nlp4j: 2.0.2.c75.0
+    rbl: 7.47.4.c75.0
+    rct: 3.0.20.c75.0
+    relax: 4.0.2.c75.0
+    rex: 7.55.14.c75.0
+    rli: 7.23.14.c75.0
+    rnirnt: 7.47.0.c75.0
+    tcat: 3.0.2.c75.0
+    topics: 4.0.0.c75.0
+    tvec: 7.0.2.c75.0
 
 enabledEndpoints:
 #- address-similarity
@@ -235,6 +291,39 @@ config:
     # maxFieldLength is the maximum length of a field in an address to process
     # values: default is 500
     #maxFieldLength=500
+  com.basistech.ws.apikeys.cfg: |
+    # The connection mode to the apikeys database. Can be file or server. File is a database stored on disk and managed
+    # by Rosette Server. Server is an H2 database server, which must be started separately.
+    # Defaults to file
+    #dbConnectionMode=file
+    # Name of the database. Defaults to apikeys
+    #dbName=apikeys
+    # In file mode the path to the directory where the database is stored. Relative paths are based from the bin directory.
+    # Defaults to ../db
+    # In server mode this must be provided and should be <host>:[<port>][/<path>]. For more details see
+    # https://www.h2database.com/html/features.html#database_url Server mode sections
+    #dbURI=../db
+    # When in server mode, use SSL to connect to the database. The database server must be running with SSL enabled.
+    # Defaults to false.
+    #dbSSLMode=false
+    # Username for the database. For a new database this will be used to create the database. Defaults to rosette-server
+    #dbUser=rosette-server
+    # Password for the database. For a new database this will be used to create the database. Defaults to ""
+    #dbPassword=
+    # Do not validate the authorities of an API key. This means that every valid API key can access all licensed endpoints.
+    # Can be true or false. Defaults to true
+    #authenticationOnly=true
+    # A comma separated list of antMatchers for endpoint paths that can be accessed without an API key.
+    # As the url path base is configurable in com.basistech.ws.cxf there are two formats the paths can be defined
+    # 1. Paths starting with '/' will be interpreted as is.
+    # 2. Paths starting without '/' will be appended to the urlBase defined in com.basistech.ws.cxf
+    # e.g. if the urlBase is the default '/rest': '/my-base/v1/info' -> '/my-base/v1/info'
+    #                                             'v1/info' -> '/rest/v1/info
+    # Read more about antMatchers at: https://docs.spring.io/spring-security/site/docs/current/api/org/springframework/security/web/util/matcher/AntPathRequestMatcher.html
+    # The default is doc/**,v1/info,v1/ping
+    #unsecuredEndpoints=doc/**,v1/info,v1/ping
+    # The number of days before an API key expires. Defaults to 90
+    #expirationDays=90
   com.basistech.ws.cxf.cfg: |2
 
     # urlBase is the host and port for the apache cxf
@@ -370,18 +459,18 @@ config:
     # configurationFilePathname is the pathname to the worker service configuration yaml.
     configurationFilePathname=${rosapi.config}/rosapi/worker-config.yaml
     # <component>-root is the pathname to the root directory for various component.
-    rbl-root=${rosapi.roots}/rbl/7.47.3.c74.0
-    rct-root=${rosapi.roots}/rct/3.0.19.c74.0
-    ascent-root=${rosapi.roots}/ascent/3.0.1.c74.0
-    tcat-root=${rosapi.roots}/tcat/3.0.1.c74.0
-    rli-root=${rosapi.roots}/rli/7.23.13.c74.0
-    rex-root=${rosapi.roots}/rex/7.55.13.c74.0
-    flinx-root=${rosapi.roots}/rex/7.55.13.c74.0/flinx
-    relax-root=${rosapi.roots}/relax/4.0.1.c74.0
-    dp-root=${rosapi.roots}/nlp4j/2.0.1.c74.0
-    rni-rnt-root=${rosapi.roots}/rni-rnt/7.46.0.c74.0
-    tvec-root=${rosapi.roots}/tvec/7.0.1.c74.0
-    topics-root=${rosapi.roots}/topics/3.0.1.c74.0
+    rbl-root=${rosapi.roots}/rbl/7.47.4.c75.0
+    rct-root=${rosapi.roots}/rct/3.0.20.c75.0
+    ascent-root=${rosapi.roots}/ascent/3.0.2.c75.0
+    tcat-root=${rosapi.roots}/tcat/3.0.2.c75.0
+    rli-root=${rosapi.roots}/rli/7.23.14.c75.0
+    rex-root=${rosapi.roots}/rex/7.55.14.c75.0
+    flinx-root=${rosapi.roots}/rex/7.55.14.c75.0/flinx
+    relax-root=${rosapi.roots}/relax/4.0.2.c75.0
+    dp-root=${rosapi.roots}/nlp4j/2.0.2.c75.0
+    rni-rnt-root=${rosapi.roots}/rni-rnt/7.47.0.c75.0
+    tvec-root=${rosapi.roots}/tvec/7.0.2.c75.0
+    topics-root=${rosapi.roots}/topics/4.0.0.c75.0
     # healthCheckQueueSizeThreshold is used for ELB health check, change the default as desired. Default is 20.
     #healthCheckQueueSizeThreshold=20
     # workerThreadTimeout is the timeout value for worker threads. To avoid diminished return or even degradation
@@ -458,8 +547,6 @@ config:
     # The client adds /v1 for /rest/v1 in com.basistech.frontend.cfg
     # org.apache.cxf.servlet.context is the prefix for all URLs for CXF services. We set this to `/rest`.
     org.apache.cxf.servlet.context=/rest
-
-
 rosapi:
   analyze-factory-config.yaml: |
     #Whether to tokenize and analyze emoticons.
@@ -2589,6 +2676,30 @@ rosapi:
 
 
 conf:
+  apikey-console.log4j2.xml: |
+    <?xml version="1.0" encoding="UTF-8"?>
+    <Configuration monitorInterval="60">
+        <Properties>
+            <Property name="log-path">../apikey-logs</Property>
+            <Property name="archive">${log-path}/archive</Property>
+        </Properties>
+        <Appenders>
+            <Console name="Console-Appender" target="SYSTEM_OUT">
+                <PatternLayout>
+                    <pattern>
+                        [%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %c - %msg%n
+                    </pattern>>
+                </PatternLayout>
+            </Console>
+        </Appenders>
+        <Loggers>
+            <Root level="warn">
+                <AppenderRef ref="Console-Appender" level="warn"/>
+            </Root>
+            <!-- Turn off Hibernate SQL exception logging -->
+            <Logger name="org.hibernate.engine.jdbc.spi.SqlExceptionHelper" level="off"/>
+        </Loggers>
+    </Configuration>
   java_opts.conf: ""
   log4j2.xml: |
     <?xml version="1.0" encoding="UTF-8"?>
@@ -2744,6 +2855,9 @@ conf:
     # WS-2622: disable crypto-policies alignment
     # https://access.redhat.com/documentation/en-us/openjdk/17/html/configuring_openjdk_17_on_rhel_with_fips/config-fips-in-openjdk
     wrapper.java.additional.331=-Djava.security.disableSystemPropertiesFile=true
+    # Feature flags (4xx)
+    #wrapper.java.additional.401=-Drosapi.feature.CUSTOM_PROFILE_UNDER_APP_ID=true
+    #wrapper.java.additional.402=-Drosapi.feature.ENABLE_API_KEYS=true
     # Logging (6xx)
     wrapper.java.additional.600=-Drosapi.framework.logger=OFF
     wrapper.java.additional.601=-Djava.util.logging.config.file=../conf/logging.properties
@@ -2902,5 +3016,6 @@ conf:
     #  administrator credentials. (Requires Professional Edition)
     #wrapper.ntservice.permissions.1.account=CURRENT_USER
     #wrapper.ntservice.permissions.1.allow=START, STOP, PAUSE_RESUME
+
 
 

@@ -1,0 +1,158 @@
+{{- if (eq .Values.apikeys.enabled true) }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "rosette-server.fullname" . }}-apikeys-db-server
+  labels:
+    {{- include "rosette-server.labels" . | nindent 4 }}
+spec:
+  serviceName: {{ include "rosette-server.fullname" . }}-apikeys-db
+  replicas: 2
+  selector:
+    matchLabels:
+      {{- include "rosette-server.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: "apikeys-db-server"
+  template:
+    metadata:
+      {{- with .Values.apikeys.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        app.kubernetes.io/component: "apikeys-db-server"
+        helm/revision: "{{ .Release.Revision }}"
+        {{- include "rosette-server.labels" . | nindent 8 }}
+        {{- with .Values.apikeys.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "rosette-server-apikeys.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.apikeys.podSecurityContext | nindent 8 }}
+      initContainers:
+        {{- if (eq .Values.apikeys.volumePermissionOverride.enabled true) }}
+        - name: database-volume-permission-override
+          image:  {{ include "rosette-server.image" .  | quote }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          securityContext:
+            runAsUser: {{ .Values.apikeys.volumePermissionOverride.userId }}
+          command: ["bash", "-c", "chmod ugo+rwx /database; find /database -maxdepth 1 -type f -exec chmod ugo+rw {} \\;" ]
+          volumeMounts:
+            - name: apikeys-db
+              mountPath: /database
+        {{- end }}
+        - name: apikeys-database-setup
+          image:  {{ include "rosette-server.image" .  | quote }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+              {{- include "apikeys-database-env-variables" .  | nindent 12 }}
+          command:
+            - bash
+            - -c
+          args:
+            - |
+              echo "Initializing for the database server";
+              
+              ORDINAL=$(cat /etc/hostname | awk -F- '{print $NF}');
+              
+              if [ "$ORDINAL" = "0" ]; then
+                # Remove the clustering from the database
+                if [ -f /database/$DB_NAME.mv.db ]; then
+                  echo "Removing clustering from the database";
+                  java -cp /rosette/server/cli-lib/h2*.jar org.h2.tools.Shell -url "jdbc:h2:/database/$DB_NAME;CLUSTER=''"\
+                    -user $DB_USER -password $DB_PASSWORD -sql "SELECT 1" > /dev/null 2>&1;
+                fi
+                echo "Connecting to the database to run potential migrations"
+              
+                echo "dbURI=/database" >> /rosette/server/launcher/config/com.basistech.ws.apikeys.cfg;
+                echo "dbName=$DB_NAME" >> /rosette/server/launcher/config/com.basistech.ws.apikeys.cfg;
+                echo "dbUser=$DB_USER" >> /rosette/server/launcher/config/com.basistech.ws.apikeys.cfg;
+                echo "dbPassword=$DB_PASSWORD" >> /rosette/server/launcher/config/com.basistech.ws.apikeys.cfg;
+                /rosette/server/bin/rosette-apikeys help;
+              else
+                echo "Secondary database, no operations needed";
+              fi
+          volumeMounts:
+            - mountPath: /database
+              name: apikeys-db
+      containers:
+        - name: apikeys-database-server
+          securityContext:
+            {{- toYaml .Values.apikeys.securityContext | nindent 12 }}
+          image:  {{ include "rosette-server.image" .  | quote }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["bash", "-c"]
+          env:
+            {{- include "apikeys-database-env-variables" .  | nindent 12 }}
+          args:
+            - |
+              set -x;
+              ORDINAL=$(cat /etc/hostname | awk -F- '{print $NF}');
+              if [ "$ORDINAL" = "0" ]; then
+                java -cp /rosette/server/cli-lib/h2*.jar org.h2.tools.Server -tcp -tcpPort 9092 -tcpAllowOthers -baseDir /database 
+              else
+                # Split APIKEYS_URL along the comma
+                urls=()
+                for url in $(echo "$APIKEYS_URL" | tr ',' '\n'); do
+                  urls+=("$url")
+                done
+              
+                # Wait twice the amount of the time the scaling job polls the database to avoid adding clustering before 
+                # the scaling job could connect to it when the database was not in the cluster before.
+                # The scaling job will only work polling the main database and not both, and when clustering is done, the main database will only 
+                # accept a connection if it tries polling both databases. So we want to avoid clustering being able to happen before
+                # the scaling job can poll the database.
+                sleep 10;
+                
+                echo "Starting secondary server";
+                # Start the server on a non exposed port while copying the database with clustering
+                # then restart it on an exposed port to make it available. 
+                # (We don't have the tools in the image to port forward)
+                java -cp /rosette/server/cli-lib/h2*.jar org.h2.tools.Server -tcp -tcpPort 9093 -tcpAllowOthers -baseDir /tmp -ifNotExists &
+                SERVER_PID=$!;
+                SECONDARY_TEMP_URL=$(echo ${urls[1]} | sed 's/9092/9093/');
+                java -cp /rosette/server/cli-lib/h2*.jar org.h2.tools.CreateCluster -urlSource jdbc:h2:tcp://${urls[0]}/$DB_NAME -urlTarget jdbc:h2:tcp://$SECONDARY_TEMP_URL/$DB_NAME -user $DB_USER -password $DB_PASSWORD -serverList $APIKEYS_URL;
+                kill $SERVER_PID;
+                wait $SERVER_PID;
+              
+                java -cp /rosette/server/cli-lib/h2*.jar org.h2.tools.Server -tcp -tcpPort 9092 -tcpAllowOthers -baseDir /tmp -ifNotExists
+              fi
+
+          ports:
+            - name: database-port
+              containerPort: 9092
+              protocol: TCP
+          livenessProbe:
+            tcpSocket:
+              port: database-port
+            {{- toYaml .Values.apikeys.probes | nindent 12 }}
+          readinessProbe:
+            tcpSocket:
+              port: database-port
+            {{- toYaml .Values.apikeys.probes | nindent 12 }}
+          resources:
+            {{- toYaml .Values.apikeys.resources | nindent 12 }}
+          volumeMounts:
+            - name: apikeys-db
+              mountPath: /database
+      volumes:
+        - name: apikeys-db
+          persistentVolumeClaim:
+            claimName: {{ required "Persistent volume claim name for apikeys database is required (.Values.apikeys.persistentVolumeClaimName)" .Values.apikeys.persistentVolumeClaimName }}
+      {{- with .Values.apikeys.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.apikeys.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.apikeys.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

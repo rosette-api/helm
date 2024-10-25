@@ -19,9 +19,11 @@ This chart bootstraps a Rosette Server deployment, and also populates a persiste
   - [Overrides for configurations located in Root storage parameters](#Overrides-for-configurations-located-in-Root-storage-parameters)
   - [Rosette Server parameters](#Rosette-Server-parameters)
   - [Indoc Coref Server parameters](#Indoc-Coref-Server-parameters)
+  - [API keys parameters](#API-keys-parameters)
 - [**Rosette Roots extraction**](#Rosette-Roots-extraction)
   - [Root configurations overrides](#Root-configurations-overrides)
 - [**Custom profiles**](#Custom-profiles)
+  - [Data paths for custom profiles](#Data-paths-for-custom-profiles)
 - [**Resource requirements**](#Resource-requirements)
   - [Memory requirements](#Memory-requirements)
   - [Disk space requirements](#Disk-space-requirements)
@@ -66,7 +68,7 @@ The extraction of the roots can be a lengthy process, depending on which endpoin
 Make sure to set a long enough timeout for the process to finish considering your resources.
 
 ### Download the templates
-Use this [link](https://charts.babelstreet.com/rosette-server-1.2.0.tgz) to download the chart and its templates
+Use this [link](https://charts.babelstreet.com/rosette-server-2.0.0.tgz) to download the chart and its templates
 
 # Uninstall
 To uninstall the release, run
@@ -129,17 +131,17 @@ the Rosette Roots persistent volume, depending on its reclaim policy.
 
 | Name                                    | Description                                                                                                                                              | Value         |
 |-----------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------|---------------|
-| rosette.roots.rex                       | The version of the REX root                                                                                                                              | 7.55.13.c74.0 |
-| rosette.roots.rbl                       | The version of the RBL root                                                                                                                              | 7.47.3.c74.0  |
-| rosette.roots.rli                       | The version of the RLI root                                                                                                                              | 7.23.13.c74.0 |
-| rosette.roots.tvec                      | The version of the TVEC root                                                                                                                             | 7.0.1.c74.0   |
-| rosette.roots.rnirnt                    | The version of the RNI-RNT root                                                                                                                          | 7.46.0.c74.0  |
-| rosette.roots.tcat                      | The version of the TCAT root                                                                                                                             | 3.0.1.c74.0   |
-| rosette.roots.ascent                    | The version of the ASCENT root                                                                                                                           | 3.0.1.c74.0   |
-| rosette.roots.nlp4j                     | The version of the NLP4J root                                                                                                                            | 2.0.1.c74.0   |
-| rosette.roots.rct                       | The version of the RCT root                                                                                                                              | 3.0.19.c74.0  |
-| rosette.roots.relax                     | The version of the RELAX root                                                                                                                            | 4.0.1.c74.0   |
-| rosette.roots.topics                    | The version of the TOPICS root                                                                                                                           | 3.0.1.c74.0   |
+| roots.version.rex                       | The version of the REX root                                                                                                                              | 7.55.14.c75.0 |
+| roots.version.rbl                       | The version of the RBL root                                                                                                                              | 7.47.4.c75.0  |
+| roots.version.rli                       | The version of the RLI root                                                                                                                              | 7.23.14.c75.0 |
+| roots.version.tvec                      | The version of the TVEC root                                                                                                                             | 7.0.2.c75.0   |
+| roots.version.rnirnt                    | The version of the RNI-RNT root                                                                                                                          | 7.47.0.c75.0  |
+| roots.version.tcat                      | The version of the TCAT root                                                                                                                             | 3.0.2.c75.0   |
+| roots.version.ascent                    | The version of the ASCENT root                                                                                                                           | 3.0.2.c75.0   |
+| roots.version.nlp4j                     | The version of the NLP4J root                                                                                                                            | 2.0.2.c75.0   |
+| roots.version.rct                       | The version of the RCT root                                                                                                                              | 3.0.20.c75.0  |
+| roots.version.relax                     | The version of the RELAX root                                                                                                                            | 4.0.2.c75.0   |
+| roots.version.topics                    | The version of the TOPICS root                                                                                                                           | 4.0.0.c75.0   |
 | enabledEndpoints                        | A list of Rosette Server endpoints to enable.  When passed as a command line property; comma separated and no spaces.                                    | {language}    |
 | enabledLanguages                        | A list of languages to be enabled for roots split by languages.  When passed as a command line property; comma separated and no spaces.                  | {eng}         |
 | rootsImageRepository                    | The repository prefix to use when downloading Rosette Roots images. The default "rosette/" will download from DockerHub                                  | "rosette/"    |
@@ -197,8 +199,8 @@ the Rosette Roots persistent volume, depending on its reclaim policy.
 | conf.logging.properties       | Logging properties file supplied to the JVM                                                                                                                                                                      |                 |
 | conf.wrapper.conf             | The Tanuki Wrapper's configuration file                                                                                                                                                                          |                 |
 | conf.wrapper-license.conf     | The Tanuki configuration file. Do not change.                                                                                                                                                                    |                 |
-| config                        | Rosette Server system configuration files. For more detail see the [User Guide](https://support.rosette.com/hc/en-us/articles/360049878432-Configuration-files#UUID-eeb37d25-91f6-75ae-5f91-6ca3b853f9d9)        |                 |
-| rosapi                        | Individual endpoint configuration files. For more detail see the [User Guide](https://support.rosette.com/hc/en-us/articles/360049878432-Configuration-files#UUID-2891ac06-0339-4a4c-8344-8cfdb8a0dec9)          |                 |
+| config                        | Rosette Server system configuration files. For more detail see the [User Guide](https://docs.babelstreet.com/Extract/en/rosette-server-user-guide.html#system-configuration-files)                               |                 |
+| rosapi                        | Individual endpoint configuration files. For more detail see the [User Guide](https://docs.babelstreet.com/Extract/en/rosette-server-user-guide.html#endpoint-and-transport-rules-configuration-files)           |                 |
 
 ## Indoc Coref Server parameters
 The Indoc Coref Server enhances the Rosette Entity Extractor's results by finding coreferences of the entities.
@@ -206,45 +208,159 @@ When enabled, a deployment of the Indoc Coref Server will be deployed alongside 
 communicate with it. The Indoc Coref Server is deployed as a subchart. By default, it only has the `indoccoref.enabled` parameter in the Rosette Server **values.yaml**,
 but it can be further customized with the following parameters:
 
-| Name                                                     | Description                                                                                                                                                                           | Default      |
-|----------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------|
-| indoccoref.enabled                                       | Enables the Indoc Coref Server deployment                                                                                                                                             | false        |
-| indoccoref.replicaCount                                  | Number of desired Indoc Coref Server pods                                                                                                                                             | 1            |
-| indoccoref.image.repository                              | The repository and image name for the Indoc Coref Server containers                                                                                                                   | TODO         |
-| indoccoref.image.pullPolicy                              | The pull policy for the Indoc Coref Server image                                                                                                                                      | IfNotPresent |
-| indoccoref.image.tag                                     | The tag of the Indoc Coref Server image. If not provided uses default version for the accompanying Rosette Server                                                                     | ""           |
-| indoccoref.imagePullSecrets                              | An optional list of references to secrets in the same namespace to use for pulling the Indoc Coref Server image.                                                                      | []           |
-| indoccoref.nameOverride                                  | String to partially override indoc-coref.fullname template used in naming Kubernetes objects. The release name will be maintained.                                                    | ""           |
-| indoccoref.fullnameOverride                              | String to override indoc-coref.fullname template used in naming Kubernetes objects                                                                                                    | ""           |
-| indoccoref.serviceAccount.create                         | Specifies whether a service account should be created for Indoc Coref Server pods                                                                                                     | true         |
-| indoccoref.serviceAccount.annotations                    | Annotations to add to the service account                                                                                                                                             | {}           |
-| indoccoref.serviceAccount.name                           | The name of the service account to use. If not set and create is true, a name is generated using the fullname template                                                                | ""           |
-| indoccoref.podAnnotations                                | Annotations added to the Indoc Coref Server pods                                                                                                                                      | {}           |
-| indoccoref.podLabels                                     | Labels added to the Indoc Coref Server pods                                                                                                                                           | {}           |
-| indoccoref.podSecurityContext                            | Security context for the Indoc Coref Server pods                                                                                                                                      | {}           |
-| indoccoref.securityContext                               | Security context to for the Indoc Coref Server containers                                                                                                                             | {}           |
-| indoccoref.service.type                                  | Type of the Indoc Coref Server service                                                                                                                                                | ClusterIP    |
-| indoccoref.service.port                                  | The port on which Indoc Coref Server is available in the containers. For the base image this is `5000`.                                                                               | 5000         |
-| indoccoref.ingress.enabled                               | Set to true to enable ingress object creation for the Indoc Coref Server service                                                                                                      | false        |
-| indoccoref.ingress.className                             | The ingress class to use for the ingress object                                                                                                                                       | ""           |
-| indoccoref.ingress.annotations                           | Annotations added to the ingress object. Check your Ingress controllers annotations for configuring your ingress object.                                                              | {}           |
-| indoccoref.ingress.hosts                                 | The ingress rules to use                                                                                                                                                              | []           |
-| indoccoref.ingress.hosts.[].host                         | The host the rule applies to                                                                                                                                                          |              |
-| indoccoref.ingress.hosts.[].paths                        | The paths used for the given host. All map to the Indoc Coref Server service.                                                                                                         |              |
-| indoccoref.ingress.hosts.[].paths.[].path                | A path to map to the Indoc Coref Server service with the  given host                                                                                                                  |              |
-| indoccoref.ingress.hosts.[].paths.[].pathType            | The type of the given path. Determines path matching behaviour.                                                                                                                       |              |
-| indoccoref.ingress.tls                                   | Ingress TLS configurations                                                                                                                                                            | []           |
-| indoccoref.ingress.tls.[].secretName                     | The TLS secret to use with the given hosts. For how to create the secret, check the [Kubernetes documentation](https://kubernetes.io/docs/concepts/services-networking/ingress/#tls). |              |
-| indoccoref.ingress.tls.[].hosts                          | A list of hosts using the secret                                                                                                                                                      |              |
-| indoccoref.resources                                     | Resource requests and limitations for the Indoc Coref Server containers.                                                                                                              | {}           |
-| indoccoref.autoscaling.enabled                           | Set to true to enable horizontal pod autoscaling for the Indoc Coref Server pods                                                                                                      | false        |
-| indoccoref.autoscaling.minReplicas                       | The lower limit for the number of replicas to which the autoscaler can scale down                                                                                                     | 1            |
-| indoccoref.autoscaling.maxReplicas                       | The upper limit for the number of pods that can be set by the autoscaler                                                                                                              | 100          |
-| indoccoref.autoscaling.targetCPUUtilizationPercentage    | The target average CPU utilization (represented as a percentage of requested CPU) over all the pods                                                                                   | 80           |
-| indoccoref.autoscaling.targetMemoryUtilizationPercentage | The target average memory utilization (represented as a percentage of requested memory) over all the pods                                                                             | 80           |
-| indoccoref.nodeSelector                                  | Selector which must match a node's labels for the Indoc Coref Server pods to be scheduled on that node                                                                                | {}           |
-| indoccoref.tolerations                                   | Tolerations for Indoc Coref Server pods                                                                                                                                               | []           |
-| indoccoref.affinity                                      | Affinity constraints for Indoc Coref Server pods                                                                                                                                      | {}           |
+| Name                                                     | Description                                                                                                                                                                           | Default                  |
+|----------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------|
+| indoccoref.enabled                                       | Enables the Indoc Coref Server deployment                                                                                                                                             | false                    |
+| indoccoref.replicaCount                                  | Number of desired Indoc Coref Server pods                                                                                                                                             | 1                        |
+| indoccoref.image.repository                              | The repository and image name for the Indoc Coref Server containers                                                                                                                   | rosette/fastcoref-server |
+| indoccoref.image.pullPolicy                              | The pull policy for the Indoc Coref Server image                                                                                                                                      | IfNotPresent             |
+| indoccoref.image.tag                                     | The tag of the Indoc Coref Server image. If not provided uses default version for the accompanying Rosette Server                                                                     | ""                       |
+| indoccoref.imagePullSecrets                              | An optional list of references to secrets in the same namespace to use for pulling the Indoc Coref Server image.                                                                      | []                       |
+| indoccoref.nameOverride                                  | String to partially override indoc-coref.fullname template used in naming Kubernetes objects. The release name will be maintained.                                                    | ""                       |
+| indoccoref.fullnameOverride                              | String to override indoc-coref.fullname template used in naming Kubernetes objects                                                                                                    | ""                       |
+| indoccoref.serviceAccount.create                         | Specifies whether a service account should be created for Indoc Coref Server pods                                                                                                     | true                     |
+| indoccoref.serviceAccount.annotations                    | Annotations to add to the service account                                                                                                                                             | {}                       |
+| indoccoref.serviceAccount.name                           | The name of the service account to use. If not set and create is true, a name is generated using the fullname template                                                                | ""                       |
+| indoccoref.podAnnotations                                | Annotations added to the Indoc Coref Server pods                                                                                                                                      | {}                       |
+| indoccoref.podLabels                                     | Labels added to the Indoc Coref Server pods                                                                                                                                           | {}                       |
+| indoccoref.podSecurityContext                            | Security context for the Indoc Coref Server pods                                                                                                                                      | {}                       |
+| indoccoref.securityContext                               | Security context to for the Indoc Coref Server containers                                                                                                                             | {}                       |
+| indoccoref.service.type                                  | Type of the Indoc Coref Server service                                                                                                                                                | ClusterIP                |
+| indoccoref.service.port                                  | The port on which Indoc Coref Server is available in the containers. For the base image this is `5000`.                                                                               | 5000                     |
+| indoccoref.ingress.enabled                               | Set to true to enable ingress object creation for the Indoc Coref Server service                                                                                                      | false                    |
+| indoccoref.ingress.className                             | The ingress class to use for the ingress object                                                                                                                                       | ""                       |
+| indoccoref.ingress.annotations                           | Annotations added to the ingress object. Check your Ingress controllers annotations for configuring your ingress object.                                                              | {}                       |
+| indoccoref.ingress.hosts                                 | The ingress rules to use                                                                                                                                                              | []                       |
+| indoccoref.ingress.hosts.[].host                         | The host the rule applies to                                                                                                                                                          |                          |
+| indoccoref.ingress.hosts.[].paths                        | The paths used for the given host. All map to the Indoc Coref Server service.                                                                                                         |                          |
+| indoccoref.ingress.hosts.[].paths.[].path                | A path to map to the Indoc Coref Server service with the  given host                                                                                                                  |                          |
+| indoccoref.ingress.hosts.[].paths.[].pathType            | The type of the given path. Determines path matching behaviour.                                                                                                                       |                          |
+| indoccoref.ingress.tls                                   | Ingress TLS configurations                                                                                                                                                            | []                       |
+| indoccoref.ingress.tls.[].secretName                     | The TLS secret to use with the given hosts. For how to create the secret, check the [Kubernetes documentation](https://kubernetes.io/docs/concepts/services-networking/ingress/#tls). |                          |
+| indoccoref.ingress.tls.[].hosts                          | A list of hosts using the secret                                                                                                                                                      |                          |
+| indoccoref.resources                                     | Resource requests and limitations for the Indoc Coref Server containers.                                                                                                              | {}                       |
+| indoccoref.autoscaling.enabled                           | Set to true to enable horizontal pod autoscaling for the Indoc Coref Server pods                                                                                                      | false                    |
+| indoccoref.autoscaling.minReplicas                       | The lower limit for the number of replicas to which the autoscaler can scale down                                                                                                     | 1                        |
+| indoccoref.autoscaling.maxReplicas                       | The upper limit for the number of pods that can be set by the autoscaler                                                                                                              | 100                      |
+| indoccoref.autoscaling.targetCPUUtilizationPercentage    | The target average CPU utilization (represented as a percentage of requested CPU) over all the pods                                                                                   | 80                       |
+| indoccoref.autoscaling.targetMemoryUtilizationPercentage | The target average memory utilization (represented as a percentage of requested memory) over all the pods                                                                             | 80                       |
+| indoccoref.nodeSelector                                  | Selector which must match a node's labels for the Indoc Coref Server pods to be scheduled on that node                                                                                | {}                       |
+| indoccoref.tolerations                                   | Tolerations for Indoc Coref Server pods                                                                                                                                               | []                       |
+| indoccoref.affinity                                      | Affinity constraints for Indoc Coref Server pods                                                                                                                                      | {}                       |
+
+## API keys parameters
+By default, no authorization is required when making calls to Rosette Server. If required, you can turn on
+API key protection for the endpoints by setting `apikeys.enabled` to true. This will start a database server StatefulSet
+alongside the Rosette Server deployment. It will also update the configuration provided through `config.com.basistech.ws.apikeys.cfg`
+so that the Rosette Server pods will connect to this database. This means the following values are overwritten:
+- dbConnectionMode
+- dbURI
+- dbName
+- dbUser
+- dbPassword
+- dbSSLMode
+
+Enabling the feature will also create a cronjob that regularly creates a backup of the database
+
+The apikeys also need a PVC to store the database and its backups. It's name must be provided in the 
+`apikeys.persistentVolumeClaimName` parameter. If the PVC already contains a database with the name 
+provided by `apikeys.dbName`, it will be used, otherwise a new database will be created. Databases are searched and stored
+in the root directory of the PVC. The PVC's root directory must have read and write permissions for `2001:0`. The 
+`apikeys.volumePermissionOverride` section can be used to add read, write and execute permissions to all users for the 
+root directory of the PVC and read, write permissions for all files contained immediately in it. 
+
+The following parameters can be used to further customize the API key behavior:
+
+| Name                                     | Description                                                                                                                                                                       | Default                                                   |
+|------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------|
+| apikeys.enabled                          | Enables the API key protection for the Rosette Server endpoints.                                                                                                                  | false                                                     |
+| apikeys.persistentVolumeClaimName        | The PVC where the database file and its backups should be stored. A valid PVC must be provided.                                                                                   | ""                                                        |
+| apikeys.volumePermissionOverride.enabled | Enables the init container to add write permissions to the files in the root directory of the database PVC.                                                                       | false                                                     |
+| apikeys.volumePermissionOverride.userId  | The userId to use in the volume permissions override init container.                                                                                                              | 0                                                         |
+| apikeys.dbName                           | The name of the database to be used for the API keys.                                                                                                                             | apikeys                                                   |
+| apikeys.dbAccessSecretName               | The name of the secret containing the database access credentials. It must have a values with the keys `username` and `password`.                                                 | ""                                                        |
+| apikeys.backup.cronSchedule              | The cron schedule for the database backup job. Defaults to an hourly schedule.                                                                                                    | "0 * * * *"                                               |
+| apikeys.backup.restartPolicy             | The restart policy for the database backup job's pod.                                                                                                                             | Never                                                     |
+| apikeys.backup.ttlSecondsAfterFinished   | The time after completed/failed backup jobs are deleted.                                                                                                                          | 600                                                       |
+| apikeys.backup.backoffLimit              | The number of retries before the backup job is considered failed.                                                                                                                 | 3                                                         |
+| apikeys.upgradeTimeoutSeconds            | How long to wait for the database server to be upgraded/rolled back/installed, before failing the operation. Separately applied to 2 wait processes.                              | 300                                                       |
+| apikeys.hookAnnotations                  | Annotations for the database server scaling hook job. Should make sure to scale down the database server StatefulSet to 1 replica after every install/upgrade/rollback operation. | Defaults to scale down to 1 replica after every operation |
+| apikeys.service.type                     | The type of the service for the database server StatefulSet.                                                                                                                      | ClusterIP                                                 |
+| apikeys.service.port                     | The port of the service for the database server StatefulSet.                                                                                                                      | 5432                                                      |
+| apikeys.clusterDomain                    | The cluster domain. Needed so Rosette Server pods can find the individual database server pods. Change it if it is different in your cluster.                                     | cluster.local                                             |
+| apikeys.serviceAccount.create            | Specifies whether a service account should be created for the database server pods.                                                                                               | true                                                      |
+| apikeys.serviceAccount.annotations       | Annotations to add to the service account.                                                                                                                                        | {}                                                        |
+| apikeys.serviceAccount.name              | The name of the service account to use. If not set and create is true, a name is generated using the fullname template.                                                           | ""                                                        |
+| apikeys.podAnnotations                   | Annotations added to the database server pods.                                                                                                                                    | {}                                                        |
+| apikeys.podLabels                        | Labels added to the database server pods.                                                                                                                                         | {}                                                        |
+| apikeys.podSecurityContext               | Security context for the database server pods.                                                                                                                                    | {}                                                        |
+| apikeys.securityContext                  | Security context for the database server container.                                                                                                                               | {}                                                        |
+| apikeys.resources                        | Resource requests and limitations for the database server container.                                                                                                              | {}                                                        |
+| apikeys.nodeSelector                     | Selector which must match a node's labels for the database server pods to be scheduled on that node.                                                                              | {}                                                        |
+| apikeys.tolerations                      | Tolerations for the database server pods.                                                                                                                                         | []                                                        |
+| apikeys.affinity                         | Affinity constraints for the database server pods.                                                                                                                                | {}                                                        |
+| apikeys.probes.initialDelaySeconds       | Number of seconds after the container has started before liveness/readiness probes are initiated for the database server.                                                         | 5                                                         |
+| apikeys.probes.timeoutSeconds            | Number of seconds after which the liveness/readiness probe times out for the database server.                                                                                     | 10                                                        |
+| apikeys.probes.periodSeconds             | How often to perform the liveness/readiness probe for the database server.                                                                                                        | 10                                                        |
+| apikeys.probes.failureThreshold          | Minimum consecutive failures for the liveness/readiness probe to be considered failed after having succeeded for the database server.                                             | 3                                                         |
+
+### Connecting to the API key management console
+Using the official Rosette Server image, the API key management console will be available in all pods. You can access it
+by using the following bash script. Before you run it make sure to update the RELEASE_NAME variable to the name of your release.:
+```bash
+RELEASE_NAME=<YOUR_RELEASE_NAME>
+
+POD_ID=$(kubectl get pods -l app.kubernetes.io/instance=$RELEASE_NAME,app.kubernetes.io/component=restful-server -o jsonpath='{.items[0].metadata.name}')
+
+kubectl exec -it $POD_ID -- /rosette/server/bin/rosette-apikeys
+```
+
+On Windows you should be able to use the following batch script. Before you run it make sure to update the RELEASE_NAME 
+variable to the name of your release.:
+
+```bat
+set "RELEASE_NAME=<YOUR_RELEASE_NAME>"
+
+for /f "tokens=*" %%i in ('kubectl get pods -l "app.kubernetes.io/instance=%RELEASE_NAME%,app.kubernetes.io/component=restful-server" -o "jsonpath="{.items[0].metadata.name}""') do set "POD_ID=%%i"
+
+kubectl exec -it %POD_ID% -- /rosette/server/bin/rosette-apikeys
+```
+
+If you are connecting to an API key management console after running an upgrade/rollback, make sure you connect through a
+pod that has the latest configuration. Otherwise, it might connect to the wrong database (if it was changed in the update)
+and the console will close when the pod is destroyed.
+
+### Create a database access secret
+To create a secret with the database access credentials, you can use the following command:
+```bash
+kubectl create secret generic --from-literal=username=<USER> --from-literal=password=<PASSWORD> <SECRET-NAME>
+```
+### Limitations
+If the database server pod fails to launch successfully (for example due to wrong database credentials being provided), 
+manual intervention is required because of a [kubernetes known issue](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#forced-rollback).
+After upgrading or rolling back the chart the failing pod needs to be deleted. The following command can be used to find the failing pod:
+```bash
+kubectl get pods -l app.kubernetes.io/instance=<YOUR-RELEASE-NAME>,app.kubernetes.io/component=apikeys-db-server
+```
+
+The database backups are created on the same PVC the database is located at also.
+
+The info endpoint must be left unprotected as it is used by the health probes of the Rosette Server pods. Because of 
+this when the configuration is updated at the pod startup, the info endpoint will always be added to the unsecured endpoints.
+
+To achieve zero-downtime during updates (rollback or upgrade), a secondary database server is started which will be running while the main 
+database server is updating. Changes that are only handled by this server are not persisted. Because of this **the key
+management console should not be used during updates**. Rosette Server should work fine with the secondary database.
+
+**There is a known issue** with Rosette Server, where during updates if the server is under constant load, it cannot 
+release the closed connections from its database connection pool. This can lead to 401 responses from Rosette Server while
+the load persists. To avoid this:
+- Try to limit requests to Rosette Server during updates.
+- Run multiple replicas of Rosette Server. This does not guarantee to solve the issue entirely, there will be stray 401
+responses, but the issue will resolve itself relatively quickly.
+
+If the database server pod crashes, Rosette Server requests will hang, and may return 401 responses, even if the database
+server comes back online during the 30 seconds database connection timeout period.
 
 # Rosette Roots extraction
 This chart needs a persistent volume to store the Rosette Roots. It can be provided in two ways:
@@ -269,7 +385,7 @@ service account which is able to patch the Rosette Server deployment.
 
 ## Root configurations overrides
 There might be some need to change/add/delete some files from the Rosette Roots. For example the Rosette Names services have some configuration files inside their root and
-the Rosette Entity Extractor can be customized by adding [new gazetteer or regex files to its root](https://support.rosette.com/hc/en-us/articles/360052969712-Modifying-Entity-Extraction-Processors).
+the Rosette Entity Extractor can be customized by adding [new gazetteer or regex files to its root](https://docs.babelstreet.com/Extract/en/entity-extractor.html#modifying-entity-extraction-processors).
 The `rootsOverride` section (and the corresponding functionality) in **values.yaml** aims to help make these file changes inside the Rosette Roots in a way, that works with the helm update/rollback process.
 The functionality is disabled by default, and can be enabled by setting `rootsOverride.enabled` to true. It has 3 possible operations:
 
@@ -278,7 +394,7 @@ The functionality is disabled by default, and can be enabled by setting `rootsOv
 - *override*: Replaces a file or directory inside the Rosette Root directory if one exists at the specified path
 
 The operations run in the above mentioned order. All operations have 2 common parameters:
-- `root`: The name of the Rosette Root, in which the files should be changed. Possible values are the same as the keys of `rosette.roots` in **values.yaml**.
+- `root`: The name of the Rosette Root, in which the files should be changed. Possible values are the same as the keys of `roots.version` in **values.yaml**.
 - `targetPath`: The path inside the `<root>/<version>` directory where the operation should be done. Cannot contain `..`. Leading `/` is ignored. Cannot be empty.
 
 The *addition* and *override* operations require a volume which has been prepopulated with the files or directories to be added/to be used for overriding. A volume claim bounded to this volume
@@ -382,8 +498,27 @@ To use custom profiles with Rosette Server, set `customProfilesVolumeClaimName` 
 When this value is set the volume will be mounted into the Rosette Server pods, so make sure if using multiple Rosette Server pods that the volume has read access for many. 
 The Rosette Server instances will automatically be configured to use this volume as their `profile-data-root` directory. Any other configuration changes 
 (like rosapi.feature.CUSTOM_PROFILE_UNDER_APP_ID) must be made in their respective configuration files.
-Read more about Rosette Server's custom profiles at the [official documentation](https://support.rosette.com/hc/en-us/articles/360050335831-Custom-profiles).
+Read more about Rosette Server's custom profiles at the [official documentation](https://docs.babelstreet.com/Extract/en/rosette-server-user-guide.html#custom-profiles).
 
+## Data paths for custom profiles
+Profiles can include custom data sets, for example the entities endpoint can be enriched with custom gazetteers or regexes.
+Entities can be configured to use these files by providing `dataOverlayDirectory` in the `rex-factory-config.yaml` file.
+These files should be on the same PVC as the custom profiles. Their path in the container will be `/rosette/server/custom-profiles`.
+As this path might change in the future, starting with Rosette Server 1.31.0 (helm chart version 1.3.0) you should use 
+the `${profile-root}` variable in your configuration files.
+
+### Example
+Assuming you have a directory structure like the following on your custom profiles PVC:
+```
+my-profile
+| - config
+   \ - rosapi
+        \ - rex-factory-config.yaml
+\ - data
+    | ...
+```
+You would want to set your `dataOverlayDirectory` in the `rex-factory-config.yaml` to either `file:///rosette/server/custom-profiles/my-profile/data` 
+or `file://${profile-root}/my-profile/data`.
 # Resource requirements
 
 ## Memory requirements
@@ -671,3 +806,14 @@ You can use an [init container](#persistent-volume-permissions-parameters) to ov
 If the Rosette Server container's log only shows until the following text: `wrapper  | --> Wrapper Started as Console`, 
 it is possible your console cannot handle the VT100 escape code the Tanuki Wrapper uses to set the console title. 
 To fix this, remove `wrapper.console.title` key from `wrapper.conf` in the `conf` section of the values.yaml file.
+
+**The API keys database always reports it is running in cluster mode when trying to connect to it**
+
+The chart uses H2 clustering to achieve zero-downtime upgrades to the database. There is a small window of time when the
+secondary database is running while the main database updates, where if a backup/copy is made from the main database, the copy 
+will be in a state where it expects to be accessed through cluster mode. To remove this clustering flag (which only 
+allows accessing the database with the given URL) from the database file, run the following command with the parameters from your deployment:
+```bash
+java -cp <h2-jar> org.h2.tools.Shell -url "jdbc:h2:<The-url-for-your-database>;CLUSTER=''"\
+  -user <DB-USER> -password <DB-PASSWORD> -sql "SELECT 1";
+```

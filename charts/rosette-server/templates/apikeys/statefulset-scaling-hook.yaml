@@ -1,0 +1,122 @@
+{{/*
+  The general idea for the zero downtime database server is the following: (defined here and in statefulset.yaml)
+    StatefulSet's pod 0 is the main database server that runs normally and pod 1 is the "secondary" database server
+    that only runs when 0 is being updated. Pod 1 in its startup clusters on the database server of pod 0 (copies it). The zero downtime (for
+    Rosette Server, the following is not true for the Key Management Console) is achieved by pod 1 being able to serve read requests
+    while pod 0 updates. All write requests during this time will be lost, as the database of pod 1 is discarded.
+    
+    This hook basically queries pod 0's template and wait's until the pod updates (there is label that matches the helm revision number)
+    and then waits for the database to be available again, before issuing a scale down to one replica. This can lead to 2 scenarios
+  
+    1. install/api-keys enabled after being disabled/rollback to enabled from apikeys disabled:
+      - The StatefulSet cannot find itself in the cluster, it creates with two replica
+      - The StatefulSet creates pod 0, it is immediately labeled with the matching revision number.
+      - Rosette Server pods and this hook wait until it becomes available
+      - The StatefulSet is scaled to size 1, pod 1 will start to create but will almost immediately terminate as well. 
+        Tried with only startin with a single replica in this scenario, but on rollbacks to this state it will not repeat
+        the check for the statefulset being present in the cluster
+
+    2. upgrade/rollback from a state where the apikeys were already enabled:
+      - The StatefulSet finds itself in the cluster, it updates its template with two replicas
+      - Kubernetes first scales up, and creates pod 1 that copies pod 0. During this pod 0's label is the wrong (previous)
+        revision number, so the hook waits for that to change.
+      - Pod 1 is started, kubernetes starts upgrading pod 0. Once it is terminated and restarted, its label is going to be
+        correct and the hook will continue to wait on the server starting up. During this time Rosette Server pods will work with pod 1
+      - Once pod 0 is up it will also start serving requests, and the hook down scales the StatefulSet to 1 replica, terminating pod 1
+*/}}
+{{- if (eq .Values.apikeys.enabled true) }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: patch-statefulset-replicas
+  labels:
+    app.kubernetes.io/name: patch-statefulset-replicas
+  annotations:
+    {{- with .Values.apikeys.hookAnnotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  backoffLimit: 0
+  template:
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "rosette-server.fullname" . }}-apikeys-db-scaling-sa
+      initContainers:
+          - name: wait-for-main-database-to-update
+            image:  {{ include "rosette-server.image" .  | quote }}
+            imagePullPolicy: {{ .Values.image.pullPolicy }}
+            env:
+              {{- include "apikeys-database-env-variables" . | nindent 12 }}
+            command:
+              - /bin/sh
+              - -c
+              - |
+                TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+                CACERT=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+                NAMESPACE=$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace)
+                UPDATED=1
+                echo "Waiting for pod revision and release revision to be equal."
+                for i in {1..{{ div (int .Values.apikeys.upgradeTimeoutSeconds) 5 }}}; do
+                  POD_REVISION=$(curl -s -k -X GET \
+                    -H "Authorization: Bearer $TOKEN" \
+                    -H "Content-Type: application/json" \
+                    --cacert $CACERT \
+                    https://kubernetes.default.svc/api/v1/namespaces/$NAMESPACE/pods/{{ include "rosette-server.fullname" . }}-apikeys-db-server-0 \
+                    | jq -r '.metadata.labels."helm/revision"')
+                  if [ "$POD_REVISION" == {{ .Release.Revision }} ]; then
+                      echo "Main database server is using the updated template"
+                      UPDATED=0
+                      break
+                  fi
+                  echo "Main database server is not using the updated template yet, waiting 5 seconds..."
+                  sleep 5
+                done
+                if [ $UPDATED -eq 1 ]; then
+                  echo "Main database server is not using the updated template after {{ .Values.apikeys.upgradeTimeoutSeconds }} seconds, exiting..."
+                  echo "Release revision is: {{ .Release.Revision }}"
+                  echo "Pod revision is: $POD_REVISION"
+                  echo "Pod revision query full output is:"
+                  curl -s -k -X GET \
+                    -H "Authorization: Bearer $TOKEN" \
+                    -H "Content-Type: application/json" \
+                    --cacert $CACERT \
+                    https://kubernetes.default.svc/api/v1/namespaces/$NAMESPACE/pods/{{ include "rosette-server.fullname" . }}-apikeys-db-server-0
+                  exit 1
+                fi
+                MAIN_DB_URL=$(echo "$APIKEYS_URL" | awk -F',' '{print $1}')
+                for i in {1..{{ div (int .Values.apikeys.upgradeTimeoutSeconds) 5 }}}; do
+                  if java -cp /rosette/server/cli-lib/h2*.jar org.h2.tools.Shell -url "jdbc:h2:tcp:$MAIN_DB_URL/$DB_NAME" \
+                                       -user $DB_USER -password $DB_PASSWORD -sql "SELECT 1" > /dev/null 2>&1 ; then
+                    echo "Main database server is up"
+                    exit 0
+                  fi
+                  echo "Main database server is not up yet, waiting 5 seconds..."
+                  sleep 5
+                done
+                echo "Main database server is not up after {{ .Values.apikeys.upgradeTimeoutSeconds }} seconds, exiting..."
+                echo "Output from query for database availability check is:"
+                java -cp /rosette/server/cli-lib/h2*.jar org.h2.tools.Shell -url "jdbc:h2:tcp:$MAIN_DB_URL/$DB_NAME" \
+                                       -user $DB_USER -password $DB_PASSWORD -sql "SELECT 1"
+                exit 1
+      containers:
+          - name: patch-statefulset
+            image:  {{ include "rosette-server.image" .  | quote }}
+            imagePullPolicy: {{ .Values.image.pullPolicy }}
+            command:
+              - /bin/sh
+              - -c
+              - |
+                TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+                CACERT=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+                NAMESPACE=$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace)
+                curl -s -k -X PATCH --data '{"spec":{"replicas": 1 }} ' \
+                  -H "Authorization: Bearer $TOKEN" \
+                  -H "Content-Type: application/merge-patch+json" \
+                  --cacert $CACERT \
+                  https://kubernetes.default.svc/apis/apps/v1/namespaces/$NAMESPACE/statefulsets/{{ include "rosette-server.fullname" . }}-apikeys-db-server 2>&1 > /dev/null
+                echo "{{ include "rosette-server.fullname" . }}-apikeys-db-server StatefulSet 'replicas' updated to 1"
+      restartPolicy: Never
+{{- end }}

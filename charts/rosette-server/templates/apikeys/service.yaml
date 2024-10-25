@@ -1,0 +1,19 @@
+{{- if (eq .Values.apikeys.enabled true) }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "rosette-server.fullname" . }}-apikeys-db
+  labels:
+    {{- include "rosette-server.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.apikeys.service.type }}
+  clusterIP: None
+  ports:
+    - port: {{ .Values.apikeys.service.port }}
+      targetPort: database-port
+      protocol: TCP
+      name: database-port-tcp
+  selector:
+    {{- include "rosette-server.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: "apikeys-db-server"
+{{- end }}
