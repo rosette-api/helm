@@ -69,7 +69,7 @@ annotations:
     - kind: changed
       description: Release Notes for Rosette Server 1.31.0 https://docs.babelstreet.com/Release/en/rosette-server.html
     - kind: changed
-      description: BREAKING CHANGE: Updated the selector label of the Rosette Server deployment. This requires a reinstall of the chart, as upgrades will fail from previous version. 
+      description: "BREAKING CHANGE: Updated the selector label of the Rosette Server deployment. This requires a reinstall of the chart, as upgrades will fail from previous version." 
     - kind: changed
       description: changed rosette.roots to roots.version in the values.yaml file.
     - kind: added
