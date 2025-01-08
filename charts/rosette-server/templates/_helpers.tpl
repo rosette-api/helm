@@ -73,9 +73,21 @@ Create a separator string for roots config override scripts to work with
 {{- end }}
 
 {{/*
+Define the registry for the Rosette Serve container
+*/}}
+{{- define "rosette-server.image.registry" -}}
+{{- $registry := ((.Values.global).imageRegistry | default .Values.image.registry) -}}
+{{- if $registry -}}
+{{- print $registry "/" -}}
+{{- end -}}
+{{- end -}}
+
+
+{{/*
 Define the image and tag to use for the Rosette Serve container
 */}}
 {{- define "rosette-server.image" -}}
+{{- include "rosette-server.image.registry" . -}}
 {{- print  .Values.image.repository ":" ( default .Chart.AppVersion .Values.image.tag ) }}
 {{- end }}
 
