@@ -1,11 +1,15 @@
 # Default values for rosette-server.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
+global:
+  imageRegistry: ""
+  imagePullSecrets: []
 
 replicaCount: 1
 indoccoref:
   enabled: false
 image:
+  registry:
   repository: rosette/server-enterprise
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
@@ -38,6 +42,7 @@ securityContext: {}
 # runAsNonRoot: true
 # runAsUser: 1000
 initContainer:
+  registry:
   image:
   tag:
 
@@ -216,17 +221,17 @@ rootsImageRepository: "rosette/"
 
 roots:
   version:
-    ascent: 3.0.2.c75.0
-    nlp4j: 2.0.2.c75.0
-    rbl: 7.47.4.c75.0
-    rct: 3.0.20.c75.0
-    relax: 4.0.2.c75.0
-    rex: 7.55.14.c75.0
-    rli: 7.23.14.c75.0
-    rnirnt: 7.47.0.c75.0
-    tcat: 3.0.2.c75.0
-    topics: 4.0.0.c75.0
-    tvec: 7.0.2.c75.0
+    ascent: 3.0.3.c76.0
+    nlp4j: 2.0.3.c76.0
+    rbl: 7.47.6.c76.0
+    rct: 3.0.21.c76.0
+    relax: 4.0.3.c76.0
+    rex: 7.55.15.c76.0
+    rli: 7.23.15.c76.0
+    rnirnt: 7.48.0.c76.0
+    tcat: 3.0.3.c76.0
+    topics: 4.0.1.c76.0
+    tvec: 7.0.3.c76.0
 
 enabledEndpoints:
 #- address-similarity
@@ -459,18 +464,18 @@ config:
     # configurationFilePathname is the pathname to the worker service configuration yaml.
     configurationFilePathname=${rosapi.config}/rosapi/worker-config.yaml
     # <component>-root is the pathname to the root directory for various component.
-    rbl-root=${rosapi.roots}/rbl/7.47.4.c75.0
-    rct-root=${rosapi.roots}/rct/3.0.20.c75.0
-    ascent-root=${rosapi.roots}/ascent/3.0.2.c75.0
-    tcat-root=${rosapi.roots}/tcat/3.0.2.c75.0
-    rli-root=${rosapi.roots}/rli/7.23.14.c75.0
-    rex-root=${rosapi.roots}/rex/7.55.14.c75.0
-    flinx-root=${rosapi.roots}/rex/7.55.14.c75.0/flinx
-    relax-root=${rosapi.roots}/relax/4.0.2.c75.0
-    dp-root=${rosapi.roots}/nlp4j/2.0.2.c75.0
-    rni-rnt-root=${rosapi.roots}/rni-rnt/7.47.0.c75.0
-    tvec-root=${rosapi.roots}/tvec/7.0.2.c75.0
-    topics-root=${rosapi.roots}/topics/4.0.0.c75.0
+    rbl-root=${rosapi.roots}/rbl/7.47.6.c76.0
+    rct-root=${rosapi.roots}/rct/3.0.21.c76.0
+    ascent-root=${rosapi.roots}/ascent/3.0.3.c76.0
+    tcat-root=${rosapi.roots}/tcat/3.0.3.c76.0
+    rli-root=${rosapi.roots}/rli/7.23.15.c76.0
+    rex-root=${rosapi.roots}/rex/7.55.15.c76.0
+    flinx-root=${rosapi.roots}/rex/7.55.15.c76.0/flinx
+    relax-root=${rosapi.roots}/relax/4.0.3.c76.0
+    dp-root=${rosapi.roots}/nlp4j/2.0.3.c76.0
+    rni-rnt-root=${rosapi.roots}/rni-rnt/7.48.0.c76.0
+    tvec-root=${rosapi.roots}/tvec/7.0.3.c76.0
+    topics-root=${rosapi.roots}/topics/4.0.1.c76.0
     # healthCheckQueueSizeThreshold is used for ELB health check, change the default as desired. Default is 20.
     #healthCheckQueueSizeThreshold=20
     # workerThreadTimeout is the timeout value for worker threads. To avoid diminished return or even degradation
@@ -547,6 +552,8 @@ config:
     # The client adds /v1 for /rest/v1 in com.basistech.frontend.cfg
     # org.apache.cxf.servlet.context is the prefix for all URLs for CXF services. We set this to `/rest`.
     org.apache.cxf.servlet.context=/rest
+
+
 rosapi:
   analyze-factory-config.yaml: |
     #Whether to tokenize and analyze emoticons.
@@ -2736,6 +2743,15 @@ conf:
                 <DefaultRolloverStrategy max="30"/>
             </RollingFile>
     -->
+            <RollingFile name="CXF-Request-Appender"
+                         fileName="${log-path}/cxf-request-logger.log"
+                         filePattern="${archive}/cxf-request-logger.log.%d{yyyy-MM-dd-hh-mm}.gz">
+                <PatternLayout pattern="[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %c - %msg%n"/>
+                <Policies>
+                    <SizeBasedTriggeringPolicy size="30 MB"/>
+                </Policies>
+                <DefaultRolloverStrategy max="30"/>
+            </RollingFile>
             <RollingFile name="500-Exception-Appender"
                          fileName="${log-path}/500-exception.log"
                          filePattern="${archive}/500-exception.log.%d{yyyy-MM-dd-hh-mm}.gz">
@@ -2758,6 +2774,12 @@ conf:
                 <AppenderRef ref="Request-Appender"/>
             </Logger>
     -->
+    <!--
+            <Logger name="org.apache.cxf.services" level="info">
+                <AppenderRef ref="CXF-Request-Appender"/>
+                <AppenderRef ref="Console-Appender"/>
+            </Logger>
+    -->
             <Logger name="com.basistech.ws" level="info">
                 <AppenderRef ref="500-Exception-Appender" level="info"/>
             </Logger>
@@ -2766,20 +2788,20 @@ conf:
   logging.properties: |
     org.apache.aries.spifly = ERROR
     org.apache.cxf.bus.blueprint = ERROR
-  wrapper-license.conf: |
+  wrapper-license.conf: |-
     #encoding=UTF-8
     wrapper.license.type=DEV
-    wrapper.license.id=202309140000048
+    wrapper.license.id=202411270000001
     wrapper.license.licensee=Basis Technology Corp.
     wrapper.license.group=Rosette API
-    wrapper.license.dev_application=Rosette Server Edition
+    wrapper.license.dev_application=Analytics by Babel Street
     wrapper.license.features=pro, 64bit
     wrapper.license.upgrade_term.begin_date=2010-11-09
-    wrapper.license.upgrade_term.end_date=2024-11-09
-    wrapper.license.key.1=ea46-e866-05ea-db35
-    wrapper.license.key.2=1775-b49e-0ec4-9726
-    wrapper.license.key.3=85e3-6f8b-fe69-bf92
-    wrapper.license.key.4=8deb-59b8-6a2d-2fd3
+    wrapper.license.upgrade_term.end_date=2025-11-09
+    wrapper.license.key.1=6e79-b642-320d-4283
+    wrapper.license.key.2=d701-8070-5923-82fd
+    wrapper.license.key.3=1f59-be50-c42a-ef0b
+    wrapper.license.key.4=db90-75f2-8b12-51d6
   wrapper.conf: |
     #encoding=UTF-8
     # Configuration files must begin with a line specifying the encoding
@@ -2884,6 +2906,10 @@ conf:
     # ...
     # if the below isn't set to true, the wrapper will assume process is hung while debugging
     #wrapper.java.detect_debug_jvm=true
+    # To debug the requests the server receives, uncomment the following lines
+    # and enable the org.apache.cxf.services logger in the log4j2.xml configuration
+    #wrapper.java.classpath.3=./cxf-rt-features-logging*.jar
+    #wrapper.java.additional.654=-Dorg.apache.cxf.logging.enabled=pretty
     #********************************************************************
     # End
     #********************************************************************
@@ -3016,6 +3042,5 @@ conf:
     #  administrator credentials. (Requires Professional Edition)
     #wrapper.ntservice.permissions.1.account=CURRENT_USER
     #wrapper.ntservice.permissions.1.allow=START, STOP, PAUSE_RESUME
-
 
 

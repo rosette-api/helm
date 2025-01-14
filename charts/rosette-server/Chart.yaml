@@ -49,13 +49,13 @@ type: application
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 2.0.0
+version: 2.1.0
 
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application. Versions are not expected to
 # follow Semantic Versioning. They should reflect the version the application is using.
 # It is recommended to use it with quotes.
-appVersion: "1.31.0"
+appVersion: "1.32.0"
 
 # Artifact Hub Annotations
 # https://artifacthub.io/docs/topics/annotations/helm/#supported-annotations
@@ -63,21 +63,14 @@ annotations:
   artifacthub.io/category: ai-machine-learning
   artifacthub.io/changes: |
     - kind: changed
-      description: Upgraded appVersion to 1.31.0
+      description: Upgraded appVersion to 1.32.0
     - kind: changed
-      description: Upgraded configuration files to match Rosette Server 1.31.0
+      description: Upgraded configuration files to match Analytics Server 1.32.0
     - kind: changed
-      description: Release Notes for Rosette Server 1.31.0 https://docs.babelstreet.com/Release/en/rosette-server.html
-    - kind: changed
-      description: "BREAKING CHANGE: Updated the selector label of the Rosette Server deployment. This requires a reinstall of the chart, as upgrades will fail from previous version." 
-    - kind: changed
-      description: changed rosette.roots to roots.version in the values.yaml file.
+      description: Release Notes for Analytics Server 1.32.0 https://docs.babelstreet.com/Release/en/rosette-server.html
     - kind: added
-      description: Support for using the API key protection for Rosette Server endpoints
-    - kind: changed
-      description: Rosette Roots population hooks will now use the fullname of the chart and not just the release name
-    - kind: added
-      description: Custom profiles section of the documentation now includes example on how to use custom data files
+      description: Added support to define individual or global image repository for the images of the chart 
+
   artifacthub.io/containsSecurityUpdates: "false"
   artifacthub.io/license: Apache-2.0
   artifacthub.io/links: |
@@ -91,6 +84,6 @@ annotations:
 dependencies:
   - name: indoc-coref-server
     repository: file://../indoc-coref
-    version: 1.0.0
+    version: 1.0.1
     condition: indoccoref.enabled
     alias: indoccoref
