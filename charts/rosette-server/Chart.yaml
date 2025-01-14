@@ -67,9 +67,9 @@ annotations:
     - kind: changed
       description: Upgraded configuration files to match Analytics Server 1.32.0
     - kind: changed
-      description: Release Notes for Analytics Server 1.32.0 https://docs.babelstreet.com/Release/en/rosette-server.html
+      description: Release Notes for Analytics Server 1.32.0 https://docs.babelstreet.com/Release/en/babel-street-analytics-server.html
     - kind: added
-      description: Added support to define individual or global image repository for the images of the chart 
+      description: Added support to define individual or global image repository for the images of the chart
 
   artifacthub.io/containsSecurityUpdates: "false"
   artifacthub.io/license: Apache-2.0
