@@ -1,3 +1,10 @@
+### Breaking Changes
+**3.0.0**
+
+The storageClassName variable is no longer quoted during templating. This means upgrades to deployments that 
+have not defined a storageClassName during installation will fail to upgrade from previous versions, unless 
+`--set 'storageClassName=""'` is specified.
+
 # Introduction
 Our product is a full text processing pipeline from data preparation to extracting the most relevant information and 
 analysis utilizing precise, focused AI that has built-in human understanding. Text Analytics provides foundational 
@@ -78,7 +85,7 @@ The extraction of the roots can be a lengthy process, depending on which endpoin
 Make sure to set a long enough timeout for the process to finish considering your resources.
 
 ### Download the templates
-Use this [link](https://charts.babelstreet.com/rosette-server-2.1.0.tgz) to download the chart and its templates
+Use this [link](https://charts.babelstreet.com/rosette-server-3.0.0.tgz) to download the chart and its templates
 
 # Uninstall
 To uninstall the release, run

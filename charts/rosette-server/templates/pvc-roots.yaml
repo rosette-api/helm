@@ -10,8 +10,8 @@ spec:
     matchLabels:
       {{- include "rosette-server.selectorLabels" . | nindent 6 }}
 {{- end }}
-{{- if not ( quote .Values.storageClassName | empty) }}
-  storageClassName: {{ .Values.storageClassName | quote }}
+{{- if .Values.storageClassName }}
+  storageClassName: {{ .Values.storageClassName }}
 {{- end }}
 {{- if not ( .Values.rootsVolumeName | empty) }}
   volumeName: {{ .Values.rootsVolumeName | quote }}

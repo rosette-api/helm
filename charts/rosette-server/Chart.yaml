@@ -49,7 +49,7 @@ type: application
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 2.1.0
+version: 3.0.0
 
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application. Versions are not expected to
@@ -63,14 +63,7 @@ annotations:
   artifacthub.io/category: ai-machine-learning
   artifacthub.io/changes: |
     - kind: changed
-      description: Upgraded appVersion to 1.32.0
-    - kind: changed
-      description: Upgraded configuration files to match Analytics Server 1.32.0
-    - kind: changed
-      description: Release Notes for Analytics Server 1.32.0 https://docs.babelstreet.com/Release/en/babel-street-analytics-server.html
-    - kind: added
-      description: Added support to define individual or global image repository for the images of the chart
-
+      description: Removed quoting from storageClassName templating to be inline with Kubernetes defaults
   artifacthub.io/containsSecurityUpdates: "false"
   artifacthub.io/license: Apache-2.0
   artifacthub.io/links: |
