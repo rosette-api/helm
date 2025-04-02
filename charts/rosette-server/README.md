@@ -1,10 +1,3 @@
-### Breaking Changes
-**3.0.0**
-
-The storageClassName variable is no longer quoted during templating. This means upgrades to deployments that 
-have not defined a storageClassName during installation will fail to upgrade from previous versions, unless 
-`--set 'storageClassName=""'` is specified.
-
 # Introduction
 Our product is a full text processing pipeline from data preparation to extracting the most relevant information and 
 analysis utilizing precise, focused AI that has built-in human understanding. Text Analytics provides foundational 
@@ -85,7 +78,7 @@ The extraction of the roots can be a lengthy process, depending on which endpoin
 Make sure to set a long enough timeout for the process to finish considering your resources.
 
 ### Download the templates
-Use this [link](https://charts.babelstreet.com/rosette-server-3.0.0.tgz) to download the chart and its templates
+Use this [link](https://charts.babelstreet.com/rosette-server-3.1.0.tgz) to download the chart and its templates
 
 # Uninstall
 To uninstall the release, run
@@ -156,17 +149,17 @@ the Analytics Roots persistent volume, depending on its reclaim policy.
 
 | Name                                    | Description                                                                                                                                                | Value         |
 |-----------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------|
-| roots.version.rex                       | The version of the REX root                                                                                                                                | 7.55.15.c76.0 |
-| roots.version.rbl                       | The version of the RBL root                                                                                                                                | 7.47.6.c76.0  |
-| roots.version.rli                       | The version of the RLI root                                                                                                                                | 7.23.15.c76.0 |
-| roots.version.tvec                      | The version of the TVEC root                                                                                                                               | 7.0.3.c76.0   |
-| roots.version.rnirnt                    | The version of the RNI-RNT root                                                                                                                            | 7.48.0.c76.0  |
-| roots.version.tcat                      | The version of the TCAT root                                                                                                                               | 3.0.3.c76.0   |
-| roots.version.ascent                    | The version of the ASCENT root                                                                                                                             | 3.0.3.c76.0   |
-| roots.version.nlp4j                     | The version of the NLP4J root                                                                                                                              | 2.0.3.c76.0   |
-| roots.version.rct                       | The version of the RCT root                                                                                                                                | 3.0.21.c76.0  |
-| roots.version.relax                     | The version of the RELAX root                                                                                                                              | 4.0.3.c76.0   |
-| roots.version.topics                    | The version of the TOPICS root                                                                                                                             | 4.0.1.c76.0   |
+| roots.version.rex                       | The version of the REX root                                                                                                                                | 7.56.0.c77.0 |
+| roots.version.rbl                       | The version of the RBL root                                                                                                                                | 7.47.7.c77.0 |
+| roots.version.rli                       | The version of the RLI root                                                                                                                                | 7.23.16.c77.0 |
+| roots.version.tvec                      | The version of the TVEC root                                                                                                                               | 7.0.4.c77.0 |
+| roots.version.rnirnt                    | The version of the RNI-RNT root                                                                                                                            | 7.49.0.c77.0 |
+| roots.version.tcat                      | The version of the TCAT root                                                                                                                               | 3.0.4.c77.0 |
+| roots.version.ascent                    | The version of the ASCENT root                                                                                                                             | 3.0.4.c77.0 |
+| roots.version.nlp4j                     | The version of the NLP4J root                                                                                                                              | 2.0.4.c77.0 |
+| roots.version.rct                       | The version of the RCT root                                                                                                                                | 3.0.22.c77.0 |
+| roots.version.relax                     | The version of the RELAX root                                                                                                                              | 4.0.4.c77.0 |
+| roots.version.topics                    | The version of the TOPICS root                                                                                                                             | 4.0.2.c77.0 |
 | enabledEndpoints                        | A list of Analytics Server endpoints to enable.  When passed as a command line property; comma separated and no spaces.                                    | {language}    |
 | enabledLanguages                        | A list of languages to be enabled for roots split by languages.  When passed as a command line property; comma separated and no spaces.                    | {eng}         |
 | rootsImageRepository                    | The repository prefix to use when downloading Analytics Roots images. The default "rosette/" will download from DockerHub                                  | "rosette/"    |
