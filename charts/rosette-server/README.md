@@ -19,6 +19,7 @@ Analytics Roots required for the server's successful operation.
 - [**Introduction**](#Introduction)
 - [**Prerequisites**](#Prerequisites)
 - [**Installation**](#Installation)
+  - [Installing with Argo CD](#Installing-with-Argo-CD)
   - [Download the templates](#Download-the-templates)
 - [**Uninstall**](#Uninstall)
 - [**Parameters**](#Parameters)
@@ -42,13 +43,14 @@ Analytics Roots required for the server's successful operation.
   - [GCP Persistent Disk](#GCP-Persistent-Disk)
   - [NFS server](#NFS-server)
 - [**Troubleshooting**](#Troubleshooting)
+  - [Troubleshoot Argo CD](#Troubleshoot-Argo-CD)
 
 # Prerequisites
 - A license secret available in the namespace where the installation will happen and `licenseSecretName` set in **values.yaml** or
 provided during installation like `--set licenseSecretName=<license secret name>`.
 If you don't have a license already available in the namespace, you can create one with
   ```
-  kubectl create secret generic license-file --from-file=<license-file>
+  kubectl create secret generic analytics-license-file --from-file=<license-file>
   ```
     - _Your license file will be included in the shipment from Analytics Support._
 - A static persistent volume or a storage class capable of dynamically provisioning persistent volumes for the Analytics Roots and the corresponding
@@ -77,8 +79,12 @@ This command will create a deployment for Analytics Server and a persistent volu
 The extraction of the roots can be a lengthy process, depending on which endpoints and languages are enabled and also on available system resources.
 Make sure to set a long enough timeout for the process to finish considering your resources.
 
-### Download the templates
-Use this [link](https://charts.babelstreet.com/rosette-server-3.1.0.tgz) to download the chart and its templates
+## Installing with Argo CD
+The chart is maintained to be used with Helm installation primarily, but it is possible to install it with Argo CD as well. Be sure to check out
+the corresponding [troubleshooting section](#troubleshoot-argo-cd) if you run into issues or reach out to Analytics Support for help.
+
+## Download the templates
+Use this [link](https://charts.babelstreet.com/rosette-server-3.2.0.tgz) to download the chart and its templates
 
 # Uninstall
 To uninstall the release, run
@@ -149,17 +155,17 @@ the Analytics Roots persistent volume, depending on its reclaim policy.
 
 | Name                                    | Description                                                                                                                                                | Value         |
 |-----------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------|
-| roots.version.rex                       | The version of the REX root                                                                                                                                | 7.56.0.c77.0 |
-| roots.version.rbl                       | The version of the RBL root                                                                                                                                | 7.47.7.c77.0 |
-| roots.version.rli                       | The version of the RLI root                                                                                                                                | 7.23.16.c77.0 |
-| roots.version.tvec                      | The version of the TVEC root                                                                                                                               | 7.0.4.c77.0 |
-| roots.version.rnirnt                    | The version of the RNI-RNT root                                                                                                                            | 7.49.0.c77.0 |
-| roots.version.tcat                      | The version of the TCAT root                                                                                                                               | 3.0.4.c77.0 |
-| roots.version.ascent                    | The version of the ASCENT root                                                                                                                             | 3.0.4.c77.0 |
-| roots.version.nlp4j                     | The version of the NLP4J root                                                                                                                              | 2.0.4.c77.0 |
-| roots.version.rct                       | The version of the RCT root                                                                                                                                | 3.0.22.c77.0 |
-| roots.version.relax                     | The version of the RELAX root                                                                                                                              | 4.0.4.c77.0 |
-| roots.version.topics                    | The version of the TOPICS root                                                                                                                             | 4.0.2.c77.0 |
+| roots.version.rex                       | The version of the REX root                                                                                                                                | 7.56.1.c78.0 |
+| roots.version.rbl                       | The version of the RBL root                                                                                                                                | 7.47.8.c78.0 |
+| roots.version.rli                       | The version of the RLI root                                                                                                                                | 7.23.17.c78.0 |
+| roots.version.tvec                      | The version of the TVEC root                                                                                                                               | 7.0.6.c78.0 |
+| roots.version.rnirnt                    | The version of the RNI-RNT root                                                                                                                            | 7.50.0.c78.0 |
+| roots.version.tcat                      | The version of the TCAT root                                                                                                                               | 3.0.5.c78.0 |
+| roots.version.ascent                    | The version of the ASCENT root                                                                                                                             | 3.0.5.c78.0 |
+| roots.version.nlp4j                     | The version of the NLP4J root                                                                                                                              | 2.0.5.c78.0 |
+| roots.version.rct                       | The version of the RCT root                                                                                                                                | 3.0.23.c78.0 |
+| roots.version.relax                     | The version of the RELAX root                                                                                                                              | 4.0.5.c78.0 |
+| roots.version.topics                    | The version of the TOPICS root                                                                                                                             | 4.0.3.c78.0 |
 | enabledEndpoints                        | A list of Analytics Server endpoints to enable.  When passed as a command line property; comma separated and no spaces.                                    | {language}    |
 | enabledLanguages                        | A list of languages to be enabled for roots split by languages.  When passed as a command line property; comma separated and no spaces.                    | {eng}         |
 | rootsImageRepository                    | The repository prefix to use when downloading Analytics Roots images. The default "rosette/" will download from DockerHub                                  | "rosette/"    |
@@ -836,3 +842,17 @@ allows accessing the database with the given URL) from the database file, run th
 java -cp <h2-jar> org.h2.tools.Shell -url "jdbc:h2:<The-url-for-your-database>;CLUSTER=''"\
   -user <DB-USER> -password <DB-PASSWORD> -sql "SELECT 1";
 ```
+## Troubleshoot Argo CD
+**The chart fails to install with missing roots when using Argo CD**
+
+The chart relies on the Helm hook lifecycle to not wait for most things to be healthy before continuing with post-install/upgrade hooks. 
+Argo CD converts post-install/upgrade hooks to postSync ones, which will only run after the resources are healthy. This can cause a deadlock
+with the Analytics Server failing to start as the roots are not extracted and the roots not being extracted because the Analytics Server is not running.
+To avoid this situation you should set the `rootsExtraction.upgrade.annotations` values to remove the default Helm hooks that are assigned. E.g.:
+```yaml
+rootExtraction:
+  upgrade:
+    annotations:
+      defaults: "false"
+```
+The key and value you provide as an annotation is not important as long as it is not a Helm or Argo CD hook.
