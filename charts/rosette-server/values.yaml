@@ -227,17 +227,17 @@ rootsImageRepository: "rosette/"
 
 roots:
   version:
-    ascent: 3.0.6.c79.0
-    nlp4j: 2.0.6.c79.0
-    rbl: 7.47.9.c79.0
-    rct: 3.0.24.c79.0
-    relax: 4.0.6.c79.0
-    rex: 7.56.2.c79.0
-    rli: 7.23.18.c79.0
-    rnirnt: 7.51.0.c79.0
-    tcat: 3.0.6.c79.0
-    topics: 4.0.4.c79.0
-    tvec: 7.0.7.c79.0
+    ascent: 3.0.7.c80.0
+    nlp4j: 2.0.7.c80.0
+    rbl: 7.47.10.c80.0
+    rct: 3.0.25.c80.0
+    relax: 4.0.7.c80.0
+    rex: 7.56.3.c80.0
+    rli: 7.23.19.c80.0
+    rnirnt: 7.52.0.c80.0
+    tcat: 3.0.7.c80.0
+    topics: 4.0.5.c80.0
+    tvec: 7.0.8.c80.0
 
 enabledEndpoints:
 #- address-similarity
@@ -470,18 +470,18 @@ config:
     # configurationFilePathname is the pathname to the worker service configuration yaml.
     configurationFilePathname=${rosapi.config}/rosapi/worker-config.yaml
     # <component>-root is the pathname to the root directory for various component.
-    rbl-root=${rosapi.roots}/rbl/7.47.9.c79.0
-    rct-root=${rosapi.roots}/rct/3.0.24.c79.0
-    ascent-root=${rosapi.roots}/ascent/3.0.6.c79.0
-    tcat-root=${rosapi.roots}/tcat/3.0.6.c79.0
-    rli-root=${rosapi.roots}/rli/7.23.18.c79.0
-    rex-root=${rosapi.roots}/rex/7.56.2.c79.0
-    flinx-root=${rosapi.roots}/rex/7.56.2.c79.0/flinx
-    relax-root=${rosapi.roots}/relax/4.0.6.c79.0
-    dp-root=${rosapi.roots}/nlp4j/2.0.6.c79.0
-    rni-rnt-root=${rosapi.roots}/rni-rnt/7.51.0.c79.0
-    tvec-root=${rosapi.roots}/tvec/7.0.7.c79.0
-    topics-root=${rosapi.roots}/topics/4.0.4.c79.0
+    rbl-root=${rosapi.roots}/rbl/7.47.10.c80.0
+    rct-root=${rosapi.roots}/rct/3.0.25.c80.0
+    ascent-root=${rosapi.roots}/ascent/3.0.7.c80.0
+    tcat-root=${rosapi.roots}/tcat/3.0.7.c80.0
+    rli-root=${rosapi.roots}/rli/7.23.19.c80.0
+    rex-root=${rosapi.roots}/rex/7.56.3.c80.0
+    flinx-root=${rosapi.roots}/rex/7.56.3.c80.0/flinx
+    relax-root=${rosapi.roots}/relax/4.0.7.c80.0
+    dp-root=${rosapi.roots}/nlp4j/2.0.7.c80.0
+    rni-rnt-root=${rosapi.roots}/rni-rnt/7.52.0.c80.0
+    tvec-root=${rosapi.roots}/tvec/7.0.8.c80.0
+    topics-root=${rosapi.roots}/topics/4.0.5.c80.0
     # healthCheckQueueSizeThreshold is used for ELB health check, change the default as desired. Default is 20.
     #healthCheckQueueSizeThreshold=20
     # workerThreadTimeout is the timeout value for worker threads. To avoid diminished return or even degradation
@@ -2803,17 +2803,17 @@ conf:
   wrapper-license.conf: |-
     #encoding=UTF-8
     wrapper.license.type=DEV
-    wrapper.license.id=202411270000001
+    wrapper.license.id=202511130000001
     wrapper.license.licensee=Basis Technology Corp.
     wrapper.license.group=Rosette API
-    wrapper.license.dev_application=Analytics by Babel Street
+    wrapper.license.dev_application=Analytics Server
     wrapper.license.features=pro, 64bit
     wrapper.license.upgrade_term.begin_date=2010-11-09
-    wrapper.license.upgrade_term.end_date=2025-11-09
-    wrapper.license.key.1=6e79-b642-320d-4283
-    wrapper.license.key.2=d701-8070-5923-82fd
-    wrapper.license.key.3=1f59-be50-c42a-ef0b
-    wrapper.license.key.4=db90-75f2-8b12-51d6
+    wrapper.license.upgrade_term.end_date=2026-11-09
+    wrapper.license.key.1=ed51-1fb7-cefd-2d68
+    wrapper.license.key.2=fec8-4bdc-b942-c358
+    wrapper.license.key.3=e5b6-ec61-e88e-71a7
+    wrapper.license.key.4=8e38-3cae-0781-7890
   wrapper.conf: |
     #encoding=UTF-8
     # Configuration files must begin with a line specifying the encoding

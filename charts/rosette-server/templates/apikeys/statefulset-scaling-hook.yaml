@@ -88,7 +88,7 @@ spec:
                 fi
                 MAIN_DB_URL=$(echo "$APIKEYS_URL" | awk -F',' '{print $1}')
                 for i in {1..{{ div (int .Values.apikeys.upgradeTimeoutSeconds) 5 }}}; do
-                  if java -cp /rosette/server/cli-lib/h2*.jar org.h2.tools.Shell -url "jdbc:h2:tcp:$MAIN_DB_URL/$DB_NAME" \
+                  if java -cp /rosette/server/cli-lib/h2*.jar org.h2.tools.Shell -url "jdbc:h2:tcp:$MAIN_DB_URL/$DB_NAME;CLUSTER=''" \
                                        -user $DB_USER -password $DB_PASSWORD -sql "SELECT 1" > /dev/null 2>&1 ; then
                     echo "Main database server is up"
                     exit 0
@@ -98,7 +98,7 @@ spec:
                 done
                 echo "Main database server is not up after {{ .Values.apikeys.upgradeTimeoutSeconds }} seconds, exiting..."
                 echo "Output from query for database availability check is:"
-                java -cp /rosette/server/cli-lib/h2*.jar org.h2.tools.Shell -url "jdbc:h2:tcp:$MAIN_DB_URL/$DB_NAME" \
+                java -cp /rosette/server/cli-lib/h2*.jar org.h2.tools.Shell -url "jdbc:h2:tcp:$MAIN_DB_URL/$DB_NAME;CLUSTER=''" \
                                        -user $DB_USER -password $DB_PASSWORD -sql "SELECT 1"
                 exit 1
       containers:
