@@ -49,13 +49,13 @@ type: application
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 3.4.0
+version: 3.5.0
 
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application. Versions are not expected to
 # follow Semantic Versioning. They should reflect the version the application is using.
 # It is recommended to use it with quotes.
-appVersion: "1.36.0"
+appVersion: "1.37.0"
 
 # Artifact Hub Annotations
 # https://artifacthub.io/docs/topics/annotations/helm/#supported-annotations
@@ -63,13 +63,17 @@ annotations:
   artifacthub.io/category: ai-machine-learning
   artifacthub.io/changes: |
     - kind: changed
-      description: Upgraded appVersion to 1.36.0
+      description: Upgraded appVersion to 1.37.0
     - kind: changed
-      description: Upgraded configuration files to match Analytics Server 1.36.0
+      description: Upgraded indoc-coref-server dependency to 1.1.0; which upgrades the server to v1.0.6.
     - kind: changed
-      description: Release Notes for Analytics Server 1.36.0 https://docs.babelstreet.com/Release/en/analytics-server-release-notes.html
-    - kind: fixed
-      description: Fixed an issue where the api keys database scaling hook could fail because the database was stuck in clustering mode.
+      description: Upgraded configuration files to match Analytics Server 1.37.0
+    - kind: changed
+      description: Release Notes for Analytics Server 1.37.0 https://docs.babelstreet.com/r/Analytics-Server-Release-Notes/Release-1.37.0
+    - kind:  changed
+      description: Documentation emphasizes the importance of overriding the default Helm timeout to ensure a successful root extraction.
+    - kind: added
+      description: A root extraction validator that confirms all the expected marker files from a successful extraction are present.  Enabled by default.  Results are logged to a file.
   artifacthub.io/containsSecurityUpdates: "false"
   artifacthub.io/license: Apache-2.0
   artifacthub.io/links: |
@@ -83,6 +87,6 @@ annotations:
 dependencies:
   - name: indoc-coref-server
     repository: file://../indoc-coref
-    version: 1.0.1
+    version: 1.1.0
     condition: indoccoref.enabled
     alias: indoccoref

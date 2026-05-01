@@ -88,6 +88,274 @@ spec:
               name: {{ $roots.rootsVolumeName }}
         {{- end}}
         {{- include "rosette.root-extraction.containers" (merge $roots .) | nindent 8}}
+        {{- if ne (((.Values.rootsExtraction).validation).enabled | toString) "false" }}
+        # Validation runs as LAST initContainer to execute even if a Helm timeout occurs during extraction
+        # To disable validation, set rootsExtraction.validation.enabled=false in values.yaml
+        - name: validate-roots-extraction
+          image: {{ include "initContainer-image" . | quote }}
+          command: ['bash', '-c']
+          args:
+            - |
+              set -e
+
+              ROOTS_DIR="/roots-vol"
+              LOG_FILE="$ROOTS_DIR/root-validation-{{ .Release.Name }}-{{ .Release.Revision }}.log"
+
+              # Function to output to both stdout and log file
+              log() {
+                echo "$@" | tee -a "$LOG_FILE"
+              }
+
+              # Start logging
+              echo "Root Extraction Validation - Release {{ .Release.Name }} Revision {{ .Release.Revision }}" > "$LOG_FILE"
+              echo "Timestamp: $(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> "$LOG_FILE"
+              echo "" >> "$LOG_FILE"
+
+              log "========================================"
+              log "Root Extraction Validation"
+              log "========================================"
+              log ""
+
+              # Build expected roots list based on enabledEndpoints and enabledLanguages
+              MISSING_ROOTS=""
+              VALIDATION_FAILED=0
+              # rex is handled with a separate variable to avoid false positives from language markers
+              NEEDS_REX_ROOT=false
+              # we have to do secondary processing for tvec languages so we need a flag for that too
+              NEEDS_TVEC_LANGUAGES=false
+              # Always required: rli and rbl (via language and also covers morphology, sentences, tokens)
+              EXPECTED_ROOTS="rli rbl"
+
+              # Map endpoints to required roots
+              {{- range $ep := .Values.enabledEndpoints }}
+              {{- if or (eq $ep "entities") (eq $ep "events") (eq $ep "topics") (eq $ep "relationships") (eq $ep "sentiment") }}
+              # {{ $ep }} requires rex-root
+              NEEDS_REX_ROOT=true
+              {{- end }}
+              {{- if eq $ep "categories" }}
+              # {{ $ep }} requires tcat
+              EXPECTED_ROOTS="$EXPECTED_ROOTS tcat"
+              {{- end }}
+              {{- if or (eq $ep "name-translation") (eq $ep "name-similarity") (eq $ep "name-deduplication") (eq $ep "address-similarity") (eq $ep "record-similarity") }}
+              # {{ $ep }} requires rni-rnt
+              EXPECTED_ROOTS="$EXPECTED_ROOTS rni-rnt"
+              {{- end }}
+              {{- if eq $ep "sentiment" }}
+              # {{ $ep }} requires ascent
+              EXPECTED_ROOTS="$EXPECTED_ROOTS ascent"
+              {{- end }}
+              {{- if or (eq $ep "syntax/dependencies") (eq $ep "relationships") }}
+              # {{ $ep }} requires nlp4j
+              EXPECTED_ROOTS="$EXPECTED_ROOTS nlp4j"
+              {{- end }}
+              {{- if eq $ep "transliteration" }}
+              # {{ $ep }} requires rct
+              EXPECTED_ROOTS="$EXPECTED_ROOTS rct"
+              {{- end }}
+              {{- if eq $ep "relationships" }}
+              # {{ $ep }} requires relax
+              EXPECTED_ROOTS="$EXPECTED_ROOTS relax"
+              {{- end }}
+              {{- if or (eq $ep "topics") (eq $ep "events") }}
+              # {{ $ep }} requires topics
+              EXPECTED_ROOTS="$EXPECTED_ROOTS topics"
+              {{- end }}
+              {{- if or (eq $ep "semantics/similar") (eq $ep "semantics/vector") }}
+              # {{ $ep }} requires per-language tvec roots
+              NEEDS_TVEC_LANGUAGES=true
+              {{- end }}
+              {{- end }}
+
+              # Deduplicate expected roots
+              EXPECTED_ROOTS=$(echo "$EXPECTED_ROOTS" | tr ' ' '\n' | sort -u | tr '\n' ' ')
+
+              log "Expected root types based on enabledEndpoints:"
+              echo "$EXPECTED_ROOTS" | tr ' ' '\n' | grep -v '^$' | sed 's/^/  - /' | tee -a "$LOG_FILE"
+              log ""
+
+              # Check for language-specific roots (rex for entities, tvec for semantics)
+              # REX and TVEC support a subset of all the languages available in the application.  Filter here.
+              EXPECTED_REX_LANGS=""
+              EXPECTED_TVEC_LANGS=""
+
+              # Build rex language list if rex is needed
+              if [ "$NEEDS_REX_ROOT" = "true" ]; then
+                # Entity extraction languages
+                ENTITIES_LANGS="ara deu eng fas fra heb hun ita ind jpn kor nld por pus rus spa swe tgl urd vie zho zsm"
+                {{- range $lang := .Values.enabledLanguages }}
+                if echo "$ENTITIES_LANGS" | grep -qw "{{ $lang }}"; then
+                  EXPECTED_REX_LANGS="$EXPECTED_REX_LANGS {{ $lang }}"
+                fi
+                {{- end }}
+              fi
+
+              # Build tvec language list if tvec is needed
+              if [ "$NEEDS_TVEC_LANGUAGES" = "true" ]; then
+                # Vector languages
+                VECTOR_LANGS="ara deu eng fas fra heb hun ita jpn kor por qkp rus spa tgl urd zho"
+                {{- range $lang := .Values.enabledLanguages }}
+                if echo "$VECTOR_LANGS" | grep -qw "{{ $lang }}"; then
+                  EXPECTED_TVEC_LANGS="$EXPECTED_TVEC_LANGS {{ $lang }}"
+                fi
+                {{- end }}
+              fi
+
+              if [ -n "$EXPECTED_REX_LANGS" ]; then
+                log "Expected rex languages:"
+                echo "$EXPECTED_REX_LANGS" | tr ' ' '\n' | grep -v '^$' | sed 's/^/  - /' | tee -a "$LOG_FILE"
+                log ""
+              fi
+
+              if [ -n "$EXPECTED_TVEC_LANGS" ]; then
+                log "Expected tvec languages:"
+                echo "$EXPECTED_TVEC_LANGS" | tr ' ' '\n' | grep -v '^$' | sed 's/^/  - /' | tee -a "$LOG_FILE"
+                log ""
+              fi
+
+              # Define expected versions from values.yaml for version-aware validation
+              EXPECTED_VERSION_RLI="{{ .Values.roots.version.rli }}"
+              EXPECTED_VERSION_RBL="{{ .Values.roots.version.rbl }}"
+              EXPECTED_VERSION_REX="{{ .Values.roots.version.rex }}"
+              EXPECTED_VERSION_TCAT="{{ .Values.roots.version.tcat }}"
+              EXPECTED_VERSION_RNIRNT="{{ .Values.roots.version.rnirnt }}"
+              EXPECTED_VERSION_ASCENT="{{ .Values.roots.version.ascent }}"
+              EXPECTED_VERSION_NLP4J="{{ .Values.roots.version.nlp4j }}"
+              EXPECTED_VERSION_RCT="{{ .Values.roots.version.rct }}"
+              EXPECTED_VERSION_RELAX="{{ .Values.roots.version.relax }}"
+              EXPECTED_VERSION_TOPICS="{{ .Values.roots.version.topics }}"
+              EXPECTED_VERSION_TVEC="{{ .Values.roots.version.tvec }}"
+
+              # List all unpacked marker files (both naming patterns)
+              log "Unpacked marker files found:"
+              MARKER_FILES=$(find "$ROOTS_DIR" -maxdepth 1 -type f -name ".root-*.unpacked" 2>/dev/null | sort)
+              if [ -n "$MARKER_FILES" ]; then
+                echo "$MARKER_FILES" | sed 's#^.*/##' | sed 's/^/  /' | tee -a "$LOG_FILE"
+              else
+                log "  (none found)"
+              fi
+              log ""
+
+              # Validate each expected root type (VERSION-AWARE - marker files only)
+              log "Expected versions and validation status:"
+              for root in $EXPECTED_ROOTS; do
+                # Get expected version for this root
+                EXPECTED_VERSION=""
+                case "$root" in
+                  rli) EXPECTED_VERSION="$EXPECTED_VERSION_RLI" ;;
+                  rbl) EXPECTED_VERSION="$EXPECTED_VERSION_RBL" ;;
+                  tcat) EXPECTED_VERSION="$EXPECTED_VERSION_TCAT" ;;
+                  rni-rnt) EXPECTED_VERSION="$EXPECTED_VERSION_RNIRNT" ;;
+                  ascent) EXPECTED_VERSION="$EXPECTED_VERSION_ASCENT" ;;
+                  nlp4j) EXPECTED_VERSION="$EXPECTED_VERSION_NLP4J" ;;
+                  rct) EXPECTED_VERSION="$EXPECTED_VERSION_RCT" ;;
+                  relax) EXPECTED_VERSION="$EXPECTED_VERSION_RELAX" ;;
+                  topics) EXPECTED_VERSION="$EXPECTED_VERSION_TOPICS" ;;
+                  tvec) EXPECTED_VERSION="$EXPECTED_VERSION_TVEC" ;;
+                esac
+
+                # Check for VERSION-SPECIFIC marker files
+                # Must match expected version from values.yaml to prevent false positives during upgrades
+                # Pattern: .root-{root}-{version}.unpacked (e.g., .root-rli-7.23.20.c81.0.unpacked)
+                MARKER=$(find "$ROOTS_DIR" -maxdepth 1 -type f -name ".root-${root}-${EXPECTED_VERSION}.unpacked" 2>/dev/null | head -1)
+
+                if [ -n "$MARKER" ]; then
+                  log "  ✓ $root version $EXPECTED_VERSION"
+                else
+                  log "  ✗ MISSING: $root version $EXPECTED_VERSION"
+                  MISSING_ROOTS="$MISSING_ROOTS $root-$EXPECTED_VERSION"
+                  VALIDATION_FAILED=1
+                fi
+              done
+              log ""
+
+              # Handle REX separately to prevents false positives where language markers could match generic patterns
+              if [ "$NEEDS_REX_ROOT" = "true" ]; then
+                log "Validating rex base root (version: $EXPECTED_VERSION_REX):"
+                # Look for exact rex-root marker
+                # Pattern: .root-rex-root-{version}.unpacked (e.g., .root-rex-root-7.56.4.c81.0.unpacked)
+                MARKER=$(find "$ROOTS_DIR" -maxdepth 1 -type f -name ".root-rex-root-${EXPECTED_VERSION_REX}.unpacked" 2>/dev/null | head -1)
+
+                if [ -n "$MARKER" ]; then
+                  log "  ✓ rex-root"
+                else
+                  log "  ✗ MISSING: rex-root"
+                  MISSING_ROOTS="$MISSING_ROOTS rex-root-$EXPECTED_VERSION_REX"
+                  VALIDATION_FAILED=1
+                fi
+                log ""
+              fi
+
+              # Validate rex languages (VERSION-AWARE - marker files only)
+              if [ -n "$EXPECTED_REX_LANGS" ]; then
+                log "Validating rex language roots (version: $EXPECTED_VERSION_REX):"
+                for lang in $EXPECTED_REX_LANGS; do
+                  # Check for VERSION-SPECIFIC language marker files
+                  # Must match expected version from values.yaml to prevent false positives
+                  # Pattern: .root-rex-{lang}-{version}.unpacked (e.g., .root-rex-eng-7.56.4.c81.0.unpacked)
+                  MARKER=$(find "$ROOTS_DIR" -maxdepth 1 -type f -name ".root-rex-${lang}-${EXPECTED_VERSION_REX}.unpacked" 2>/dev/null | head -1)
+
+                  if [ -n "$MARKER" ]; then
+                    log "  ✓ rex-$lang"
+                  else
+                    log "  ✗ MISSING: rex-$lang"
+                    MISSING_ROOTS="$MISSING_ROOTS rex-$lang-$EXPECTED_VERSION_REX"
+                    VALIDATION_FAILED=1
+                  fi
+                done
+                log ""
+              fi
+
+              # Validate tvec languages (VERSION-AWARE - marker files only)
+              if [ -n "$EXPECTED_TVEC_LANGS" ]; then
+                log "Validating tvec language roots (version: $EXPECTED_VERSION_TVEC):"
+                for lang in $EXPECTED_TVEC_LANGS; do
+                  # Check for VERSION-SPECIFIC marker files
+                  # Must match expected version from values.yaml to prevent false positives
+                  # Pattern: .root-tvec-{lang}-{version}.unpacked (e.g., .root-tvec-eng-7.0.9.c81.0.unpacked)
+                  MARKER=$(find "$ROOTS_DIR" -maxdepth 1 -type f -name ".root-tvec-${lang}-${EXPECTED_VERSION_TVEC}.unpacked" 2>/dev/null | head -1)
+
+                  if [ -n "$MARKER" ]; then
+                    log "  ✓ tvec-$lang"
+                  else
+                    log "  ✗ MISSING: tvec-$lang"
+                    MISSING_ROOTS="$MISSING_ROOTS tvec-$lang-$EXPECTED_VERSION_TVEC"
+                    VALIDATION_FAILED=1
+                  fi
+                done
+                log ""
+              fi
+
+              # Final validation summary
+              log "========================================"
+              if [ $VALIDATION_FAILED -eq 1 ]; then
+                log "✗ VALIDATION FAILED"
+                log ""
+                log "Missing roots:"
+                echo "$MISSING_ROOTS" | tr ' ' '\n' | grep -v '^$' | sed 's/^/  - /' | tee -a "$LOG_FILE"
+                log ""
+                log "This indicates partial root extraction. The service may"
+                log "appear healthy but will fail when processing content in"
+                log "missing languages or using unavailable endpoints."
+                log ""
+                log "Troubleshooting:"
+                log "  - Check if the job timed out before all roots extracted"
+                log "  - Review logs: kubectl logs job/{{ include "rosette-server.fullname" . }}-upgrade-populate-roots --all-containers=true"
+                log "  - Verify sufficient storage space and network connectivity"
+                log ""
+                log "Validation log saved to: $LOG_FILE"
+                exit 1
+              else
+                log "✓ VALIDATION PASSED"
+                log ""
+                log "All expected roots have been successfully extracted."
+                log "Validation log saved to: $LOG_FILE"
+                log "========================================"
+                exit 0
+              fi
+          volumeMounts:
+            - mountPath: "/roots-vol"
+              name: {{ $roots.rootsVolumeName }}
+        {{- end }}
       containers:
         - name: rosette-roots-override
           image: {{ include "initContainer-image" . | quote }}

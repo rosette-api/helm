@@ -60,6 +60,10 @@ key set in **values.yaml** or provided during installation like `--set storageCl
   - For more instructions on how to dynamically setup the roots storage, see [examples](#analytics-roots-storage-examples).
 
 # Installation
+
+**IMPORTANT:  You must override the default Helm timeout of 5 minutes.**
+The model data for this application can be quite large.  Downloading the images and extracting the contents can take a significant amount of time, especially if you are enabling many endpoints and languages.
+
 Before installing or updating the chart you can set the desired endpoints and languages in **values.yaml** by uncommenting the values or by providing them to the command like
 `--set "enabledEndpoints={language,morphology}" --set "enabledLanguages={eng,fra}"`. These lists are comma separated WITHOUT spaces.  This will start a post hook job,
 that extracts the necessary Analytics Roots to the persistent volume provided.
@@ -68,11 +72,14 @@ See more details about the job at the [root extraction section](#analytics-roots
 To add the repo to helm, run
 ```shell
 helm repo add babelstreet https://charts.babelstreet.com
+
 ```
 
 and then you can install the chart with
 ```shell
-helm install analytics-server babelstreet/rosette-server --timeout=1h
+helm install analytics-server babelstreet/rosette-server \
+     --timeout=1h
+
 ```
 
 This command will create a deployment for Analytics Server and a persistent volume claim for the Analytics Roots persistent volume.
@@ -84,12 +91,13 @@ The chart is maintained to be used with Helm installation primarily, but it is p
 the corresponding [troubleshooting section](#troubleshoot-argo-cd) if you run into issues or reach out to Analytics Support for help.
 
 ## Download the templates
-Use this [link](https://charts.babelstreet.com/rosette-server-3.4.0.tgz) to download the chart and its templates
+Use this [link](https://charts.babelstreet.com/rosette-server-3.5.0.tgz) to download the chart and its templates
 
 # Uninstall
 To uninstall the release, run
 ```shell
 helm uninstall analytics-server
+
 ```
 To fully remove all Analytics Server associated components from the cluster, you will need to manually delete the license secret and potentially
 the Analytics Roots persistent volume, depending on its reclaim policy.
@@ -155,20 +163,21 @@ the Analytics Roots persistent volume, depending on its reclaim policy.
 
 | Name                                    | Description                                                                                                                                                | Value         |
 |-----------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------|
-| roots.version.rex                       | The version of the REX root                                                                                                                                | 7.56.3.c80.0 |
-| roots.version.rbl                       | The version of the RBL root                                                                                                                                | 7.47.10.c80.0 |
-| roots.version.rli                       | The version of the RLI root                                                                                                                                | 7.23.19.c80.0 |
-| roots.version.tvec                      | The version of the TVEC root                                                                                                                               | 7.0.8.c80.0 |
-| roots.version.rnirnt                    | The version of the RNI-RNT root                                                                                                                            | 7.52.0.c80.0 |
-| roots.version.tcat                      | The version of the TCAT root                                                                                                                               | 3.0.7.c80.0 |
-| roots.version.ascent                    | The version of the ASCENT root                                                                                                                             | 3.0.7.c80.0 |
-| roots.version.nlp4j                     | The version of the NLP4J root                                                                                                                              | 2.0.7.c80.0 |
-| roots.version.rct                       | The version of the RCT root                                                                                                                                | 3.0.25.c80.0 |
-| roots.version.relax                     | The version of the RELAX root                                                                                                                              | 4.0.7.c80.0 |
-| roots.version.topics                    | The version of the TOPICS root                                                                                                                             | 4.0.5.c80.0 |
+| roots.version.rex                       | The version of the REX root                                                                                                                                | 7.56.4.c81.0  |
+| roots.version.rbl                       | The version of the RBL root                                                                                                                                | 7.47.11.c81.0 |
+| roots.version.rli                       | The version of the RLI root                                                                                                                                | 7.23.20.c81.0 |
+| roots.version.tvec                      | The version of the TVEC root                                                                                                                               | 7.0.9.c81.0   |
+| roots.version.rnirnt                    | The version of the RNI-RNT root                                                                                                                            | 7.53.0.c81.0  |
+| roots.version.tcat                      | The version of the TCAT root                                                                                                                               | 3.0.8.c81.0   |
+| roots.version.ascent                    | The version of the ASCENT root                                                                                                                             | 3.0.8.c81.0   |
+| roots.version.nlp4j                     | The version of the NLP4J root                                                                                                                              | 2.0.8.c81.0   |
+| roots.version.rct                       | The version of the RCT root                                                                                                                                | 3.0.26.c81.0  |
+| roots.version.relax                     | The version of the RELAX root                                                                                                                              | 4.0.8.c81.0   |
+| roots.version.topics                    | The version of the TOPICS root                                                                                                                             | 4.0.6.c81.0   |
 | enabledEndpoints                        | A list of Analytics Server endpoints to enable.  When passed as a command line property; comma separated and no spaces.                                    | {language}    |
 | enabledLanguages                        | A list of languages to be enabled for roots split by languages.  When passed as a command line property; comma separated and no spaces.                    | {eng}         |
 | rootsImageRepository                    | The repository prefix to use when downloading Analytics Roots images. The default "rosette/" will download from DockerHub                                  | "rosette/"    |
+| rootsExtraction.validation.enabled      | Enable/disable root extraction validation.  When enabled, validation logs are saved to the roots volume.                                                   | true          |
 | rootsExtraction.upgrade.annotations     | Annotations for the Analytics Roots extraction job that runs during install and upgrade. If not defined the appropriate helm hook annotations are applied. | {}            |
 | rootsExtraction.upgrade.podAnnotations  | Annotations for the Analytics Roots extraction job's pod that runs during install and upgrade.                                                             | {}            |
 | rootsExtraction.rollback.annotations    | Annotations for the Analytics Roots extraction job that runs during rollback. If not defined the appropriate helm hook annotations are applied.            | {}            |
@@ -338,6 +347,7 @@ RELEASE_NAME=<YOUR_RELEASE_NAME>
 POD_ID=$(kubectl get pods -l app.kubernetes.io/instance=$RELEASE_NAME,app.kubernetes.io/component=restful-server -o jsonpath='{.items[0].metadata.name}')
 
 kubectl exec -it $POD_ID -- /rosette/server/bin/rosette-apikeys
+
 ```
 
 On Windows you should be able to use the following batch script. Before you run it make sure to update the RELEASE_NAME 
@@ -349,6 +359,7 @@ set "RELEASE_NAME=<YOUR_RELEASE_NAME>"
 for /f "tokens=*" %%i in ('kubectl get pods -l "app.kubernetes.io/instance=%RELEASE_NAME%,app.kubernetes.io/component=restful-server" -o "jsonpath="{.items[0].metadata.name}""') do set "POD_ID=%%i"
 
 kubectl exec -it %POD_ID% -- /rosette/server/bin/rosette-apikeys
+
 ```
 
 If you are connecting to an API key management console after running an upgrade/rollback, make sure you connect through a
@@ -359,6 +370,7 @@ and the console will close when the pod is destroyed.
 To create a secret with the database access credentials, you can use the following command:
 ```bash
 kubectl create secret generic --from-literal=username=<USER> --from-literal=password=<PASSWORD> <SECRET-NAME>
+
 ```
 ### Limitations
 If the database server pod fails to launch successfully (for example due to wrong database credentials being provided), 
@@ -366,6 +378,7 @@ manual intervention is required because of a [kubernetes known issue](https://ku
 After upgrading or rolling back the chart the failing pod needs to be deleted. The following command can be used to find the failing pod:
 ```bash
 kubectl get pods -l app.kubernetes.io/instance=<YOUR-RELEASE-NAME>,app.kubernetes.io/component=apikeys-db-server
+
 ```
 
 The database backups are created on the same PVC the database is located at also.
@@ -507,14 +520,17 @@ You will need a license that includes the `/entities` endpoint.
 At this point if you run
 ```
 helm rollback <release>
+
 ```
 or
 ```
 helm rollback <release> 3
+
 ```
 the request should return with both `FOOD` types in it.  Running
 ```
 helm rollback <release> 2
+
 ```
 should return with only `Pizza` being identified as a `FOOD`.
 
@@ -610,13 +626,16 @@ To install the provisioner in a cluster run:
 ```bash
 helm repo add rimusz https://charts.rimusz.net
 helm upgrade --install hostpath-provisioner rimusz/hostpath-provisioner
+
 ```
 Then set `storageClassName` in **values.yaml** to `hostpath` or install the chart with
 ```bash
 helm install <release name> \
      --set licenseSecretName=<license-secret> \
      --set storageClassName=hostpath \
-     babelstreet/rosette-server
+     babelstreet/rosette-server \
+     --timeout=1h
+
 ```
 This will create directory for the Analytics roots persistent volume claim under `/mnt/hostpath`
 
@@ -625,6 +644,7 @@ To use a different directory to store the volumes in or a different name for the
 helm upgrade --install hostpath-provisioner rimusz/hostpath-provisioner \
              --set storageClass.name=<SC-name> \
              --set nodeHostPath=<Path to host dir>
+
 ```
 
 The complete list of configuration options can be found at [ArtifactHUB](https://artifacthub.io/packages/helm/rimusz/hostpath-provisioner#configuration)
@@ -710,6 +730,7 @@ sudo mkdir -p /var/nfsshare
 sudo chmod -R 755 /var/nfsshare
 sudo yum install -y nfs-utils
 sudo chown nfsnobody:nfsnobody /var/nfsshare
+
 ```
 
 ##### Create an NFS Server:
@@ -721,17 +742,20 @@ sudo systemctl enable rpcbind
 sudo systemctl enable nfs-server
 sudo systemctl enable nfs-lock
 sudo systemctl enable nfs-idmap
+
 ```
 
 **Expose the nfsshare directory**
 ```
 echo -e "/var/nfsshare\t\t*(rw,sync,no_root_squash,no_all_squash)" | sudo tee --append /etc/exports
+
 ```
 
 **Confirm the output**
 ```
 $ cat /etc/exports
 /var/nfsshare		*(rw,sync,no_root_squash,no_all_squash)
+
 ```
 
 **Start the NFS services**
@@ -740,6 +764,7 @@ sudo systemctl start rpcbind
 sudo systemctl start nfs-server
 sudo systemctl start nfs-lock
 sudo systemctl start nfs-idmap
+
 ```
 
 ##### Allow the NFS traffic through the firewall:
@@ -747,10 +772,12 @@ sudo systemctl start nfs-idmap
 sudo firewall-cmd --permanent --zone=public --add-service=nfs
 sudo firewall-cmd --permanent --zone=public --add-service=mountd
 sudo firewall-cmd --permanent --zone=public --add-service=rpc-bind
+
 ```
 ##### Verify NFS is serving:
 ```
 showmount -e localhost
+
 ```
 
 ### Set up the provisioner
@@ -764,7 +791,9 @@ Once the NFS server is accessible from the cluster, the provisioner needs to be 
        nfs-subdir-external-provisioner/nfs-subdir-external-provisioner \
        --set nfs.server=<NFS server Ip address or hostname> \
        --set nfs.path=<exported NFS server path> \
-       --set storageClass.provisionerName=analytics-nfs-subdir-external-provisioner
+       --set storageClass.provisionerName=analytics-nfs-subdir-external-provisioner \
+       --timeout=10m
+
   ```
 
 Read more about the NFS chart and its possible parameters [here](https://github.com/kubernetes-sigs/nfs-subdir-external-provisioner/blob/master/charts/nfs-subdir-external-provisioner/README.md).
@@ -796,6 +825,7 @@ Use pathPattern to customize where the roots will be extracted under the NFS acc
 If no analytics license secret exists in the cluster, create one by running
 ```
 kubectl create secret generic analytics-license-file --from-file=<path-to-license-file>
+
 ```
 
 ### Setup values.yaml
@@ -808,7 +838,7 @@ kubectl create secret generic analytics-license-file --from-file=<path-to-licens
 - Set `rootsResourceRequest` depending on the number of [endpoints and languages enabled](#disk-space-requirements)
 
 ### Run helm install
-Depending on the number of endpoints and roots enabled the install process can be lengthy so make sure to set a reasonable [timeout](https://helm.sh/docs/intro/using_helm/#helpful-options-for-installupgraderollback) considering your system resources
+Depending on the number of endpoints and roots enabled, the `install` process can be lengthy so make sure to set a reasonable [timeout](https://helm.sh/docs/intro/using_helm/#helpful-options-for-installupgraderollback) considering your system resources
 
 # Troubleshooting
 **The populate-roots pod completes successfully but no roots have been extracted**
