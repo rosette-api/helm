@@ -91,7 +91,7 @@ The chart is maintained to be used with Helm installation primarily, but it is p
 the corresponding [troubleshooting section](#troubleshoot-argo-cd) if you run into issues or reach out to Analytics Support for help.
 
 ## Download the templates
-Use this [link](https://charts.babelstreet.com/rosette-server-3.5.0.tgz) to download the chart and its templates
+Use this [link](https://charts.babelstreet.com/rosette-server-3.6.0.tgz) to download the chart and its templates
 
 # Uninstall
 To uninstall the release, run
@@ -163,17 +163,17 @@ the Analytics Roots persistent volume, depending on its reclaim policy.
 
 | Name                                    | Description                                                                                                                                                | Value         |
 |-----------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------|
-| roots.version.rex                       | The version of the REX root                                                                                                                                | 7.56.4.c81.0  |
-| roots.version.rbl                       | The version of the RBL root                                                                                                                                | 7.47.11.c81.0 |
-| roots.version.rli                       | The version of the RLI root                                                                                                                                | 7.23.20.c81.0 |
-| roots.version.tvec                      | The version of the TVEC root                                                                                                                               | 7.0.9.c81.0   |
-| roots.version.rnirnt                    | The version of the RNI-RNT root                                                                                                                            | 7.53.0.c81.0  |
-| roots.version.tcat                      | The version of the TCAT root                                                                                                                               | 3.0.8.c81.0   |
-| roots.version.ascent                    | The version of the ASCENT root                                                                                                                             | 3.0.8.c81.0   |
-| roots.version.nlp4j                     | The version of the NLP4J root                                                                                                                              | 2.0.8.c81.0   |
-| roots.version.rct                       | The version of the RCT root                                                                                                                                | 3.0.26.c81.0  |
-| roots.version.relax                     | The version of the RELAX root                                                                                                                              | 4.0.8.c81.0   |
-| roots.version.topics                    | The version of the TOPICS root                                                                                                                             | 4.0.6.c81.0   |
+| roots.version.rex                       | The version of the REX root                                                                                                                                | 7.56.6.c82.0 |
+| roots.version.rbl                       | The version of the RBL root                                                                                                                                | 7.47.13.c82.0 |
+| roots.version.rli                       | The version of the RLI root                                                                                                                                | 7.23.21.c82.0 |
+| roots.version.tvec                      | The version of the TVEC root                                                                                                                               | 7.0.10.c82.0 |
+| roots.version.rnirnt                    | The version of the RNI-RNT root                                                                                                                            | 7.54.0.c82.0 |
+| roots.version.tcat                      | The version of the TCAT root                                                                                                                               | 3.0.9.c82.0 |
+| roots.version.ascent                    | The version of the ASCENT root                                                                                                                             | 3.0.9.c82.0 |
+| roots.version.nlp4j                     | The version of the NLP4J root                                                                                                                              | 2.0.9.c82.0 |
+| roots.version.rct                       | The version of the RCT root                                                                                                                                | 3.0.27.c82.0 |
+| roots.version.relax                     | The version of the RELAX root                                                                                                                              | 4.0.9.c82.0 |
+| roots.version.topics                    | The version of the TOPICS root                                                                                                                             | 4.0.7.c82.0 |
 | enabledEndpoints                        | A list of Analytics Server endpoints to enable.  When passed as a command line property; comma separated and no spaces.                                    | {language}    |
 | enabledLanguages                        | A list of languages to be enabled for roots split by languages.  When passed as a command line property; comma separated and no spaces.                    | {eng}         |
 | rootsImageRepository                    | The repository prefix to use when downloading Analytics Roots images. The default "rosette/" will download from DockerHub                                  | "rosette/"    |
