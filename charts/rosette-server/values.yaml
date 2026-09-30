@@ -231,17 +231,17 @@ rootsImageRepository: "rosette/"
 
 roots:
   version:
-    ascent: 3.0.9.c82.0
-    nlp4j: 2.0.9.c82.0
-    rbl: 7.47.13.c82.0
-    rct: 3.0.27.c82.0
-    relax: 4.0.9.c82.0
-    rex: 7.56.6.c82.0
-    rli: 7.23.21.c82.0
-    rnirnt: 7.54.0.c82.0
-    tcat: 3.0.9.c82.0
-    topics: 4.0.7.c82.0
-    tvec: 7.0.10.c82.0
+    ascent: 3.0.10.c83.0
+    nlp4j: 2.0.10.c83.0
+    rbl: 7.47.14.c83.0
+    rct: 3.0.28.c83.0
+    relax: 4.0.10.c83.0
+    rex: 7.56.7.c83.0
+    rli: 7.23.22.c83.0
+    rnirnt: 7.55.0.c83.0
+    tcat: 3.0.10.c83.0
+    topics: 4.0.8.c83.0
+    tvec: 7.0.11.c83.0
 
 enabledEndpoints:
 #- address-similarity
@@ -474,18 +474,18 @@ config:
     # configurationFilePathname is the pathname to the worker service configuration yaml.
     configurationFilePathname=${rosapi.config}/rosapi/worker-config.yaml
     # <component>-root is the pathname to the root directory for various component.
-    rbl-root=${rosapi.roots}/rbl/7.47.13.c82.0
-    rct-root=${rosapi.roots}/rct/3.0.27.c82.0
-    ascent-root=${rosapi.roots}/ascent/3.0.9.c82.0
-    tcat-root=${rosapi.roots}/tcat/3.0.9.c82.0
-    rli-root=${rosapi.roots}/rli/7.23.21.c82.0
-    rex-root=${rosapi.roots}/rex/7.56.6.c82.0
-    flinx-root=${rosapi.roots}/rex/7.56.6.c82.0/flinx
-    relax-root=${rosapi.roots}/relax/4.0.9.c82.0
-    dp-root=${rosapi.roots}/nlp4j/2.0.9.c82.0
-    rni-rnt-root=${rosapi.roots}/rni-rnt/7.54.0.c82.0
-    tvec-root=${rosapi.roots}/tvec/7.0.10.c82.0
-    topics-root=${rosapi.roots}/topics/4.0.7.c82.0
+    rbl-root=${rosapi.roots}/rbl/7.47.14.c83.0
+    rct-root=${rosapi.roots}/rct/3.0.28.c83.0
+    ascent-root=${rosapi.roots}/ascent/3.0.10.c83.0
+    tcat-root=${rosapi.roots}/tcat/3.0.10.c83.0
+    rli-root=${rosapi.roots}/rli/7.23.22.c83.0
+    rex-root=${rosapi.roots}/rex/7.56.7.c83.0
+    flinx-root=${rosapi.roots}/rex/7.56.7.c83.0/flinx
+    relax-root=${rosapi.roots}/relax/4.0.10.c83.0
+    dp-root=${rosapi.roots}/nlp4j/2.0.10.c83.0
+    rni-rnt-root=${rosapi.roots}/rni-rnt/7.55.0.c83.0
+    tvec-root=${rosapi.roots}/tvec/7.0.11.c83.0
+    topics-root=${rosapi.roots}/topics/4.0.8.c83.0
     # healthCheckQueueSizeThreshold is used for ELB health check, change the default as desired. Default is 20.
     #healthCheckQueueSizeThreshold=20
     # workerThreadTimeout is the timeout value for worker threads. To avoid diminished return or even degradation

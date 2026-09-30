@@ -1,6 +1,6 @@
 dependencies:
 - name: indoc-coref-server
   repository: file://../indoc-coref
-  version: 1.2.0
-digest: sha256:874cb085dfd4f8ceee4c398e00dfd777dc7f638caa2f9c07abe4ccdf5113ab4d
-generated: "2026-06-25T13:50:22.317507668Z"
+  version: 1.3.0
+digest: sha256:08392f13cb7bec258c9f41dc4aff2b07607af14c2c8bc26de585e504fab805fa
+generated: "2026-09-30T12:29:26.905065512Z"
